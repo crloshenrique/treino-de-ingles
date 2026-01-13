@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Treino de Inglês</title>
+    <link rel="icon" type="image/png" href="imagens/icone.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* ESTILOS GERAIS */
+        body { font-family: Arial, sans-serif; background: #f0f0f0; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 15px; box-sizing: border-box; }
+        #container { width: 100%; max-width: 400px; text-align: center; position: relative; transition: max-width 0.3s ease; }
+        #container.modo-largo { max-width: 700px; }
+        .menu { display: flex; flex-direction: column; gap: 12px; width: 100%; }
+
+        /* SELEÇÃO DE USUÁRIO */
+        .usuarios-flex { display: flex; justify-content: center; gap: 15px; margin-top: 15px; }
+        .usuario-card { cursor: pointer; display: flex; flex-direction: column; align-items: center; transition: transform 0.3s ease; -webkit-tap-highlight-color: transparent; width: 130px; }
+        .usuario-card:hover { transform: scale(1.1); }
+        .usuario-card img { width: 110px; height: 110px; margin-bottom: 12px; background: #d9d9d9; border-radius: 30px; padding: 15px; object-fit: contain; box-sizing: border-box; }
+        .usuario-card span { font-size: 1.3rem; font-weight: bold; color: #444; }
+
+        /* BOTÕES GERAIS */
+        button { padding: 14px; font-size: 18px; border-radius: 10px; border: none; cursor: pointer; background: #5e5e5e; color: white; transition: transform 0.2s ease, opacity 0.2s; -webkit-tap-highlight-color: transparent; }
+        button:hover { transform: scale(1.05); }
+        .btn-azul { background: #10a2dd !important; }
+
+        /* CAMPO DE PESQUISA */
+        #campo-busca {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            border: 2px solid #ccc;
+            font-size: 16px;
+            box-sizing: border-box;
+            outline: none;
+        }
+        #campo-busca:focus { border-color: #10a2dd; }
+
+        /* BOX DA PALAVRA E OPÇÕES */
+        #palavra-box { background: #5e5e5e; color: white; font-size: 1.8rem; font-weight: bold; height: 125px; border-radius: 15px; display: none; align-items: center; justify-content: center; margin-bottom: 20px; padding: 10px; }
+        #opcoes-container { display: none; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+        .opcao-btn { width: calc(50% - 5px); background: #d9d9d9; color: #5e5e5e; }
+        .correta { background: #4CAF50 !important; color: white; }
+        .errada { background: #f44336 !important; color: white; }
+
+        /* PLACAR */
+        #contador-container { display: none; gap: 10px; margin-bottom: 20px; }
+        #acertos-box, #erros-box { flex: 1; padding: 12px; font-size: 20px; font-weight: bold; color: white; border-radius: 12px; }
+        #acertos-box { background: #4CAF50; }
+        #erros-box { background: #f44336; }
+        #btn-reiniciar { display: none; width: 100%; background: #5e5e5e; margin-top: 15px; }
+        h2 { color: #444; margin-bottom: 5px; } 
+
+        /* LISTAS E SCROLL */
+        #resultados-lista, #area-lista-palavras { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 8px; 
+            margin-top: 15px; 
+            max-height: 450px; 
+            overflow-y: auto; 
+            padding-right: 10px;
+            width: 100%;
+        }
+
+        .item-dicionario {
+            padding: 12px 15px;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            background: #5e5e5e;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1.8fr; 
+            gap: 15px;
+            align-items: center;
+            text-align: left;
+        }
+
+        .header-dicionario {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1.8fr;
+            gap: 15px;
+            padding: 10px 15px;
+            font-weight: bold;
+            color: #444;
+            font-size: 18px;
+            border-bottom: 2px solid #ccc;
+            text-align: left;
+        }
+
+        .item-historico { padding: 10px; border-radius: 8px; color: white; font-weight: bold; text-align: center; font-size: 18px; background: #5e5e5e; }
+
+        @media (max-width: 500px) {
+            .item-dicionario, .header-dicionario { font-size: 14px; gap: 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="menu-usuarios" class="menu">
+            <h2>Escolha o usuário</h2>
+            <div class="usuarios-flex">
+                <div class="usuario-card" onclick="selecionarUsuario('CH')">
+                    <img src="imagens/user.png" alt="User">
+                    <span>CH</span>
+                </div>
+                <div class="usuario-card" onclick="selecionarUsuario('Visitante')">
+                    <img src="imagens/user.png" alt="User">
+                    <span>Visitante</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="menu-hub" class="menu" style="display:none">
+            <h2>Menu</h2>
+            <button class="btn-azul" onclick="irParaTemas()">Praticar</button>
+            <button class="btn-azul" onclick="irParaDicionariosVisualizacao()">Dicionários</button>
+            <button onclick="window.location.reload()">Sair</button>
+        </div>
+
+        <div id="menu-gerenciar-dicionarios" class="menu" style="display:none">
+            <h2 id="titulo-escolha-dic">Escolha o dicionário</h2>
+            
+            <div id="lista-dicionarios-visualizar" class="menu"></div>
+            
+            <div id="visualizacao-palavras" style="display:none; width: 100%;">
+                <input type="text" id="campo-busca" placeholder="Pesquisar palavra ou significado..." oninput="filtrarPalavras()">
+                <div class="header-dicionario">
+                    <span>Palavra</span>
+                    <span>Pronúncia</span>
+                    <span>Significados</span>
+                </div>
+                <div id="area-lista-palavras"></div>
+            </div>
+
+            <button onclick="voltarDicionariosParaHub()">Voltar</button>
+        </div>
+
+        <div id="menu-temas" class="menu" style="display:none">
+            <h2>Escolha um dicionário</h2>
+            <div id="lista-temas-botoes" class="menu"></div>
+            <button onclick="voltarParaHub()">Voltar</button>
+        </div>
+
+        <div id="menu-principal" class="menu" style="display:none">
+            <h2>Como deseja praticar?</h2>
+            <p id="status-load" style="display:none">Carregando...</p>
+            <button onclick="abrirMenuIntervalos()" class="btn-azul">Escolher palavras</button>
+            <button onclick="abrirMenuNiveis()" class="btn-azul">Praticar por níveis</button>
+            <button onclick="voltarParaDicionarios()">Voltar</button>
+        </div>
+
+        <div id="menu-niveis" class="menu" style="display:none">
+            <button onclick="iniciarNivel(25)" style="background: #10a2dd;">Iniciante</button>
+            <button onclick="iniciarNivel(50)" style="background: #5abb6a;">Intermediário</button>
+            <button onclick="iniciarNivel(75)" style="background: #f99c35;">Avançado</button>
+            <button onclick="iniciarNivel(vocabulario.length)" style="background: #f14738;">Pro</button>
+            <button onclick="voltarAoMenuPraticar()">Voltar</button>
+        </div>
+
+        <div id="menu-intervalos" class="menu" style="display:none">
+            <button onclick="iniciarIntervalo(0,25)" style="background: #10a2dd;">1 ⮕ 25 palavras</button>
+            <button onclick="iniciarIntervalo(25,50)" style="background: #5abb6a;">26 ⮕ 50 palavras</button>
+            <button onclick="iniciarIntervalo(50,75)" style="background: #f99c35;">51 ⮕ 75 palavras</button>
+            <button onclick="iniciarIntervalo(75,100)" style="background: #f14738;">76 ⮕ 100 palavras</button>
+            <button onclick="voltarAoMenuPraticar()">Voltar</button>
+        </div>
+
+        <div id="palavra-box"></div>
+        <div id="opcoes-container"></div>
+        <div id="contador-container">
+            <div id="acertos-box">0</div>
+            <div id="erros-box">0</div>
+        </div>
+        <div id="resultados-lista"></div>
+        <button id="btn-reiniciar" onclick="window.location.reload()">Jogar Novamente</button>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
