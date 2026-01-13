@@ -26,8 +26,8 @@
         .btn-verde { background: #5abb6a !important; }
 
         /* CAMPOS DE FORMULÁRIO */
-        input { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 10px; border: 2px solid #ccc; font-size: 16px; box-sizing: border-box; outline: none; }
-        input:focus { border-color: #10a2dd; }
+        input, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 10px; border: 2px solid #ccc; font-size: 16px; box-sizing: border-box; outline: none; }
+        input:focus, textarea:focus { border-color: #10a2dd; }
 
         /* BOX DA PALAVRA E OPÇÕES */
         #palavra-box { background: #5e5e5e; color: white; font-size: 1.8rem; font-weight: bold; height: 125px; border-radius: 15px; display: none; align-items: center; justify-content: center; margin-bottom: 20px; padding: 10px; }
@@ -48,7 +48,6 @@
         #resultados-lista, #area-lista-palavras { display: flex; flex-direction: column; gap: 8px; margin-top: 15px; max-height: 450px; overflow-y: auto; padding-right: 10px; width: 100%; }
         .item-dicionario { padding: 12px 15px; border-radius: 8px; color: white; font-weight: bold; font-size: 18px; background: #5e5e5e; display: grid; grid-template-columns: 1fr 1fr 1.8fr; gap: 15px; align-items: center; text-align: left; }
         .header-dicionario { display: grid; grid-template-columns: 1fr 1fr 1.8fr; gap: 15px; padding: 10px 15px; font-weight: bold; color: #444; font-size: 18px; border-bottom: 2px solid #ccc; text-align: left; }
-        .item-historico { padding: 10px; border-radius: 8px; color: white; font-weight: bold; text-align: center; font-size: 18px; background: #5e5e5e; }
 
         @media (max-width: 500px) {
             .item-dicionario, .header-dicionario { font-size: 14px; gap: 8px; }
@@ -101,16 +100,29 @@
 
         <div id="area-adicionar-dicionario" class="menu" style="display:none">
             <h2>Adicionar ao Banco</h2>
-            <input type="text" id="add-palavra" placeholder="Palavra (ex: Apple)">
-            <input type="text" id="add-pronuncia" placeholder="Pronúncia (ex: /áp-ol/)">
-            <input type="text" id="add-significado" placeholder="Significado (ex: Maçã)">
-            <input type="text" id="add-categoria" placeholder="Categoria (ex: Frutas)">
-            <button class="btn-verde" onclick="salvarNoBancoLocal()">Cadastrar Palavra</button>
-            <button onclick="voltarParaDicionariosRaiz()">Voltar</button>
+            <div style="display: flex; gap: 5px; margin-bottom: 15px;">
+                <button class="btn-azul" style="flex:1; font-size: 14px;" onclick="mostrarFormIndividual()">Uma por vez</button>
+                <button class="btn-azul" style="flex:1; font-size: 14px;" onclick="mostrarFormMassa()">Em massa</button>
+            </div>
+
+            <div id="form-individual">
+                <input type="text" id="add-palavra" placeholder="Palavra (ex: Apple)">
+                <input type="text" id="add-pronuncia" placeholder="Pronúncia (ex: /áp-ol/)">
+                <input type="text" id="add-significado" placeholder="Significado (ex: Maçã)">
+                <input type="text" id="add-categoria" placeholder="Categoria (ex: Frutas)">
+                <button class="btn-verde" style="width:100%" onclick="salvarNoBancoLocal()">Cadastrar Palavra</button>
+            </div>
+
+            <div id="form-massa" style="display:none">
+                <input type="text" id="add-categoria-massa" placeholder="Categoria para todas (ex: Verbos)">
+                <textarea id="texto-massa" rows="10" placeholder="Formato: palavra (pronúncia) = significados"></textarea>
+                <button class="btn-verde" style="width:100%; margin-top:10px;" onclick="salvarEmMassa()">Cadastrar Tudo</button>
+            </div>
+            <button onclick="voltarParaDicionariosRaiz()" style="margin-top:15px;">Voltar</button>
         </div>
 
         <div id="menu-temas" class="menu" style="display:none">
-            <h2>Praticar: Escolha o tema</h2>
+            <h2>Escolha o dicionário</h2>
             <div id="lista-temas-botoes" class="menu"></div>
             <button onclick="voltarParaHub()">Voltar</button>
         </div>
@@ -145,7 +157,6 @@
             <div id="acertos-box">0</div>
             <div id="erros-box">0</div>
         </div>
-        <div id="resultados-lista"></div>
         <button id="btn-reiniciar" onclick="window.location.reload()">Jogar Novamente</button>
     </div>
 
