@@ -29,18 +29,19 @@ window.onload = async () => {
     irParaHub(); 
 };
 
-// --- CONTROLE DA SIDEBAR ---
+// --- CONTROLE DA SIDEBAR E NAVEGAÇÃO ---
 function alternarSidebar() {
     if (window.innerWidth <= 768) {
         document.body.classList.toggle("sidebar-aberta");
     }
 }
 
-// --- NAVEGAÇÃO ---
 function esconderTodosMenus() {
     const menus = [menuHub, menuDicionariosRaiz, menuGerenciarDicionarios, areaAdicionarDicionario, 
                    menuTemas, menuPrincipal, menuNiveis, menuIntervalos, visualizacaoPalavras];
     menus.forEach(m => { if(m) m.style.display = "none"; });
+    
+    // Removemos as classes de largura especial ao trocar de menu
     container.classList.remove("modo-largo");
 
     if (window.innerWidth <= 768) {
@@ -48,51 +49,54 @@ function esconderTodosMenus() {
     }
 }
 
-function irParaHub() { esconderTodosMenus(); menuHub.style.display = "flex"; }
-function irParaTemas() { esconderTodosMenus(); menuTemas.style.display = "flex"; }
-function irParaDicionariosRaiz() { esconderTodosMenus(); menuDicionariosRaiz.style.display = "flex"; }
-
-function abrirSubMenuDicionarios() { 
+function irParaHub() { 
     esconderTodosMenus(); 
-    menuGerenciarDicionarios.style.display = "flex"; 
-    visualizacaoPalavras.style.display = "none"; 
-    listaDicionariosVisualizar.style.display = "flex"; 
+    menuHub.style.display = "flex"; 
 }
 
-function abrirEscolhaTipoAdicao() { 
-    esconderTodosMenus();
-    areaAdicionarDicionario.style.display = "flex"; 
-    document.getElementById("selecao-tipo-adicao").style.display = "flex";
-    document.getElementById("form-individual").style.display = "none";
-    document.getElementById("form-massa").style.display = "none";
+function irParaTemas() { 
+    esconderTodosMenus(); 
+    container.classList.add("modo-largo"); // Alarga para caber os cards em grade
+    menuTemas.style.display = "flex"; 
 }
 
-function voltarParaDicionariosRaiz() { irParaDicionariosRaiz(); }
-
-function mostrarFormIndividual() { 
-    document.getElementById("selecao-tipo-adicao").style.display = "none";
-    document.getElementById("form-individual").style.display = "block"; 
-}
-function mostrarFormMassa() { 
-    document.getElementById("selecao-tipo-adicao").style.display = "none";
-    document.getElementById("form-massa").style.display = "block"; 
+function irParaDicionariosRaiz() { 
+    esconderTodosMenus(); 
+    menuDicionariosRaiz.style.display = "flex"; 
 }
 
-// --- FUNÇÕES DE BANCO ---
+// --- GERAR CARDS DE TEMAS (QUADRADOS ROSA) ---
+function gerarMenuTemas() {
+    listaTemasBotoes.innerHTML = "";
+    categoriasDisponiveis.forEach(cat => {
+        const btn = document.createElement("button");
+        btn.textContent = cat; 
+        btn.className = "btn-tema-card"; // Classe do CSS com borda rosa
+        btn.onclick = () => carregarVocabulario(cat);
+        listaTemasBotoes.appendChild(btn);
+    });
+}
+
+// --- FUNÇÕES DO BANCO DE DADOS (SUPABASE) ---
 async function carregarCategoriasDoBanco() {
     const { data, error } = await _supabase.from('dicionarios').select('categoria');
-    if (!error && data) { categoriasDisponiveis = [...new Set(data.map(item => item.categoria))]; }
+    if (!error && data) { 
+        categoriasDisponiveis = [...new Set(data.map(item => item.categoria))]; 
+    }
 }
 
 function gerarMenuDicionariosVisualizacao() {
     listaDicionariosVisualizar.innerHTML = "";
     const btnTodos = document.createElement("button");
-    btnTodos.textContent = "Todos"; btnTodos.className = "btn-azul";
+    btnTodos.textContent = "Todos"; 
+    btnTodos.className = "btn-azul";
     btnTodos.onclick = () => carregarEExibirVarios('todos');
     listaDicionariosVisualizar.appendChild(btnTodos);
+
     categoriasDisponiveis.forEach(cat => {
         const btn = document.createElement("button");
-        btn.textContent = cat; btn.className = "btn-azul";
+        btn.textContent = cat; 
+        btn.className = "btn-azul";
         btn.onclick = () => carregarEExibirVarios(cat);
         listaDicionariosVisualizar.appendChild(btn);
     });
@@ -103,10 +107,13 @@ async function carregarEExibirVarios(cat) {
     visualizacaoPalavras.style.display = "block";
     areaListaPalavras.innerHTML = "Carregando...";
     container.classList.add("modo-largo");
+
     let query = _supabase.from('dicionarios').select('*');
     if (cat !== 'todos') query = query.eq('categoria', cat);
+
     const { data } = await query.order('palavra', { ascending: true });
     areaListaPalavras.innerHTML = "";
+    
     data.forEach(item => {
         const div = document.createElement("div");
         div.className = "item-dicionario";
@@ -115,56 +122,78 @@ async function carregarEExibirVarios(cat) {
     });
 }
 
-// --- SALVAMENTO ---
-async function salvarNoBancoLocal() {
-    const palavra = document.getElementById("add-palavra").value.trim();
-    const pronuncia = document.getElementById("add-pronuncia").value.trim();
-    const significado = document.getElementById("add-significado").value.trim();
-    const categoria = document.getElementById("add-categoria").value.trim();
-    if (!palavra || !significado || !categoria) { alert("Preencha os campos!"); return; }
-    const { error } = await _supabase.from('dicionarios').insert([{ palavra, pronuncia, significado, categoria }]);
-    if (error) alert("Erro: " + error.message);
-    else { alert("Cadastrada!"); location.reload(); }
+// --- ADIÇÃO DE PALAVRAS ---
+function abrirSubMenuDicionarios() { 
+    esconderTodosMenus(); 
+    menuGerenciarDicionarios.style.display = "flex"; 
+    visualizacaoPalavras.style.display = "none"; 
+    listaDicionariosVisualizar.style.display = "flex"; 
 }
 
-async function salvarEmMassa() {
-    const categoria = document.getElementById("add-categoria-massa").value.trim();
-    const texto = document.getElementById("texto-massa").value.trim();
-    if (!categoria || !texto) { alert("Preencha categoria e texto!"); return; }
-    const linhas = texto.split('\n');
-    const objetosParaEnviar = [];
-    linhas.forEach(linha => {
-        if (linha.includes('=') && linha.includes('(')) {
-            const partes = linha.split('=');
-            const significado = partes[1].trim();
-            const antesDoIgual = partes[0].trim();
-            const palavra = antesDoIgual.split('(')[0].trim();
-            const pronuncia = "(" + antesDoIgual.split('(')[1].split(')')[0].trim() + ")";
-            objetosParaEnviar.push({ palavra, pronuncia, significado, categoria });
-        }
-    });
-    if (objetosParaEnviar.length === 0) { alert("Formato inválido!"); return; }
-    const { error } = await _supabase.from('dicionarios').insert(objetosParaEnviar);
-    if (error) alert("Erro: " + error.message);
-    else { alert(`${objetosParaEnviar.length} palavras cadastradas!`); location.reload(); }
+function abrirEscolhaTipoAdicao() { 
+    esconderTodosMenus(); 
+    areaAdicionarDicionario.style.display = "flex"; 
+    document.getElementById("selecao-tipo-adicao").style.display = "flex"; 
+    document.getElementById("form-individual").style.display = "none"; 
+    document.getElementById("form-massa").style.display = "none"; 
 }
 
-// --- JOGO ---
-function gerarMenuTemas() {
-    listaTemasBotoes.innerHTML = "";
-    categoriasDisponiveis.forEach(cat => {
-        const btn = document.createElement("button");
-        btn.textContent = cat; btn.className = "btn-azul";
-        btn.onclick = () => carregarVocabulario(cat);
-        listaTemasBotoes.appendChild(btn);
-    });
+function voltarParaDicionariosRaiz() { irParaDicionariosRaiz(); }
+function mostrarFormIndividual() { document.getElementById("selecao-tipo-adicao").style.display = "none"; document.getElementById("form-individual").style.display = "block"; }
+function mostrarFormMassa() { document.getElementById("selecao-tipo-adicao").style.display = "none"; document.getElementById("form-massa").style.display = "block"; }
+
+async function salvarNoBancoLocal() { 
+    const palavra = document.getElementById("add-palavra").value.trim(); 
+    const pronuncia = document.getElementById("add-pronuncia").value.trim(); 
+    const significado = document.getElementById("add-significado").value.trim(); 
+    const categoria = document.getElementById("add-categoria").value.trim(); 
+
+    if (!palavra || !significado || !categoria) { alert("Preencha os campos!"); return; } 
+
+    const { error } = await _supabase.from('dicionarios').insert([{ palavra, pronuncia, significado, categoria }]); 
+    if (error) alert("Erro: " + error.message); 
+    else { alert("Cadastrada!"); location.reload(); } 
 }
 
+async function salvarEmMassa() { 
+    const categoria = document.getElementById("add-categoria-massa").value.trim(); 
+    const texto = document.getElementById("texto-massa").value.trim(); 
+
+    if (!categoria || !texto) { alert("Preencha categoria e texto!"); return; } 
+
+    const linhas = texto.split('\n'); 
+    const objetosParaEnviar = []; 
+
+    linhas.forEach(linha => { 
+        if (linha.includes('=') && linha.includes('(')) { 
+            const partes = linha.split('='); 
+            const significado = partes[1].trim(); 
+            const antesDoIgual = partes[0].trim(); 
+            const palavra = antesDoIgual.split('(')[0].trim(); 
+            const pronuncia = "(" + antesDoIgual.split('(')[1].split(')')[0].trim() + ")"; 
+            objetosParaEnviar.push({ palavra, pronuncia, significado, categoria }); 
+        } 
+    }); 
+
+    if (objetosParaEnviar.length === 0) { alert("Formato inválido!"); return; } 
+
+    const { error } = await _supabase.from('dicionarios').insert(objetosParaEnviar); 
+    if (error) alert("Erro: " + error.message); 
+    else { alert(`${objetosParaEnviar.length} palavras cadastradas!`); location.reload(); } 
+}
+
+// --- LÓGICA DO JOGO ---
 async function carregarVocabulario(cat) {
     document.getElementById("status-load").style.display = "block";
     const { data } = await _supabase.from('dicionarios').select('*').eq('categoria', cat);
-    vocabulario = data.map(item => ({ exibir: `${item.palavra} ${item.pronuncia}`, correta: item.significado.split("/")[0].trim() }));
-    esconderTodosMenus(); menuPrincipal.style.display = "flex";
+    
+    vocabulario = data.map(item => ({ 
+        exibir: `${item.palavra} ${item.pronuncia}`, 
+        correta: item.significado.split("/")[0].trim() 
+    }));
+
+    esconderTodosMenus(); 
+    menuPrincipal.style.display = "flex";
     document.getElementById("status-load").style.display = "none";
 }
 
@@ -176,32 +205,44 @@ function iniciarNivel(q) { palavrasParaOJogo = vocabulario.slice(0, q); iniciarJ
 function iniciarIntervalo(i, f) { palavrasParaOJogo = vocabulario.slice(i, f); iniciarJogo(); }
 
 function iniciarJogo() {
-    menuNiveis.style.display = "none"; menuIntervalos.style.display = "none";
+    menuNiveis.style.display = "none"; 
+    menuIntervalos.style.display = "none";
     document.getElementById("palavra-box").style.display = "flex"; 
     document.getElementById("opcoes-container").style.display = "flex"; 
     document.getElementById("contador-container").style.display = "flex";
+    
     palavrasParaOJogo.sort(() => Math.random() - 0.5);
     proximaRodada();
 }
 
 function proximaRodada() {
     if (palavrasParaOJogo.length === 0) { finalizarTeste(); return; }
+    
     let atual = palavrasParaOJogo.shift();
     const box = document.getElementById("palavra-box");
     const containerOpcoes = document.getElementById("opcoes-container");
+    
     box.textContent = atual.exibir;
     containerOpcoes.innerHTML = "";
+
     let opcoes = [atual.correta];
     while (opcoes.length < 4) {
         let sorteio = vocabulario[Math.floor(Math.random() * vocabulario.length)].correta;
         if (!opcoes.includes(sorteio)) opcoes.push(sorteio);
     }
+
     opcoes.sort(() => Math.random() - 0.5).forEach(op => {
         const btn = document.createElement("button");
-        btn.className = "opcao-btn"; btn.textContent = op;
+        btn.className = "opcao-btn"; 
+        btn.textContent = op;
         btn.onclick = () => {
-            if (op === atual.correta) { acertos++; document.getElementById("acertos-box").textContent = acertos; }
-            else { erros++; document.getElementById("erros-box").textContent = erros; }
+            if (op === atual.correta) { 
+                acertos++; 
+                document.getElementById("acertos-box").textContent = acertos; 
+            } else { 
+                erros++; 
+                document.getElementById("erros-box").textContent = erros; 
+            }
             setTimeout(proximaRodada, 600);
         };
         containerOpcoes.appendChild(btn);
