@@ -177,18 +177,22 @@
                 <p id="status-load" style="display:none">Carregando...</p>
                 <button onclick="abrirMenuIntervalos()" class="btn-azul">Escolher Intervalo</button>
                 <button onclick="abrirMenuNiveis()" class="btn-azul">Níveis Sugeridos</button>
+                <button onclick="irParaTemas()">Voltar</button>
             </div>
 
             <div id="menu-niveis" class="menu" style="display:none">
-                <button onclick="iniciarNivel(25)" style="border-left: 5px solid #10a2dd;">Iniciante (25)</button>
-                <button onclick="iniciarNivel(50)" style="border-left: 5px solid #5abb6a;">Intermediário (50)</button>
-                <button onclick="iniciarNivel(vocabulario.length)" style="border-left: 5px solid #f14738;">Completo</button>
+                <button onclick="iniciarNivel(25)" style="background: #10a2dd;">Iniciante</button>
+                <button onclick="iniciarNivel(50)" style="background: #5abb6a;">Intermediário</button>
+                <button onclick="iniciarNivel(75)" style="background: #f99c35;">Avançado</button>
+                <button onclick="iniciarNivel(vocabulario.length)" style="background: #f14738;">Pro</button>
                 <button onclick="voltarAoMenuPraticar()">Voltar</button>
             </div>
 
             <div id="menu-intervalos" class="menu" style="display:none">
-                <button onclick="iniciarIntervalo(0,25)">1 a 25</button>
-                <button onclick="iniciarIntervalo(25,50)">26 a 50</button>
+                <button onclick="iniciarIntervalo(0,25)" style="background: #10a2dd;">1 ⮕ 25</button>
+                <button onclick="iniciarIntervalo(25,50)" style="background: #5abb6a;">26 ⮕ 50</button>
+                <button onclick="iniciarIntervalo(50,75)" style="background: #f99c35;">51 ⮕ 75</button>
+                <button onclick="iniciarIntervalo(75,100)" style="background: #f14738;">76 ⮕ 100</button>
                 <button onclick="voltarAoMenuPraticar()">Voltar</button>
             </div>
 

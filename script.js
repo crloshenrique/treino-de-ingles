@@ -30,7 +30,7 @@ window.onload = async () => {
     await carregarCategoriasDoBanco();
     gerarMenuDicionariosVisualizacao();
     gerarMenuTemas();
-    irParaHub(); // Inicia direto no Hub agora que removemos o login
+    irParaHub(); 
 };
 
 // --- CONTROLE DA SIDEBAR ---
@@ -38,7 +38,6 @@ function toggleSidebar() {
     sidebar.classList.toggle("expandida");
 }
 
-// Fecha a sidebar ao clicar no conteúdo principal (apenas se estiver expandida)
 mainContent.onclick = (e) => {
     if (sidebar.classList.contains("expandida")) {
         sidebar.classList.remove("expandida");
@@ -72,7 +71,7 @@ function abrirEscolhaTipoAdicao() {
     document.getElementById("form-massa").style.display = "none";
 }
 
-function voltarParaDicionariosRaiz() { abrirEscolhaTipoAdicao(); irParaDicionariosRaiz(); }
+function voltarParaDicionariosRaiz() { irParaDicionariosRaiz(); }
 
 // --- CONTROLE DE FORMULÁRIO ---
 function mostrarFormIndividual() { 
