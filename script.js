@@ -33,6 +33,8 @@ window.onload = async () => {
 // --- CONTROLE DA SIDEBAR ---
 function alternarSidebar() {
     if (window.innerWidth <= 768) {
+        // No mobile, removemos o modo oculto para garantir que os itens apareçam ao expandir
+        sidebar.classList.remove("modo-oculto");
         document.body.classList.toggle("sidebar-aberta");
     } else {
         sidebar.classList.toggle("modo-oculto");
@@ -46,7 +48,7 @@ function esconderTodosMenus() {
     menus.forEach(m => { if(m) m.style.display = "none"; });
     container.classList.remove("modo-largo");
 
-    // Quando o usuário clica em algo, a barra some
+    // Fecha a sidebar ao clicar em uma opção
     if (window.innerWidth <= 768) {
         document.body.classList.remove("sidebar-aberta");
     } else {

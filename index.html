@@ -39,25 +39,35 @@
             position: relative;
             z-index: 1000;
             flex-shrink: 0;
+            overflow: hidden;
         }
 
-        /* Modo Oculto: Apenas o hambúrguer visível */
+        /* Modo Oculto: PC (Apenas Hambúrguer) */
         #sidebar.modo-oculto { width: 65px; }
         #sidebar.modo-oculto .sidebar-item:not(:first-child) { display: none; }
 
-        /* Hover: Só expande se não estiver oculto */
-        #sidebar:not(.modo-oculto):hover { width: var(--sidebar-expanded); }
-        #sidebar:not(.modo-oculto):hover .sidebar-item span { opacity: 1; }
+        /* Comportamento de Expansão (PC via Hover e Mobile via Classe) */
+        #sidebar:not(.modo-oculto):hover, 
+        body.sidebar-aberta #sidebar { 
+            width: var(--sidebar-expanded); 
+        }
+
+        /* Visibilidade imediata do texto ao expandir */
+        #sidebar:not(.modo-oculto):hover .sidebar-item span,
+        body.sidebar-aberta #sidebar .sidebar-item span { 
+            opacity: 1; 
+        }
 
         .sidebar-item {
             display: flex;
             align-items: center;
-            padding: 15px 20px;
+            padding: 15px 22px;
             cursor: pointer;
             color: white;
             white-space: nowrap;
             transition: background 0.2s;
             height: 75px;
+            width: 100%;
         }
 
         .sidebar-item:hover { background: rgba(255, 0, 116, 0.1); }
@@ -74,7 +84,7 @@
             display: flex; 
             justify-content: center; 
             align-items: flex-start; 
-            transition: transform 0.3s ease, margin-left 0.3s ease;
+            transition: transform 0.3s ease;
         }
         
         #container { width: 100%; max-width: 450px; text-align: center; }
@@ -107,14 +117,13 @@
                 left: 0;
                 top: 0;
                 transform: translateX(-100%);
-                width: 70% !important;
+                width: 260px !important;
             }
             body.sidebar-aberta #sidebar { transform: translateX(0); }
-            body.sidebar-aberta #main-content { transform: translateX(70%); }
+            body.sidebar-aberta #main-content { transform: translateX(260px); }
             
-            #sidebar.modo-oculto { transform: translateX(-100%); } /* Esconde tudo no mobile se clicar em algo */
+            #sidebar.modo-oculto { transform: translateX(-100%); } 
             
-            /* Botão de segurança para abrir o menu se sumir tudo */
             #btn-mobile-toggle {
                 display: block;
                 position: fixed;
