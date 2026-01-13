@@ -29,7 +29,8 @@
 
         /* --- SIDEBAR DINÂMICA --- */
         #sidebar {
-            width: var(--sidebar-width);
+            width: var(--sidebar-width); /* Fixa o tamanho inicial corretamente */
+            min-width: var(--sidebar-width);
             background: var(--bg-color);
             border-right: 2px solid var(--accent-color);
             height: 100%;
@@ -42,18 +43,13 @@
             overflow: hidden;
         }
 
-        /* Modo Oculto: PC (Apenas Hambúrguer) */
-        #sidebar.modo-oculto { width: 65px; }
-        #sidebar.modo-oculto .sidebar-item:not(:first-child) { display: none; }
-
-        /* Comportamento de Expansão (PC via Hover e Mobile via Classe) */
-        #sidebar:not(.modo-oculto):hover, 
-        body.sidebar-aberta #sidebar { 
+        /* No PC, a sidebar só expande no Hover. Removido o modo-oculto para manter ícones fixos */
+        #sidebar:hover { 
             width: var(--sidebar-expanded); 
         }
 
-        /* Visibilidade imediata do texto ao expandir */
-        #sidebar:not(.modo-oculto):hover .sidebar-item span,
+        /* Visibilidade do texto no PC e no Mobile aberto */
+        #sidebar:hover .sidebar-item span,
         body.sidebar-aberta #sidebar .sidebar-item span { 
             opacity: 1; 
         }
@@ -110,7 +106,7 @@
         .item-dicionario { padding: 12px; border-radius: 8px; background: #2a2a2a; display: grid; grid-template-columns: 1fr 1fr 1.5fr; gap: 10px; text-align: left; margin-bottom: 8px; border-left: 3px solid var(--accent-color); }
         .header-dicionario { display: grid; grid-template-columns: 1fr 1fr 1.5fr; gap: 10px; padding: 10px; font-weight: bold; color: var(--accent-color); border-bottom: 1px solid #444; }
 
-        /* --- MOBILE: COMPORTAMENTO EMPURRAR --- */
+        /* --- MOBILE: COMPORTAMENTO EMPURRAR (Mantido sem alterações) --- */
         @media (max-width: 768px) {
             #sidebar {
                 position: fixed;
@@ -121,8 +117,6 @@
             }
             body.sidebar-aberta #sidebar { transform: translateX(0); }
             body.sidebar-aberta #main-content { transform: translateX(260px); }
-            
-            #sidebar.modo-oculto { transform: translateX(-100%); } 
             
             #btn-mobile-toggle {
                 display: block;
@@ -264,7 +258,6 @@
                 <div id="erros-box">0</div>
             </div>
             <button id="btn-reiniciar" style="display:none" onclick="location.reload()">Reiniciar</button>
-
         </div>
     </main>
 

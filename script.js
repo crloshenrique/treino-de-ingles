@@ -2,7 +2,6 @@ const SUPABASE_URL = 'https://byhuejznipdjwoicbmsh.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ5aHVlanpuaXBkandvaWNibXNoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgzMTUwOTcsImV4cCI6MjA4Mzg5MTA5N30.shEmFonuHGqOpHOnqRmXFh_EmfaUKhU8do57xZ7SK1E';
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// SELETORES DE MENUS
 const menuHub = document.getElementById("menu-hub");
 const menuDicionariosRaiz = document.getElementById("menu-dicionarios-raiz");
 const menuGerenciarDicionarios = document.getElementById("menu-gerenciar-dicionarios");
@@ -33,12 +32,9 @@ window.onload = async () => {
 // --- CONTROLE DA SIDEBAR ---
 function alternarSidebar() {
     if (window.innerWidth <= 768) {
-        // No mobile, removemos o modo oculto para garantir que os itens apareçam ao expandir
-        sidebar.classList.remove("modo-oculto");
         document.body.classList.toggle("sidebar-aberta");
-    } else {
-        sidebar.classList.toggle("modo-oculto");
     }
+    // No PC, o alternar foi removido para manter os ícones sempre visíveis (fixos)
 }
 
 // --- NAVEGAÇÃO ---
@@ -48,11 +44,9 @@ function esconderTodosMenus() {
     menus.forEach(m => { if(m) m.style.display = "none"; });
     container.classList.remove("modo-largo");
 
-    // Fecha a sidebar ao clicar em uma opção
+    // No mobile, fecha a sidebar. No PC, os ícones permanecem fixos.
     if (window.innerWidth <= 768) {
         document.body.classList.remove("sidebar-aberta");
-    } else {
-        sidebar.classList.add("modo-oculto");
     }
 }
 
