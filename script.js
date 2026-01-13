@@ -1,6 +1,3 @@
-// Test line: Verified compatibility check - 2026-01-13
-// Update: Git 25 update confirmed.
-
 const SUPABASE_URL = 'https://byhuejznipdjwoicbmsh.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ5aHVlanpuaXBkandvaWNibXNoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgzMTUwOTcsImV4cCI6MjA4Mzg5MTA5N30.shEmFonuHGqOpHOnqRmXFh_EmfaUKhU8do57xZ7SK1E';
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
