@@ -27,22 +27,20 @@
             overflow: hidden; 
         }
 
-        /* --- BOTÃO MOBILE --- */
-        #mobile-header {
-            display: none;
-            width: 100%;
-            padding: 15px;
-            text-align: left;
-        }
-
+        /* --- BOTÃO MOBILE (FIXO NA ESQUERDA) --- */
         #btn-mobile-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1100;
             background: var(--bg-color);
-            border: 1.5px solid var(--accent-color);
+            border: 2px solid var(--accent-color);
             border-radius: 8px;
             padding: 8px;
             cursor: pointer;
             line-height: 0;
-            display: inline-block;
+            transition: transform 0.3s ease;
         }
 
         #sidebar-overlay {
@@ -63,16 +61,18 @@
             height: 100%;
             display: flex;
             flex-direction: column;
-            transition: width 0.3s ease, transform 0.3s ease;
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s ease;
             position: relative;
             z-index: 1000;
             flex-shrink: 0;
             overflow: hidden;
         }
 
-        /* Expansão no Hover (Desktop) */
-        #sidebar:hover { width: var(--sidebar-expanded); }
-        #sidebar:hover .sidebar-item span { opacity: 1; }
+        /* Desktop Hover */
+        @media (min-width: 769px) {
+            #sidebar:hover { width: var(--sidebar-expanded); }
+            #sidebar:hover .sidebar-item span { opacity: 1; }
+        }
 
         .sidebar-item {
             display: flex;
@@ -90,10 +90,11 @@
         .sidebar-item span { margin-left: 20px; font-weight: bold; opacity: 0; transition: opacity 0.2s; }
         .sidebar-bottom { margin-top: auto; padding-bottom: 20px; }
 
-        /* --- CONTEÚDO --- */
+        /* --- CONTEÚDO PRINCIPAL --- */
         #main-content { 
             flex: 1; 
             overflow-y: auto; 
+            padding: 40px 20px;
             display: flex; 
             flex-direction: column;
             align-items: center; 
@@ -107,10 +108,11 @@
             width: 100%; 
             max-width: 450px; 
             text-align: center;
-            padding: 20px;
         }
         
-        #container.modo-largo { max-width: 950px; }
+        #container.modo-largo { max-width: 950px; } /* Comporta os cards de 150px */
+
+        .menu { display: flex; flex-direction: column; gap: 15px; width: 100%; }
 
         /* --- CARDS DE TEMAS (150px) --- */
         #lista-temas-botoes {
@@ -123,42 +125,59 @@
         }
 
         .btn-tema-card {
-            width: 150px; height: 150px; 
+            width: 150px; 
+            height: 150px; 
             background: transparent !important;
             border: 2px solid var(--accent-color) !important;
             color: white !important;
-            font-size: 0.95rem; font-weight: bold;
+            font-size: 0.95rem;
+            font-weight: bold;
             border-radius: 18px;
-            display: flex; align-items: center; justify-content: center;
-            text-transform: uppercase; transition: all 0.2s ease;
-            cursor: pointer; padding: 15px; text-align: center; word-break: break-word;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-transform: uppercase;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            padding: 15px;
+            text-align: center;
+            word-break: break-word;
         }
 
-        /* --- BOTÕES GERAIS --- */
-        button { padding: 14px; font-size: 18px; border-radius: 10px; border: none; cursor: pointer; background: #3d3d3d; color: white; }
+        /* Botões Gerais */
+        button { padding: 14px; font-size: 18px; border-radius: 10px; border: none; cursor: pointer; background: #3d3d3d; color: white; transition: transform 0.2s; }
         .btn-azul { background: #10a2dd !important; }
         .btn-verde { background: #5abb6a !important; }
         .btn-quadrado { width: 80px; height: 80px; background: var(--accent-color) !important; color: white !important; font-size: 32px; border-radius: 15px; }
+
         input, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 10px; border: 1px solid #444; background: #2a2a2a; color: white; }
 
-        /* --- MOBILE (LÓGICA DE EMPURRAR) --- */
+        /* Interface do Jogo */
+        #palavra-box { background: #333; color: white; font-size: 1.8rem; font-weight: bold; height: 125px; border-radius: 15px; display: none; align-items: center; justify-content: center; margin-bottom: 20px; border: 1px solid var(--accent-color); }
+        #opcoes-container { display: none; flex-wrap: wrap; gap: 10px; }
+        .opcao-btn { width: calc(50% - 5px); }
+        #contador-container { display: none; gap: 10px; margin: 20px 0; }
+        #acertos-box { flex: 1; background: #4CAF50; padding: 10px; border-radius: 8px; font-weight: bold; }
+        #erros-box { flex: 1; background: #f44336; padding: 10px; border-radius: 8px; font-weight: bold; }
+
+        /* --- MOBILE LÓGICA (CORRIGIDA) --- */
         @media (max-width: 768px) {
-            #mobile-header { display: block; } /* Botão aparece no topo esquerdo */
-            
+            #btn-mobile-toggle { display: block; }
+
             #sidebar { 
                 position: fixed; 
-                left: -260px; /* Escondido */
+                left: -260px; 
                 width: 260px !important; 
             }
 
-            /* Quando aberto, empurra o conteúdo e a própria sidebar */
+            /* Estágio Aberto */
             body.sidebar-aberta #sidebar { transform: translateX(260px); }
             body.sidebar-aberta #main-content { transform: translateX(260px); }
+            body.sidebar-aberta #btn-mobile-toggle { transform: translateX(260px); }
             body.sidebar-aberta #sidebar-overlay { display: block; }
-            
-            /* Garante que os nomes apareçam quando aberto no mobile */
-            body.sidebar-aberta .sidebar-item span { opacity: 1 !important; }
+            body.sidebar-aberta .sidebar-item span { opacity: 1; }
 
+            #main-content { padding-top: 80px; }
             .btn-tema-card { width: 140px; height: 140px; }
         }
     </style>
@@ -166,6 +185,10 @@
 <body>
     <div id="sidebar-overlay" onclick="alternarSidebar()"></div>
     
+    <div id="btn-mobile-toggle" onclick="alternarSidebar()">
+        <img src="imagens/menus/menu-hamburguer.png" width="25" height="25">
+    </div>
+
     <nav id="sidebar">
         <div class="sidebar-item" onclick="alternarSidebar()">
             <img src="imagens/menus/menu-hamburguer.png" alt="Menu">
@@ -196,12 +219,6 @@
     </nav>
 
     <main id="main-content">
-        <div id="mobile-header">
-            <div id="btn-mobile-toggle" onclick="alternarSidebar()">
-                <img src="imagens/menus/menu-hamburguer.png" width="25" height="25">
-            </div>
-        </div>
-
         <div id="container">
             <div id="menu-hub" class="menu">
                 <h1 style="color: var(--accent-color)">Welcome Back</h1>
@@ -239,7 +256,7 @@
             </div>
 
             <div id="menu-gerenciar-dicionarios" class="menu" style="display:none">
-                <h2>Categorias</h2>
+                <h2>Escolha a Categoria</h2>
                 <div id="lista-dicionarios-visualizar" class="menu"></div>
                 <div id="visualizacao-palavras" style="display:none">
                     <input type="text" id="campo-busca" placeholder="Pesquisar..." oninput="filtrarPalavras()">
@@ -249,7 +266,7 @@
             </div>
 
             <div id="menu-temas" class="menu" style="display:none">
-                <h2>Escolha um Tema</h2>
+                <h2>Categorias para Praticar</h2>
                 <div id="lista-temas-botoes"></div>
                 <button onclick="irParaHub()">Voltar</button>
             </div>
