@@ -16,6 +16,7 @@ const listaDicionariosVisualizar = document.getElementById("lista-dicionarios-vi
 const areaListaPalavras = document.getElementById("area-lista-palavras");
 const listaTemasBotoes = document.getElementById("lista-temas-botoes");
 const container = document.getElementById("container");
+const sidebar = document.getElementById("sidebar");
 
 let categoriasDisponiveis = [];
 let vocabulario = [];
@@ -29,12 +30,28 @@ window.onload = async () => {
     irParaHub(); 
 };
 
+// --- CONTROLE DA SIDEBAR ---
+function alternarSidebar() {
+    if (window.innerWidth <= 768) {
+        document.body.classList.toggle("sidebar-aberta");
+    } else {
+        sidebar.classList.toggle("modo-oculto");
+    }
+}
+
 // --- NAVEGAÇÃO ---
 function esconderTodosMenus() {
     const menus = [menuHub, menuDicionariosRaiz, menuGerenciarDicionarios, areaAdicionarDicionario, 
                    menuTemas, menuPrincipal, menuNiveis, menuIntervalos, visualizacaoPalavras];
     menus.forEach(m => { if(m) m.style.display = "none"; });
     container.classList.remove("modo-largo");
+
+    // Quando o usuário clica em algo, a barra some
+    if (window.innerWidth <= 768) {
+        document.body.classList.remove("sidebar-aberta");
+    } else {
+        sidebar.classList.add("modo-oculto");
+    }
 }
 
 function irParaHub() { esconderTodosMenus(); menuHub.style.display = "flex"; }

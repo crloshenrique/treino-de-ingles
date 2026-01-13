@@ -4,19 +4,30 @@
     <meta charset="UTF-8">
     <title>Treino de Inglês - Dashboard</title>
     <link rel="icon" type="image/png" href="imagens/icone.png">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
         :root {
             --bg-color: #1f1f1f;
             --accent-color: #ff0074;
             --text-color: #ffffff;
-            --sidebar-width: 85px; /* Aumentado para ícones maiores */
+            --sidebar-width: 85px;
             --sidebar-expanded: 260px;
         }
 
-        body { font-family: Arial, sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        * { box-sizing: border-box; }
 
-        /* SIDEBAR ATUALIZADA */
+        body { 
+            font-family: Arial, sans-serif; 
+            background: var(--bg-color); 
+            color: var(--text-color); 
+            margin: 0; 
+            display: flex; 
+            height: 100vh; 
+            width: 100vw;
+            overflow: hidden; 
+        }
+
+        /* --- SIDEBAR DINÂMICA --- */
         #sidebar {
             width: var(--sidebar-width);
             background: var(--bg-color);
@@ -24,43 +35,47 @@
             height: 100%;
             display: flex;
             flex-direction: column;
-            transition: width 0.3s ease;
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s ease;
             position: relative;
-            z-index: 100;
+            z-index: 1000;
+            flex-shrink: 0;
         }
 
-        /* Expansão automática ao passar o mouse */
-        #sidebar:hover { 
-            width: var(--sidebar-expanded); 
-        }
+        /* Modo Oculto: Apenas o hambúrguer visível */
+        #sidebar.modo-oculto { width: 65px; }
+        #sidebar.modo-oculto .sidebar-item:not(:first-child) { display: none; }
+
+        /* Hover: Só expande se não estiver oculto */
+        #sidebar:not(.modo-oculto):hover { width: var(--sidebar-expanded); }
+        #sidebar:not(.modo-oculto):hover .sidebar-item span { opacity: 1; }
 
         .sidebar-item {
             display: flex;
             align-items: center;
             padding: 15px 20px;
             cursor: pointer;
-            text-decoration: none;
             color: white;
             white-space: nowrap;
             transition: background 0.2s;
-            height: 75px; /* Aumentado para ícones maiores */
-            box-sizing: border-box;
+            height: 75px;
         }
 
-        .sidebar-item:hover { background: rgba(255, 0, 116, 0.1); border: 1px solid var(--accent-color); border-radius: 8px; margin: 0 5px; }
-
-        /* ÍCONES MAIORES */
+        .sidebar-item:hover { background: rgba(255, 0, 116, 0.1); }
         .sidebar-item img { width: 40px; height: 40px; min-width: 40px; object-fit: contain; }
-
         .sidebar-item span { margin-left: 20px; font-weight: bold; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
-        
-        /* Mostra o texto quando a sidebar está em hover */
-        #sidebar:hover .sidebar-item span { opacity: 1; pointer-events: auto; }
 
         .sidebar-bottom { margin-top: auto; padding-bottom: 20px; }
 
-        /* CONTEÚDO PRINCIPAL */
-        #main-content { flex: 1; overflow-y: auto; padding: 20px; display: flex; justify-content: center; align-items: flex-start; }
+        /* --- CONTEÚDO PRINCIPAL --- */
+        #main-content { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 20px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: flex-start; 
+            transition: transform 0.3s ease, margin-left 0.3s ease;
+        }
         
         #container { width: 100%; max-width: 450px; text-align: center; }
         #container.modo-largo { max-width: 850px; }
@@ -84,12 +99,45 @@
 
         .item-dicionario { padding: 12px; border-radius: 8px; background: #2a2a2a; display: grid; grid-template-columns: 1fr 1fr 1.5fr; gap: 10px; text-align: left; margin-bottom: 8px; border-left: 3px solid var(--accent-color); }
         .header-dicionario { display: grid; grid-template-columns: 1fr 1fr 1.5fr; gap: 10px; padding: 10px; font-weight: bold; color: var(--accent-color); border-bottom: 1px solid #444; }
+
+        /* --- MOBILE: COMPORTAMENTO EMPURRAR --- */
+        @media (max-width: 768px) {
+            #sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                transform: translateX(-100%);
+                width: 70% !important;
+            }
+            body.sidebar-aberta #sidebar { transform: translateX(0); }
+            body.sidebar-aberta #main-content { transform: translateX(70%); }
+            
+            #sidebar.modo-oculto { transform: translateX(-100%); } /* Esconde tudo no mobile se clicar em algo */
+            
+            /* Botão de segurança para abrir o menu se sumir tudo */
+            #btn-mobile-toggle {
+                display: block;
+                position: fixed;
+                top: 10px;
+                left: 10px;
+                z-index: 999;
+                background: var(--bg-color);
+                border: 1px solid var(--accent-color);
+                border-radius: 5px;
+                padding: 5px;
+            }
+        }
+        @media (min-width: 769px) { #btn-mobile-toggle { display: none; } }
     </style>
 </head>
 <body>
 
+    <div id="btn-mobile-toggle" onclick="alternarSidebar()">
+        <img src="imagens/menus/menu-hamburguer.png" width="30" height="30">
+    </div>
+
     <nav id="sidebar">
-        <div class="sidebar-item">
+        <div class="sidebar-item" onclick="alternarSidebar()">
             <img src="imagens/menus/menu-hamburguer.png" alt="Menu">
             <span>Menu</span>
         </div>
@@ -135,6 +183,7 @@
                 <h2>Dicionários</h2>
                 <button class="btn-verde" onclick="abrirEscolhaTipoAdicao()">Adicionar Palavras</button>
                 <button class="btn-azul" onclick="abrirSubMenuDicionarios()">Ver Listas</button>
+                <button onclick="irParaHub()">Voltar</button>
             </div>
 
             <div id="area-adicionar-dicionario" class="menu" style="display:none">
@@ -172,6 +221,7 @@
             <div id="menu-temas" class="menu" style="display:none">
                 <h2>Categorias para Praticar</h2>
                 <div id="lista-temas-botoes" class="menu"></div>
+                <button onclick="irParaHub()">Voltar</button>
             </div>
 
             <div id="menu-principal" class="menu" style="display:none">
