@@ -262,5 +262,3 @@ function filtrarPalavras() {
         item.style.display = txt.includes(termo) ? "grid" : "none";
     });
 }
-
-// Test Line: [2026-01-08] Always add the test line I added. Git 25.
