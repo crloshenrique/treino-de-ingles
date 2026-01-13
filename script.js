@@ -1,8 +1,11 @@
+// Git 25 - Accordion Menu Logic
 const SUPABASE_URL = 'https://byhuejznipdjwoicbmsh.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ5aHVlanpuaXBkandvaWNibXNoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgzMTUwOTcsImV4cCI6MjA4Mzg5MTA5N30.shEmFonuHGqOpHOnqRmXFh_EmfaUKhU8do57xZ7SK1E';
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// SELETORES DE MENUS
+// SELETORES
+const sidebar = document.getElementById("sidebar");
+const container = document.getElementById("container");
 const menuHub = document.getElementById("menu-hub");
 const menuDicionariosRaiz = document.getElementById("menu-dicionarios-raiz");
 const menuGerenciarDicionarios = document.getElementById("menu-gerenciar-dicionarios");
@@ -15,7 +18,6 @@ const visualizacaoPalavras = document.getElementById("visualizacao-palavras");
 const listaDicionariosVisualizar = document.getElementById("lista-dicionarios-visualizar");
 const areaListaPalavras = document.getElementById("area-lista-palavras");
 const listaTemasBotoes = document.getElementById("lista-temas-botoes");
-const container = document.getElementById("container");
 
 let categoriasDisponiveis = [];
 let vocabulario = [];
@@ -29,12 +31,26 @@ window.onload = async () => {
     irParaHub(); 
 };
 
+// --- CONTROLE MOBILE ---
+function toggleMenuMobile() {
+    if (window.innerWidth <= 768) {
+        sidebar.classList.toggle('aberto-mobile');
+    }
+}
+
+function fecharMenuSeMobile() {
+    if (window.innerWidth <= 768) {
+        sidebar.classList.remove('aberto-mobile');
+    }
+}
+
 // --- NAVEGAÇÃO ---
 function esconderTodosMenus() {
     const menus = [menuHub, menuDicionariosRaiz, menuGerenciarDicionarios, areaAdicionarDicionario, 
                    menuTemas, menuPrincipal, menuNiveis, menuIntervalos, visualizacaoPalavras];
     menus.forEach(m => { if(m) m.style.display = "none"; });
     container.classList.remove("modo-largo");
+    fecharMenuSeMobile();
 }
 
 function irParaHub() { esconderTodosMenus(); menuHub.style.display = "flex"; }
@@ -150,11 +166,10 @@ function gerarMenuTemas() {
 }
 
 async function carregarVocabulario(cat) {
-    document.getElementById("status-load").style.display = "block";
+    document.getElementById("status-load")?.style.display = "block";
     const { data } = await _supabase.from('dicionarios').select('*').eq('categoria', cat);
     vocabulario = data.map(item => ({ exibir: `${item.palavra} ${item.pronuncia}`, correta: item.significado.split("/")[0].trim() }));
     esconderTodosMenus(); menuPrincipal.style.display = "flex";
-    document.getElementById("status-load").style.display = "none";
 }
 
 function abrirMenuNiveis() { menuPrincipal.style.display = "none"; menuNiveis.style.display = "flex"; }
