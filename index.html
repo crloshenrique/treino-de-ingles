@@ -27,19 +27,17 @@
             overflow: hidden; 
         }
 
-        /* --- BOTÃO MOBILE (FIXO) --- */
+        /* --- BOTÃO MOBILE (DENTRO DO FLUXO NO MOBILE) --- */
         #btn-mobile-toggle {
             display: none;
-            position: fixed;
-            top: 15px;
-            left: 15px;
-            z-index: 1100;
             background: var(--bg-color);
             border: 1.5px solid var(--accent-color);
             border-radius: 8px;
             padding: 8px;
             cursor: pointer;
             line-height: 0;
+            margin: 15px;
+            width: fit-content;
         }
 
         #sidebar-overlay {
@@ -51,9 +49,7 @@
             z-index: 998;
         }
 
-        body.sidebar-aberta #sidebar-overlay { display: block; }
-
-        /* --- SIDEBAR COMPLETA --- */
+        /* --- SIDEBAR --- */
         #sidebar {
             width: var(--sidebar-width);
             min-width: var(--sidebar-width);
@@ -62,7 +58,7 @@
             height: 100%;
             display: flex;
             flex-direction: column;
-            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s ease;
             position: relative;
             z-index: 1000;
             flex-shrink: 0;
@@ -70,8 +66,7 @@
         }
 
         #sidebar:hover { width: var(--sidebar-expanded); }
-        #sidebar:hover .sidebar-item span,
-        body.sidebar-aberta #sidebar .sidebar-item span { opacity: 1; }
+        #sidebar:hover .sidebar-item span { opacity: 1; }
 
         .sidebar-item {
             display: flex;
@@ -89,22 +84,24 @@
         .sidebar-item span { margin-left: 20px; font-weight: bold; opacity: 0; transition: opacity 0.2s; }
         .sidebar-bottom { margin-top: auto; padding-bottom: 20px; }
 
-        /* --- CONTEÚDO --- */
+        /* --- CONTEÚDO (COM EFEITO DE EMPURRAR) --- */
         #main-content { 
             flex: 1; 
             overflow-y: auto; 
-            padding: 40px 20px;
             display: flex; 
             flex-direction: column;
             align-items: center; 
             justify-content: flex-start;
             height: 100%;
+            transition: transform 0.3s ease, margin-left 0.3s ease;
+            width: 100%;
         }
         
         #container { 
             width: 100%; 
             max-width: 450px; 
             text-align: center;
+            padding: 20px;
         }
         
         #container.modo-largo { max-width: 950px; }
@@ -147,40 +144,44 @@
             box-shadow: 0 5px 15px rgba(255, 0, 116, 0.3);
         }
 
+        /* Botões Gerais */
         button { padding: 14px; font-size: 18px; border-radius: 10px; border: none; cursor: pointer; background: #3d3d3d; color: white; transition: transform 0.2s; }
-        button:hover { transform: scale(1.02); background: #4a4a4a; }
         .btn-azul { background: #10a2dd !important; }
         .btn-verde { background: #5abb6a !important; }
-        .btn-quadrado { width: 80px; height: 80px; background: var(--accent-color) !important; color: white !important; font-weight: bold; font-size: 32px; border-radius: 15px; }
+        .btn-quadrado { width: 80px; height: 80px; background: var(--accent-color) !important; color: white !important; font-size: 32px; border-radius: 15px; }
 
-        input, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 10px; border: 1px solid #444; background: #2a2a2a; color: white; box-sizing: border-box; }
+        input, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 10px; border: 1px solid #444; background: #2a2a2a; color: white; }
 
+        /* Jogo */
         #palavra-box { background: #333; color: white; font-size: 1.8rem; font-weight: bold; height: 125px; border-radius: 15px; display: none; align-items: center; justify-content: center; margin-bottom: 20px; border: 1px solid var(--accent-color); }
         #opcoes-container { display: none; flex-wrap: wrap; gap: 10px; }
-        .opcao-btn { width: calc(50% - 5px); background: #3d3d3d; }
+        .opcao-btn { width: calc(50% - 5px); }
         #contador-container { display: none; gap: 10px; margin: 20px 0; }
-        #acertos-box { flex: 1; background: #4CAF50; padding: 10px; border-radius: 8px; font-weight: bold; }
-        #erros-box { flex: 1; background: #f44336; padding: 10px; border-radius: 8px; font-weight: bold; }
+        #acertos-box { flex: 1; background: #4CAF50; padding: 10px; border-radius: 8px; }
+        #erros-box { flex: 1; background: #f44336; padding: 10px; border-radius: 8px; }
 
-        .item-dicionario { padding: 12px; border-radius: 8px; background: #2a2a2a; display: grid; grid-template-columns: 1fr 1fr 1.5fr; gap: 10px; text-align: left; margin-bottom: 8px; border-left: 3px solid var(--accent-color); }
-        .header-dicionario { display: grid; grid-template-columns: 1fr 1fr 1.5fr; gap: 10px; padding: 10px; font-weight: bold; color: var(--accent-color); border-bottom: 1px solid #444; }
-
+        /* --- MOBILE AJUSTES (EMPURRAR) --- */
         @media (max-width: 768px) {
+            body { position: relative; overflow-x: hidden; }
             #btn-mobile-toggle { display: block; }
-            #sidebar { position: fixed; left: 0; top: 0; transform: translateX(-100%); width: 260px !important; }
-            body.sidebar-aberta #sidebar { transform: translateX(0); }
-            #main-content { padding-top: 80px; }
-            .btn-tema-card { width: 130px; height: 130px; font-size: 0.85rem; }
+            
+            #sidebar { 
+                position: fixed; 
+                left: -260px; /* Escondido à esquerda */
+                width: 260px !important; 
+            }
+
+            body.sidebar-aberta #sidebar { transform: translateX(260px); }
+            body.sidebar-aberta #main-content { transform: translateX(260px); }
+            body.sidebar-aberta #sidebar-overlay { display: block; }
+
+            .btn-tema-card { width: 140px; height: 140px; }
         }
     </style>
 </head>
 <body>
     <div id="sidebar-overlay" onclick="alternarSidebar()"></div>
     
-    <div id="btn-mobile-toggle" onclick="alternarSidebar()">
-        <img src="imagens/menus/menu-hamburguer.png" width="25" height="25">
-    </div>
-
     <nav id="sidebar">
         <div class="sidebar-item" onclick="alternarSidebar()">
             <img src="imagens/menus/menu-hamburguer.png" alt="Menu">
@@ -211,6 +212,10 @@
     </nav>
 
     <main id="main-content">
+        <div id="btn-mobile-toggle" onclick="alternarSidebar()">
+            <img src="imagens/menus/menu-hamburguer.png" width="25" height="25">
+        </div>
+
         <div id="container">
             <div id="menu-hub" class="menu">
                 <h1 style="color: var(--accent-color)">Welcome Back</h1>
@@ -252,7 +257,6 @@
                 <div id="lista-dicionarios-visualizar" class="menu"></div>
                 <div id="visualizacao-palavras" style="display:none">
                     <input type="text" id="campo-busca" placeholder="Pesquisar..." oninput="filtrarPalavras()">
-                    <div class="header-dicionario"><span>PAL</span><span>PRON</span><span>SIGN</span></div>
                     <div id="area-lista-palavras"></div>
                 </div>
                 <button onclick="voltarParaDicionariosRaiz()">Voltar</button>
