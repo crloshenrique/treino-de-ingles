@@ -2,10 +2,6 @@ const SUPABASE_URL = 'https://byhuejznipdjwoicbmsh.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ5aHVlanpuaXBkandvaWNibXNoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgzMTUwOTcsImV4cCI6MjA4Mzg5MTA5N30.shEmFonuHGqOpHOnqRmXFh_EmfaUKhU8do57xZ7SK1E';
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// SELETORES SIDEBAR E LAYOUT
-const sidebar = document.getElementById("sidebar");
-const mainContent = document.getElementById("main-content");
-
 // SELETORES DE MENUS
 const menuHub = document.getElementById("menu-hub");
 const menuDicionariosRaiz = document.getElementById("menu-dicionarios-raiz");
@@ -31,17 +27,6 @@ window.onload = async () => {
     gerarMenuDicionariosVisualizacao();
     gerarMenuTemas();
     irParaHub(); 
-};
-
-// --- CONTROLE DA SIDEBAR ---
-function toggleSidebar() {
-    sidebar.classList.toggle("expandida");
-}
-
-mainContent.onclick = (e) => {
-    if (sidebar.classList.contains("expandida")) {
-        sidebar.classList.remove("expandida");
-    }
 };
 
 // --- NAVEGAÇÃO ---
@@ -73,7 +58,6 @@ function abrirEscolhaTipoAdicao() {
 
 function voltarParaDicionariosRaiz() { irParaDicionariosRaiz(); }
 
-// --- CONTROLE DE FORMULÁRIO ---
 function mostrarFormIndividual() { 
     document.getElementById("selecao-tipo-adicao").style.display = "none";
     document.getElementById("form-individual").style.display = "block"; 

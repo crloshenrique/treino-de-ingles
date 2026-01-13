@@ -10,13 +10,13 @@
             --bg-color: #1f1f1f;
             --accent-color: #ff0074;
             --text-color: #ffffff;
-            --sidebar-width: 70px;
-            --sidebar-expanded: 240px;
+            --sidebar-width: 85px; /* Aumentado para ícones maiores */
+            --sidebar-expanded: 260px;
         }
 
         body { font-family: Arial, sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; display: flex; height: 100vh; overflow: hidden; }
 
-        /* SIDEBAR */
+        /* SIDEBAR ATUALIZADA */
         #sidebar {
             width: var(--sidebar-width);
             background: var(--bg-color);
@@ -29,27 +29,33 @@
             z-index: 100;
         }
 
-        #sidebar.expandida { width: var(--sidebar-expanded); }
+        /* Expansão automática ao passar o mouse */
+        #sidebar:hover { 
+            width: var(--sidebar-expanded); 
+        }
 
         .sidebar-item {
             display: flex;
             align-items: center;
-            padding: 15px;
+            padding: 15px 20px;
             cursor: pointer;
             text-decoration: none;
             color: white;
             white-space: nowrap;
             transition: background 0.2s;
-            height: 60px;
+            height: 75px; /* Aumentado para ícones maiores */
             box-sizing: border-box;
         }
 
         .sidebar-item:hover { background: rgba(255, 0, 116, 0.1); border: 1px solid var(--accent-color); border-radius: 8px; margin: 0 5px; }
 
-        .sidebar-item img { width: 30px; height: 30px; min-width: 30px; object-fit: contain; }
+        /* ÍCONES MAIORES */
+        .sidebar-item img { width: 40px; height: 40px; min-width: 40px; object-fit: contain; }
 
         .sidebar-item span { margin-left: 20px; font-weight: bold; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
-        #sidebar.expandida .sidebar-item span { opacity: 1; pointer-events: auto; }
+        
+        /* Mostra o texto quando a sidebar está em hover */
+        #sidebar:hover .sidebar-item span { opacity: 1; pointer-events: auto; }
 
         .sidebar-bottom { margin-top: auto; padding-bottom: 20px; }
 
@@ -61,7 +67,6 @@
 
         .menu { display: flex; flex-direction: column; gap: 15px; width: 100%; }
 
-        /* BOTÕES E ELEMENTOS */
         button { padding: 14px; font-size: 18px; border-radius: 10px; border: none; cursor: pointer; background: #3d3d3d; color: white; transition: transform 0.2s; }
         button:hover { transform: scale(1.02); background: #4a4a4a; }
         .btn-azul { background: #10a2dd !important; }
@@ -70,7 +75,6 @@
 
         input, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 10px; border: 1px solid #444; background: #2a2a2a; color: white; box-sizing: border-box; }
 
-        /* JOGO */
         #palavra-box { background: #333; color: white; font-size: 1.8rem; font-weight: bold; height: 125px; border-radius: 15px; display: none; align-items: center; justify-content: center; margin-bottom: 20px; border: 1px solid var(--accent-color); }
         #opcoes-container { display: none; flex-wrap: wrap; gap: 10px; }
         .opcao-btn { width: calc(50% - 5px); background: #3d3d3d; }
@@ -78,7 +82,6 @@
         #acertos-box { flex: 1; background: #4CAF50; padding: 10px; border-radius: 8px; }
         #erros-box { flex: 1; background: #f44336; padding: 10px; border-radius: 8px; }
 
-        /* LISTA DICIONARIO */
         .item-dicionario { padding: 12px; border-radius: 8px; background: #2a2a2a; display: grid; grid-template-columns: 1fr 1fr 1.5fr; gap: 10px; text-align: left; margin-bottom: 8px; border-left: 3px solid var(--accent-color); }
         .header-dicionario { display: grid; grid-template-columns: 1fr 1fr 1.5fr; gap: 10px; padding: 10px; font-weight: bold; color: var(--accent-color); border-bottom: 1px solid #444; }
     </style>
@@ -86,9 +89,9 @@
 <body>
 
     <nav id="sidebar">
-        <div class="sidebar-item" onclick="toggleSidebar()">
+        <div class="sidebar-item">
             <img src="imagens/menus/menu-hamburguer.png" alt="Menu">
-            <span>Recolher</span>
+            <span>Menu</span>
         </div>
         
         <div class="sidebar-item" onclick="irParaHub()">
@@ -121,7 +124,6 @@
 
     <main id="main-content">
         <div id="container">
-            
             <div id="menu-hub" class="menu">
                 <h1 style="color: var(--accent-color)">Welcome Back</h1>
                 <p>O que vamos estudar hoje?</p>
