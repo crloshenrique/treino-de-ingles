@@ -34,7 +34,6 @@ function alternarSidebar() {
     if (window.innerWidth <= 768) {
         document.body.classList.toggle("sidebar-aberta");
     }
-    // No PC, o alternar foi removido para manter os ícones sempre visíveis (fixos)
 }
 
 // --- NAVEGAÇÃO ---
@@ -44,7 +43,6 @@ function esconderTodosMenus() {
     menus.forEach(m => { if(m) m.style.display = "none"; });
     container.classList.remove("modo-largo");
 
-    // No mobile, fecha a sidebar. No PC, os ícones permanecem fixos.
     if (window.innerWidth <= 768) {
         document.body.classList.remove("sidebar-aberta");
     }
@@ -223,3 +221,5 @@ function filtrarPalavras() {
         item.style.display = txt.includes(termo) ? "grid" : "none";
     });
 }
+
+// Test Line: [2026-01-08] Always add the test line I added. Git 25.

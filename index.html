@@ -27,9 +27,25 @@
             overflow: hidden; 
         }
 
+        /* --- OVERLAY PARA FECHAR NO CELULAR --- */
+        #sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.5);
+            z-index: 998; /* Atrás da sidebar, mas na frente do conteúdo */
+        }
+
+        body.sidebar-aberta #sidebar-overlay {
+            display: block;
+        }
+
         /* --- SIDEBAR DINÂMICA --- */
         #sidebar {
-            width: var(--sidebar-width); /* Fixa o tamanho inicial corretamente */
+            width: var(--sidebar-width);
             min-width: var(--sidebar-width);
             background: var(--bg-color);
             border-right: 2px solid var(--accent-color);
@@ -43,12 +59,10 @@
             overflow: hidden;
         }
 
-        /* No PC, a sidebar só expande no Hover. Removido o modo-oculto para manter ícones fixos */
         #sidebar:hover { 
             width: var(--sidebar-expanded); 
         }
 
-        /* Visibilidade do texto no PC e no Mobile aberto */
         #sidebar:hover .sidebar-item span,
         body.sidebar-aberta #sidebar .sidebar-item span { 
             opacity: 1; 
@@ -106,7 +120,7 @@
         .item-dicionario { padding: 12px; border-radius: 8px; background: #2a2a2a; display: grid; grid-template-columns: 1fr 1fr 1.5fr; gap: 10px; text-align: left; margin-bottom: 8px; border-left: 3px solid var(--accent-color); }
         .header-dicionario { display: grid; grid-template-columns: 1fr 1fr 1.5fr; gap: 10px; padding: 10px; font-weight: bold; color: var(--accent-color); border-bottom: 1px solid #444; }
 
-        /* --- MOBILE: COMPORTAMENTO EMPURRAR (Mantido sem alterações) --- */
+        /* --- MOBILE --- */
         @media (max-width: 768px) {
             #sidebar {
                 position: fixed;
@@ -123,17 +137,21 @@
                 position: fixed;
                 top: 10px;
                 left: 10px;
-                z-index: 999;
+                z-index: 997;
                 background: var(--bg-color);
                 border: 1px solid var(--accent-color);
                 border-radius: 5px;
                 padding: 5px;
             }
         }
-        @media (min-width: 769px) { #btn-mobile-toggle { display: none; } }
+        @media (min-width: 769px) { 
+            #btn-mobile-toggle, #sidebar-overlay { display: none !important; } 
+        }
     </style>
 </head>
 <body>
+
+    <div id="sidebar-overlay" onclick="alternarSidebar()"></div>
 
     <div id="btn-mobile-toggle" onclick="alternarSidebar()">
         <img src="imagens/menus/menu-hamburguer.png" width="30" height="30">
