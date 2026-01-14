@@ -41,7 +41,12 @@ function esconderTodosMenus() {
                    menuTemas, menuPrincipal, menuNiveis, menuIntervalos, visualizacaoPalavras];
     menus.forEach(m => { if(m) m.style.display = "none"; });
     
-    // Removemos as classes de largura especial ao trocar de menu
+    // Esconde elementos do jogo
+    document.getElementById("palavra-box").style.display = "none";
+    document.getElementById("opcoes-container").style.display = "none";
+    document.getElementById("contador-container").style.display = "none";
+    document.getElementById("btn-reiniciar").style.display = "none";
+
     container.classList.remove("modo-largo");
 
     if (window.innerWidth <= 768) {
@@ -56,7 +61,7 @@ function irParaHub() {
 
 function irParaTemas() { 
     esconderTodosMenus(); 
-    container.classList.add("modo-largo"); // Alarga para caber os cards em grade
+    container.classList.add("modo-largo"); 
     menuTemas.style.display = "flex"; 
 }
 
@@ -65,19 +70,19 @@ function irParaDicionariosRaiz() {
     menuDicionariosRaiz.style.display = "flex"; 
 }
 
-// --- GERAR CARDS DE TEMAS (QUADRADOS ROSA) ---
+// --- GERAR CARDS ---
 function gerarMenuTemas() {
     listaTemasBotoes.innerHTML = "";
     categoriasDisponiveis.forEach(cat => {
         const btn = document.createElement("button");
         btn.textContent = cat; 
-        btn.className = "btn-tema-card"; // Classe do CSS com borda rosa
+        btn.className = "btn-tema-card"; 
         btn.onclick = () => carregarVocabulario(cat);
         listaTemasBotoes.appendChild(btn);
     });
 }
 
-// --- FUNÇÕES DO BANCO DE DADOS (SUPABASE) ---
+// --- SUPABASE ---
 async function carregarCategoriasDoBanco() {
     const { data, error } = await _supabase.from('dicionarios').select('categoria');
     if (!error && data) { 
@@ -105,24 +110,25 @@ function gerarMenuDicionariosVisualizacao() {
 async function carregarEExibirVarios(cat) {
     listaDicionariosVisualizar.style.display = "none";
     visualizacaoPalavras.style.display = "block";
-    areaListaPalavras.innerHTML = "Carregando...";
+    areaListaPalavras.innerHTML = ""; // Removido o texto "Carregando..."
     container.classList.add("modo-largo");
 
     let query = _supabase.from('dicionarios').select('*');
     if (cat !== 'todos') query = query.eq('categoria', cat);
 
     const { data } = await query.order('palavra', { ascending: true });
-    areaListaPalavras.innerHTML = "";
     
-    data.forEach(item => {
-        const div = document.createElement("div");
-        div.className = "item-dicionario";
-        div.innerHTML = `<span>${item.palavra}</span><span>${item.pronuncia}</span><span>${item.significado}</span>`;
-        areaListaPalavras.appendChild(div);
-    });
+    if (data) {
+        data.forEach(item => {
+            const div = document.createElement("div");
+            div.className = "item-dicionario";
+            div.innerHTML = `<span>${item.palavra}</span><span>${item.pronuncia}</span><span>${item.significado}</span>`;
+            areaListaPalavras.appendChild(div);
+        });
+    }
 }
 
-// --- ADIÇÃO DE PALAVRAS ---
+// --- ADIÇÃO ---
 function abrirSubMenuDicionarios() { 
     esconderTodosMenus(); 
     menuGerenciarDicionarios.style.display = "flex"; 
@@ -139,8 +145,16 @@ function abrirEscolhaTipoAdicao() {
 }
 
 function voltarParaDicionariosRaiz() { irParaDicionariosRaiz(); }
-function mostrarFormIndividual() { document.getElementById("selecao-tipo-adicao").style.display = "none"; document.getElementById("form-individual").style.display = "block"; }
-function mostrarFormMassa() { document.getElementById("selecao-tipo-adicao").style.display = "none"; document.getElementById("form-massa").style.display = "block"; }
+
+function mostrarFormIndividual() { 
+    document.getElementById("selecao-tipo-adicao").style.display = "none"; 
+    document.getElementById("form-individual").style.display = "block"; 
+}
+
+function mostrarFormMassa() { 
+    document.getElementById("selecao-tipo-adicao").style.display = "none"; 
+    document.getElementById("form-massa").style.display = "block"; 
+}
 
 async function salvarNoBancoLocal() { 
     const palavra = document.getElementById("add-palavra").value.trim(); 
@@ -182,9 +196,11 @@ async function salvarEmMassa() {
     else { alert(`${objetosParaEnviar.length} palavras cadastradas!`); location.reload(); } 
 }
 
-// --- LÓGICA DO JOGO ---
+// --- JOGO ---
 async function carregarVocabulario(cat) {
-    document.getElementById("status-load").style.display = "block";
+    const statusLoad = document.getElementById("status-load");
+    if(statusLoad) statusLoad.style.display = "block"; // Ativado apenas se quiser feedback visual
+    
     const { data } = await _supabase.from('dicionarios').select('*').eq('categoria', cat);
     
     vocabulario = data.map(item => ({ 
@@ -194,7 +210,7 @@ async function carregarVocabulario(cat) {
 
     esconderTodosMenus(); 
     menuPrincipal.style.display = "flex";
-    document.getElementById("status-load").style.display = "none";
+    if(statusLoad) statusLoad.style.display = "none";
 }
 
 function abrirMenuNiveis() { menuPrincipal.style.display = "none"; menuNiveis.style.display = "flex"; }
@@ -236,14 +252,22 @@ function proximaRodada() {
         btn.className = "opcao-btn"; 
         btn.textContent = op;
         btn.onclick = () => {
+            // Desativa cliques durante o feedback
+            const botoes = containerOpcoes.querySelectorAll('button');
+            botoes.forEach(b => b.style.pointerEvents = "none");
+
             if (op === atual.correta) { 
                 acertos++; 
+                btn.style.backgroundColor = "#5abb6a"; // Verde
                 document.getElementById("acertos-box").textContent = acertos; 
             } else { 
                 erros++; 
+                btn.style.backgroundColor = "#f14738"; // Vermelho
                 document.getElementById("erros-box").textContent = erros; 
+                // Destaca a correta em verde
+                botoes.forEach(b => { if(b.textContent === atual.correta) b.style.backgroundColor = "#5abb6a"; });
             }
-            setTimeout(proximaRodada, 600);
+            setTimeout(proximaRodada, 1200);
         };
         containerOpcoes.appendChild(btn);
     });
@@ -262,3 +286,5 @@ function filtrarPalavras() {
         item.style.display = txt.includes(termo) ? "grid" : "none";
     });
 }
+
+// Test Line: [2026-01-08] Always add the test line I added. Git 25.
