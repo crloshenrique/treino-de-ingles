@@ -21,6 +21,7 @@ const areaListaPalavras = document.getElementById("area-lista-palavras");
 const listaTemasBotoes = document.getElementById("lista-temas-botoes");
 const container = document.getElementById("container");
 const tituloCategoriasDicionario = document.getElementById("titulo-categorias-dicionario");
+const btnVoltarRaizDicionario = document.getElementById("btn-voltar-raiz-dicionario");
 
 let categoriasDisponiveis = [];
 let vocabulario = [];
@@ -28,6 +29,7 @@ let palavrasParaOJogo = [];
 let acertos = 0, erros = 0;
 let historicoSessao = []; 
 let ultimoMenuAberto = "";
+let dadosDicionarioAtual = []; 
 
 // --- FUNÇÃO DE FORMATAÇÃO CENTRALIZADA ---
 function formatarItem(palavraRaw, pronunciaRaw, significadoRaw) {
@@ -42,8 +44,8 @@ window.onload = async () => {
     gerarMenuDicionariosVisualizacao();
     gerarMenuTemas();
     irParaHub(); 
-    // Test line: Sistema de treino carregado com Git 25
-    console.log("Testando a configuração do repositório Git 25: Sucesso.");
+    // Test line: Sempre add essa linha de teste no Git 25
+    console.log("Sistema de treino carregado com Git 25");
 };
 
 // --- CONTROLE DO MENU LATERAL ---
@@ -84,6 +86,7 @@ function abrirSubMenuDicionarios() {
     visualizacaoPalavras.style.display = "none"; 
     listaDicionariosVisualizar.style.display = "grid"; 
     if (tituloCategoriasDicionario) tituloCategoriasDicionario.style.display = "block";
+    if (btnVoltarRaizDicionario) btnVoltarRaizDicionario.style.display = "flex";
 }
 
 // --- LÓGICA DE ADIÇÃO DE PALAVRAS ---
@@ -108,21 +111,20 @@ function mostrarFormMassa() {
     document.getElementById("titulo-adicao").textContent = "Cadastro em Massa";
 }
 
-// NOVA FUNÇÃO: Voltar inteligente no menu de adição
 function voltarBotaoAdicao() {
     const individualVisivel = document.getElementById("form-individual").style.display === "block";
     const massaVisivel = document.getElementById("form-massa").style.display === "block";
 
     if (individualVisivel || massaVisivel) {
-        // Se algum form está aberto, volta para a escolha 1 ou N
         abrirEscolhaTipoAdicao();
     } else {
-        // Se já está na escolha 1 ou N, volta para a raiz do dicionário
         irParaDicionariosRaiz();
     }
 }
 
-function voltarParaDicionariosRaiz() { irParaDicionariosRaiz(); }
+function voltarParaDicionariosRaiz() { 
+    abrirSubMenuDicionarios();
+}
 
 // --- FUNÇÕES DE BANCO ---
 async function carregarCategoriasDoBanco() {
@@ -152,7 +154,9 @@ function gerarMenuDicionariosVisualizacao() {
 async function carregarEExibirVarios(cat) {
     listaDicionariosVisualizar.style.display = "none";
     if (tituloCategoriasDicionario) tituloCategoriasDicionario.style.display = "none";
-    visualizacaoPalavras.style.display = "block";
+    if (btnVoltarRaizDicionario) btnVoltarRaizDicionario.style.display = "none";
+    
+    visualizacaoPalavras.style.display = "flex";
     areaListaPalavras.innerHTML = "Carregando...";
     container.classList.add("modo-largo");
     
@@ -168,9 +172,14 @@ async function carregarEExibirVarios(cat) {
         return;
     }
 
+    dadosDicionarioAtual = data || [];
+    renderizarListaPalavras(dadosDicionarioAtual);
+}
+
+function renderizarListaPalavras(lista) {
     areaListaPalavras.innerHTML = "";
-    if (data && data.length > 0) {
-        data.forEach(item => {
+    if (lista && lista.length > 0) {
+        lista.forEach(item => {
             const f = formatarItem(item.palavra, item.pronuncia, item.significado);
             const div = document.createElement("div");
             div.className = "item-dicionario";
@@ -184,8 +193,28 @@ async function carregarEExibirVarios(cat) {
             areaListaPalavras.appendChild(div);
         });
     } else {
-        areaListaPalavras.innerHTML = "Nenhuma palavra encontrada.";
+        areaListaPalavras.innerHTML = "<div style='padding:20px'>Nenhuma palavra encontrada.</div>";
     }
+}
+
+// LÓGICA DE FILTRAGEM
+function filtrarPalavras() {
+    const termo = document.getElementById("campo-busca").value.toLowerCase().trim();
+    
+    if (termo === "") {
+        renderizarListaPalavras(dadosDicionarioAtual);
+        return;
+    }
+
+    const filtradas = dadosDicionarioAtual.filter(item => {
+        const palavraIngles = item.palavra.toLowerCase();
+        const significado = item.significado.toLowerCase();
+        const matchIngles = palavraIngles.startsWith(termo);
+        const matchSignificado = significado.includes(termo);
+        return matchIngles || matchSignificado;
+    });
+
+    renderizarListaPalavras(filtradas);
 }
 
 // --- SALVAMENTO ---
@@ -240,9 +269,14 @@ async function carregarVocabulario(cat) {
     
     vocabulario = data.map(item => {
         const f = formatarItem(item.palavra, item.pronuncia, item.significado);
+        const corretaFormatada = f.significados.split(",")[0].trim();
+        const corretaQuiz = corretaFormatada.charAt(0).toUpperCase() + corretaFormatada.slice(1);
+        
         return { 
-            exibir: `${f.palavra} ${f.pronuncia}`, 
-            correta: f.significados.split(",")[0].trim(),
+            palavra: f.palavra,
+            pronuncia: f.pronuncia,
+            correta: corretaQuiz,
+            significadosFormatados: f.significados,
             original: item 
         };
     });
@@ -272,11 +306,12 @@ function iniciarJogo() {
     document.getElementById("contador-container").style.display = "flex";
     document.getElementById("revisao-teste").style.display = "none"; 
     document.getElementById("btn-voltar-final").style.display = "none";
+    
     historicoSessao = []; 
     acertos = 0; 
     erros = 0;
-    document.getElementById("acertos-box").textContent = "0";
-    document.getElementById("erros-box").textContent = "0";
+    document.getElementById("num-acertos").textContent = "0";
+    document.getElementById("num-erros").textContent = "0";
     palavrasParaOJogo.sort(() => Math.random() - 0.5);
     proximaRodada();
 }
@@ -286,13 +321,19 @@ function proximaRodada() {
     let atual = palavrasParaOJogo.shift();
     const box = document.getElementById("palavra-box");
     const containerOpcoes = document.getElementById("opcoes-container");
-    box.textContent = atual.exibir;
+    
+    box.innerHTML = `
+        <span style="display:block">${atual.palavra}</span>
+        <span style="font-size: 1.1rem; color: rgba(255,255,255,0.5); font-weight: normal; margin-top: 5px;">${atual.pronuncia}</span>
+    `;
+
     containerOpcoes.innerHTML = "";
     let opcoes = [atual.correta];
     while (opcoes.length < 4) {
-        let sorteio = vocabulario[Math.floor(Math.random() * vocabulario.length)].correta;
-        if (!opcoes.includes(sorteio)) opcoes.push(sorteio);
+        let sorteioRaw = vocabulario[Math.floor(Math.random() * vocabulario.length)].correta;
+        if (!opcoes.includes(sorteioRaw)) opcoes.push(sorteioRaw);
     }
+    
     opcoes.sort(() => Math.random() - 0.5).forEach(op => {
         const btn = document.createElement("button");
         btn.className = "opcao-btn"; btn.textContent = op;
@@ -301,33 +342,37 @@ function proximaRodada() {
             todosBotoes.forEach(b => b.style.pointerEvents = "none");
 
             let acertou = (op === atual.correta);
-            
             const f = formatarItem(atual.original.palavra, atual.original.pronuncia, atual.original.significado);
             
             historicoSessao.push({
-                texto: `${f.palavra} ${f.pronuncia} = ${f.significados}`,
+                palavra: f.palavra,
+                pronuncia: f.pronuncia,
+                significados: f.significados,
                 acertou: acertou
             });
 
             if (acertou) { 
                 acertos++; 
-                document.getElementById("acertos-box").textContent = acertos;
+                document.getElementById("num-acertos").textContent = acertos;
                 btn.classList.add("correto");
             } else { 
                 erros++; 
-                document.getElementById("erros-box").textContent = erros;
+                document.getElementById("num-erros").textContent = erros;
                 btn.classList.add("errado");
                 Array.from(todosBotoes).find(b => b.textContent === atual.correta).classList.add("correto");
             }
-            setTimeout(proximaRodada, 700);
+            setTimeout(proximaRodada, 800);
         };
         containerOpcoes.appendChild(btn);
     });
 }
 
 function finalizarTeste() {
-    document.getElementById("palavra-box").textContent = "Fim!";
+    document.getElementById("palavra-box").innerHTML = "<span>Fim do Treino!</span>";
     document.getElementById("opcoes-container").style.display = "none";
+    document.getElementById("contador-container").style.display = "none";
+    
+    container.classList.add("modo-largo");
     
     const revisaoContainer = document.getElementById("revisao-teste");
     const listaRevisao = document.getElementById("lista-revisao");
@@ -336,7 +381,13 @@ function finalizarTeste() {
     historicoSessao.forEach(item => {
         const div = document.createElement("div");
         div.className = `item-revisao ${item.acertou ? 'revisao-correto' : 'revisao-errado'}`;
-        div.textContent = item.texto;
+        div.innerHTML = `
+            <div class="col-palavra-info">
+                <span>${item.palavra}</span>
+                <span class="pronuncia-pequena">${item.pronuncia}</span>
+            </div>
+            <span>${item.significados}</span>
+        `;
         listaRevisao.appendChild(div);
     });
     

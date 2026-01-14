@@ -28,7 +28,6 @@
             overflow: hidden; 
         }
 
-        /* OVERLAY (CAMADA PARA FECHAR CLICANDO FORA) */
         #overlay {
             display: none;
             position: fixed;
@@ -41,7 +40,6 @@
         }
         body.menu-aberto #overlay { display: block; }
 
-        /* --- SIDEBAR BASE --- */
         #sidebar {
             background: var(--bg-color);
             border-right: 2px solid var(--accent-color);
@@ -76,28 +74,17 @@
 
         .sidebar-item img { width: 40px; height: 40px; min-width: 40px; object-fit: contain; }
         .sidebar-item span { margin-left: 20px; font-weight: bold; }
-
         .sidebar-bottom { margin-top: auto; padding-bottom: 20px; }
 
-        /* --- COMPORTAMENTO DESKTOP (PC) --- */
         @media (min-width: 769px) {
             #menu-toggle, #overlay { display: none !important; }
-            
-            #sidebar {
-                width: var(--sidebar-width-pc);
-                position: relative;
-                left: 0;
-            }
-
+            #sidebar { width: var(--sidebar-width-pc); position: relative; left: 0; }
             #sidebar:hover { width: var(--sidebar-expanded-pc); }
-
             #sidebar .sidebar-item span { opacity: 0; transition: opacity 0.2s; pointer-events: none; }
             #sidebar:hover .sidebar-item span { opacity: 1; pointer-events: auto; }
-
             #main-content { padding: 40px 20px; }
         }
 
-        /* --- COMPORTAMENTO MOBILE --- */
         @media (max-width: 768px) {
             #menu-toggle {
                 position: fixed;
@@ -115,29 +102,13 @@
                 transition: left 0.3s ease;
             }
             #menu-toggle img { width: 35px; height: 35px; }
-
-            #sidebar {
-                width: 260px;
-                position: fixed;
-                left: -262px; 
-                top: 0;
-            }
-
+            #sidebar { width: 260px; position: fixed; left: -262px; top: 0; }
             body.menu-aberto #sidebar { left: 0; }
             body.menu-aberto #menu-toggle { left: 275px; }
-
-            #main-content { 
-                padding: 80px 20px 40px 20px; 
-                transition: transform 0.3s ease;
-                width: 100%;
-            }
-
-            body.menu-aberto #main-content {
-                transform: translateX(260px);
-            }
+            #main-content { padding: 80px 20px 40px 20px; transition: transform 0.3s ease; width: 100%; }
+            body.menu-aberto #main-content { transform: translateX(260px); }
         }
 
-        /* --- CONTEÚDO --- */
         #main-content { 
             flex: 1; 
             overflow-y: auto; 
@@ -154,8 +125,10 @@
             align-items: center; 
             text-align: center;
             margin: auto; 
+            height: auto;
+            min-height: min-content;
         }
-        #container.modo-largo { max-width: 850px; }
+        #container.modo-largo { max-width: 850px; justify-content: flex-start; margin-top: 20px; }
 
         .menu { display: flex; flex-direction: column; gap: 15px; width: 100%; align-items: center; }
         .menu button { width: 100%; }
@@ -186,13 +159,11 @@
             transition: background 0.2s, transform 0.2s;
             text-align: center;
         }
-
         .card-dicionario:hover { background: rgba(255, 0, 116, 0.1); transform: scale(1.05); }
 
         button { padding: 14px; font-size: 18px; border-radius: 10px; border: none; cursor: pointer; background: #3d3d3d; color: white; transition: transform 0.2s; }
         button:hover { transform: scale(1.05); background: #4a4a4a; }
         
-        /* ESTILO DOS BOTÕES CUSTOMIZADOS */
         .btn-custom-lateral {
             background: #171717 !important; 
             border-left: 3px solid var(--accent-color) !important;
@@ -204,13 +175,11 @@
         .btn-verde { background: var(--success-color) !important; }
         .btn-quadrado { width: 80px !important; height: 80px; background: var(--accent-color) !important; color: white !important; font-weight: bold; font-size: 32px; border-radius: 15px; }
 
-        /* CLASSES DE CORES PARA BORDAS LATERAIS */
         .border-blue { border-left-color: var(--blue-color) !important; border-right-color: var(--blue-color) !important; }
         .border-green { border-left-color: var(--success-color) !important; border-right-color: var(--success-color) !important; }
         .border-orange { border-left-color: var(--warning-color) !important; border-right-color: var(--warning-color) !important; }
         .border-red { border-left-color: var(--error-color) !important; border-right-color: var(--error-color) !important; }
 
-        /* BOTÃO VOLTAR COM ÍCONE */
         .btn-voltar-icone {
             display: flex;
             align-items: center;
@@ -229,20 +198,89 @@
         .btn-voltar-icone:hover { transform: scale(1.1); }
         .btn-voltar-icone img { width: 28px; height: 28px; object-fit: contain; }
 
-        input, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 10px; border: 1px solid #444; background: #2a2a2a; color: white; box-sizing: border-box; }
+        input, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 10px; border: 1px solid #444; background: #2a2a2a; color: white; box-sizing: border-box; outline: none; transition: border-color 0.2s; }
+        
+        #campo-busca:focus {
+            border: 1px solid var(--accent-color);
+        }
 
-        #palavra-box { width: 100%; background: #333; color: white; font-size: 1.8rem; font-weight: bold; height: 125px; border-radius: 15px; display: none; align-items: center; justify-content: center; margin-bottom: 20px; border: 1px solid var(--accent-color); }
-        #opcoes-container { width: 100%; display: none; flex-wrap: wrap; gap: 10px; justify-content: center; }
-        .opcao-btn { width: calc(50% - 5px) !important; background: #3d3d3d; }
-        .correto { background-color: var(--success-color) !important; transform: scale(1.05); }
-        .errado { background-color: var(--error-color) !important; }
+        /* --- QUIZ CONTAINER --- */
+        #palavra-box { 
+            width: 100%; 
+            background: transparent; 
+            color: white; 
+            font-size: 2.2rem; 
+            font-weight: bold; 
+            height: 140px; 
+            display: none; 
+            flex-direction: column;
+            align-items: center; 
+            justify-content: center; 
+            padding-top: 35px; 
+            margin-bottom: 25px; 
+            border: 3px solid transparent;
+            border-bottom: 3px solid var(--accent-color);
+            border-radius: 25px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            box-sizing: border-box;
+        }
 
-        #contador-container { width: 100%; display: none; gap: 10px; margin: 20px 0; }
-        #acertos-box { flex: 1; background: var(--success-color); padding: 10px; border-radius: 8px; }
-        #erros-box { flex: 1; background: var(--error-color); padding: 10px; border-radius: 8px; }
+        #opcoes-container { 
+            width: 100%; 
+            display: none; 
+            flex-direction: column;
+            gap: 12px; 
+            justify-content: center; 
+        }
 
-        /* AJUSTE LISTA DICIONÁRIO - NOVA ESTRUTURA 2 COLUNAS */
-        .item-dicionario { 
+        .opcao-btn { 
+            width: 100% !important; 
+            background: #2a2a2a; 
+            border: 1px solid #444;
+            padding: 16px;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+        .opcao-btn:hover { background: #333; border-color: var(--accent-color); }
+
+        .correto { border: 2px solid var(--success-color) !important; background: rgba(90, 187, 106, 0.2) !important; color: var(--success-color) !important; font-weight: bold; }
+        .errado { border: 2px solid var(--error-color) !important; background: rgba(241, 71, 56, 0.2) !important; color: var(--error-color) !important; }
+
+        #contador-container { 
+            width: 100%; 
+            display: none; 
+            gap: 15px; 
+            margin: 25px 0; 
+        }
+        
+        .contador-item {
+            flex: 1;
+            padding: 12px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center; 
+            font-weight: bold;
+            font-size: 1.2rem;
+            background: #2a2a2a;
+        }
+
+        #num-acertos { 
+            color: var(--success-color); 
+        }
+        .contador-acerto {
+            border-left: 5px solid var(--success-color);
+        }
+
+        #num-erros { 
+            color: var(--error-color); 
+        }
+        .contador-erro {
+            border-left: 5px solid var(--error-color);
+        }
+
+        /* --- REVISÃO E LISTAS --- */
+        .item-dicionario, .item-revisao { 
             width: 100%; 
             padding: 12px; 
             border-radius: 8px; 
@@ -283,7 +321,6 @@
             text-align: left; 
         }
 
-        /* ESTILO DA REVISÃO FINAL */
         #revisao-teste { width: 100%; display: none; margin-top: 5px; text-align: left; }
         #lista-revisao { 
             max-height: 350px; 
@@ -291,30 +328,26 @@
             padding-right: 5px; 
             margin-bottom: 15px; 
         }
-        .item-revisao { 
-            width: 100%; 
-            padding: 12px; 
-            border-radius: 8px; 
-            background: #2a2a2a; 
-            margin-bottom: 8px; 
-            box-sizing: border-box; 
-            text-align: center;
-            font-weight: bold;
-            border: none;
-            border-left: 5px solid transparent; 
-        }
-        .revisao-correto { border-left-color: var(--success-color) !important; }
-        .revisao-errado { border-left-color: var(--error-color) !important; }
+        
+        .revisao-correto { border-left: 5px solid var(--success-color) !important; }
+        .revisao-errado { border-left: 5px solid var(--error-color) !important; }
 
-        /* SCROLLBARS PADRONIZADAS */
         #area-lista-palavras::-webkit-scrollbar, #lista-revisao::-webkit-scrollbar { width: 8px; }
         #area-lista-palavras::-webkit-scrollbar-track, #lista-revisao::-webkit-scrollbar-track { background: #2a2a2a; border-radius: 10px; }
         #area-lista-palavras::-webkit-scrollbar-thumb, #lista-revisao::-webkit-scrollbar-thumb { background: var(--accent-color); border-radius: 10px; }
 
         #area-lista-palavras {
+            width: 100%;
             max-height: 450px;
             overflow-y: auto;
             padding-right: 5px;
+        }
+
+        #visualizacao-palavras {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
         }
     </style>
 </head>
@@ -405,8 +438,12 @@
                     <input type="text" id="campo-busca" placeholder="Pesquisar..." oninput="filtrarPalavras()">
                     <div class="header-dicionario"><span>Palavra</span><span>Significado</span></div>
                     <div id="area-lista-palavras"></div>
+                    <div class="btn-voltar-icone" onclick="voltarParaDicionariosRaiz()" style="margin-top:20px">
+                        <img src="imagens/voltar.png" alt="Voltar">
+                        <span>Voltar</span>
+                    </div>
                 </div>
-                <div class="btn-voltar-icone" onclick="voltarParaDicionariosRaiz()" style="margin-top:20px">
+                <div id="btn-voltar-raiz-dicionario" class="btn-voltar-icone" onclick="irParaDicionariosRaiz()" style="margin-top:20px">
                     <img src="imagens/voltar.png" alt="Voltar">
                     <span>Voltar</span>
                 </div>
@@ -458,11 +495,16 @@
             <div id="palavra-box"></div>
             <div id="opcoes-container"></div>
             <div id="contador-container">
-                <div id="acertos-box">0</div>
-                <div id="erros-box">0</div>
+                <div class="contador-item contador-acerto">
+                    <span id="num-acertos">0</span>
+                </div>
+                <div class="contador-item contador-erro">
+                    <span id="num-erros">0</span>
+                </div>
             </div>
 
             <div id="revisao-teste">
+                <div class="header-dicionario"><span>Palavra</span><span>Significado</span></div>
                 <div id="lista-revisao"></div>
             </div>
 
