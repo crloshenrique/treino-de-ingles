@@ -57,7 +57,6 @@ window.onload = async () => {
 
 // --- LOGICA DE AUTENTICAÇÃO ---
 
-// NOVO: Escuta mudanças de auth (como clicar no link do email)
 function configurarObservadorAuth() {
     _supabase.auth.onAuthStateChange((event, session) => {
         if (event === 'SIGNED_IN') {
@@ -87,7 +86,7 @@ function exibirFeedback(mensagem, tipo) {
 
 function limparFeedback() {
     const box = document.getElementById("auth-feedback");
-    box.style.display = "none";
+    if(box) box.style.display = "none";
 }
 
 async function verificarSessao() {
@@ -163,14 +162,15 @@ async function fazerCadastro() {
         email, 
         password: senha,
         options: {
-            data: { username: username } // Envia o username para o metadata do auth
+            data: { username: username },
+            // Redireciona de volta para o GitHub Pages corretamente
+            emailRedirectTo: window.location.origin + window.location.pathname
         }
     });
 
     if (error) {
         exibirFeedback(error.message, "erro");
     } else {
-        // Criar perfil na tabela 'profiles'
         const { error: profileError } = await _supabase
             .from('profiles')
             .insert([{ id: data.user.id, email: email, username: username, xp: 0 }]);
@@ -198,7 +198,7 @@ async function fazerLogin() {
         }
     } else {
         usuarioLogado = data.user;
-        irParaHub(); // Redireciona ao entrar
+        irParaHub(); 
     }
 }
 
@@ -363,7 +363,6 @@ function renderizarListaPalavras(lista) {
     }
 }
 
-// LÓGICA DE FILTRAGEM
 function filtrarPalavras() {
     const termo = document.getElementById("campo-busca").value.toLowerCase().trim();
     
