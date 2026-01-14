@@ -32,6 +32,8 @@ window.onload = async () => {
     gerarMenuDicionariosVisualizacao();
     gerarMenuTemas();
     irParaHub(); 
+    // Test line: Sistema de treino carregado com Git 25
+    console.log("Sistema de treino carregado com Git 25");
 };
 
 // --- CONTROLE DO MENU LATERAL ---
@@ -69,7 +71,7 @@ function abrirSubMenuDicionarios() {
     esconderTodosMenus(); 
     menuGerenciarDicionarios.style.display = "flex"; 
     visualizacaoPalavras.style.display = "none"; 
-    listaDicionariosVisualizar.style.display = "flex"; 
+    listaDicionariosVisualizar.style.display = "grid"; 
     if (tituloCategoriasDicionario) tituloCategoriasDicionario.style.display = "block";
 }
 
@@ -100,13 +102,19 @@ async function carregarCategoriasDoBanco() {
 
 function gerarMenuDicionariosVisualizacao() {
     listaDicionariosVisualizar.innerHTML = "";
-    const btnTodos = document.createElement("button");
-    btnTodos.textContent = "Todos"; btnTodos.className = "btn-azul";
+    
+    // Botão "Todos" seguindo o estilo card
+    const btnTodos = document.createElement("div");
+    btnTodos.className = "card-dicionario";
+    btnTodos.style.borderColor = "#10a2dd"; // Diferenciação visual para 'Todos'
+    btnTodos.textContent = "Todos"; 
     btnTodos.onclick = () => carregarEExibirVarios('todos');
     listaDicionariosVisualizar.appendChild(btnTodos);
+
     categoriasDisponiveis.forEach(cat => {
-        const btn = document.createElement("button");
-        btn.textContent = cat; btn.className = "btn-azul";
+        const btn = document.createElement("div");
+        btn.className = "card-dicionario";
+        btn.textContent = cat; 
         btn.onclick = () => carregarEExibirVarios(cat);
         listaDicionariosVisualizar.appendChild(btn);
     });
@@ -262,5 +270,3 @@ function filtrarPalavras() {
         item.style.display = txt.includes(termo) ? "grid" : "none";
     });
 }
-
-console.log("Sistema de treino carregado com Git 25");
