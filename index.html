@@ -84,17 +84,17 @@
         .menu { display: flex; flex-direction: column; gap: 15px; width: 100%; align-items: center; }
         .menu button { width: 100%; }
 
-        /* GRID DE DICIONÁRIOS */
+        /* GRID DE DICIONÁRIOS CORRIGIDA */
         .grid-temas {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
             gap: 15px;
             width: 100%;
             margin-top: 20px;
         }
 
         .card-dicionario {
-            aspect-ratio: 1 / 1;
+            min-height: 100px;
             background: transparent;
             border: 2px solid var(--accent-color);
             border-radius: 12px;
@@ -102,16 +102,17 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            padding: 10px;
+            padding: 15px;
             color: white;
             font-weight: bold;
             font-size: 14px;
             text-transform: uppercase;
             word-break: break-word;
-            transition: background 0.2s;
+            transition: background 0.2s, transform 0.2s;
+            text-align: center;
         }
 
-        .card-dicionario:hover { background: rgba(255, 0, 116, 0.1); }
+        .card-dicionario:hover { background: rgba(255, 0, 116, 0.1); transform: scale(1.02); }
 
         /* BOTÕES GERAIS */
         button { 
