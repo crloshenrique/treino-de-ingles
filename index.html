@@ -10,28 +10,58 @@
             --bg-color: #1f1f1f;
             --accent-color: #ff0074;
             --text-color: #ffffff;
-            --sidebar-width: 85px; 
+            --sidebar-width: 0px; 
             --sidebar-expanded: 260px;
             --success-color: #5abb6a;
             --error-color: #f14738;
         }
 
-        body { font-family: Arial, sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        body { 
+            font-family: Arial, sans-serif; 
+            background: var(--bg-color); 
+            color: var(--text-color); 
+            margin: 0; 
+            display: flex; 
+            height: 100vh; 
+            overflow: hidden; 
+        }
 
-        /* SIDEBAR */
+        /* BOTÃO HAMBÚRGUER (FIXO NO TOPO ESQUERDO) */
+        #menu-toggle {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1001;
+            cursor: pointer;
+            background: var(--bg-color);
+            border: 1px solid var(--accent-color);
+            border-radius: 8px;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: left 0.3s ease;
+        }
+
+        #menu-toggle img { width: 35px; height: 35px; }
+
+        /* SIDEBAR (OFF-CANVAS) */
         #sidebar {
-            width: var(--sidebar-width);
+            width: var(--sidebar-expanded);
             background: var(--bg-color);
             border-right: 2px solid var(--accent-color);
             height: 100%;
             display: flex;
             flex-direction: column;
-            transition: width 0.3s ease;
-            position: relative;
-            z-index: 100;
+            position: fixed;
+            left: calc(-1 * var(--sidebar-expanded));
+            top: 0;
+            z-index: 1000;
+            transition: left 0.3s ease;
         }
 
-        #sidebar:hover { width: var(--sidebar-expanded); }
+        body.menu-aberto #sidebar { left: 0; }
+        body.menu-aberto #menu-toggle { left: calc(var(--sidebar-expanded) + 15px); }
 
         .sidebar-item {
             display: flex;
@@ -55,19 +85,24 @@
         }
 
         .sidebar-item img { width: 40px; height: 40px; min-width: 40px; object-fit: contain; }
-        .sidebar-item span { margin-left: 20px; font-weight: bold; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
-        #sidebar:hover .sidebar-item span { opacity: 1; pointer-events: auto; }
+        .sidebar-item span { margin-left: 20px; font-weight: bold; }
 
         .sidebar-bottom { margin-top: auto; padding-bottom: 20px; }
 
-        /* CONTEÚDO PRINCIPAL */
+        /* CONTEÚDO PRINCIPAL (PUSH) */
         #main-content { 
             flex: 1; 
             overflow-y: auto; 
-            padding: 40px 20px; 
+            padding: 80px 20px 40px 20px; 
             display: flex; 
             justify-content: center; 
             align-items: flex-start; 
+            transition: transform 0.3s ease;
+            width: 100%;
+        }
+
+        body.menu-aberto #main-content {
+            transform: translateX(var(--sidebar-expanded));
         }
         
         #container { 
@@ -77,14 +112,12 @@
             flex-direction: column;
             align-items: center;
             text-align: center;
-            margin: auto 0;
         }
-        #container.modo-largo { max-width: 850px; margin-top: 0; }
+        #container.modo-largo { max-width: 850px; }
 
         .menu { display: flex; flex-direction: column; gap: 15px; width: 100%; align-items: center; }
         .menu button { width: 100%; }
 
-        /* GRID DE DICIONÁRIOS CORRIGIDA */
         .grid-temas {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -108,13 +141,12 @@
             font-size: 14px;
             text-transform: uppercase;
             word-break: break-word;
-            transition: background 0.2s, transform 0.2s;
+            transition: background 0.2s;
             text-align: center;
         }
 
-        .card-dicionario:hover { background: rgba(255, 0, 116, 0.1); transform: scale(1.02); }
+        .card-dicionario:hover { background: rgba(255, 0, 116, 0.1); }
 
-        /* BOTÕES GERAIS */
         button { 
             padding: 14px; 
             font-size: 18px; 
@@ -145,27 +177,30 @@
         #acertos-box { flex: 1; background: var(--success-color); padding: 10px; border-radius: 8px; }
         #erros-box { flex: 1; background: var(--error-color); padding: 10px; border-radius: 8px; }
 
-        /* LISTAGEM DICIONÁRIO */
         .item-dicionario { width: 100%; padding: 12px; border-radius: 8px; background: #2a2a2a; display: grid; grid-template-columns: 1fr 1fr 1.5fr; gap: 10px; text-align: left; margin-bottom: 8px; border-left: 3px solid var(--accent-color); box-sizing: border-box; }
         .header-dicionario { width: 100%; display: grid; grid-template-columns: 1fr 1fr 1.5fr; gap: 10px; padding: 10px; font-weight: bold; color: var(--accent-color); border-bottom: 1px solid #444; box-sizing: border-box; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
+    <div id="menu-toggle" onclick="toggleMenu()">
+        <img src="imagens/menus/menu-hamburguer.png" alt="Abrir Menu">
+    </div>
+
     <nav id="sidebar">
-        <div class="sidebar-item">
+        <div class="sidebar-item" onclick="toggleMenu()">
             <img src="imagens/menus/menu-hamburguer.png" alt="Menu">
             <span>Menu</span>
         </div>
-        <div class="sidebar-item" onclick="irParaHub()">
+        <div class="sidebar-item" onclick="irParaHub(); toggleMenu();">
             <img src="imagens/menus/menu-telainicial.png" alt="Home">
             <span>Início</span>
         </div>
-        <div class="sidebar-item" onclick="irParaTemas()">
+        <div class="sidebar-item" onclick="irParaTemas(); toggleMenu();">
             <img src="imagens/menus/menu-praticar.png" alt="Praticar">
             <span>Praticar</span>
         </div>
-        <div class="sidebar-item" onclick="irParaDicionariosRaiz()">
+        <div class="sidebar-item" onclick="irParaDicionariosRaiz(); toggleMenu();">
             <img src="imagens/menus/menu-dicionarios.png" alt="Dicionários">
             <span>Dicionários</span>
         </div>

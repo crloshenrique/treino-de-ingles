@@ -33,6 +33,11 @@ window.onload = async () => {
     irParaHub(); 
 };
 
+// --- CONTROLE DO MENU LATERAL ---
+function toggleMenu() {
+    document.body.classList.toggle("menu-aberto");
+}
+
 // --- NAVEGAÇÃO ---
 function esconderTodosMenus() {
     const menus = [menuHub, menuDicionariosRaiz, menuGerenciarDicionarios, areaAdicionarDicionario, 
