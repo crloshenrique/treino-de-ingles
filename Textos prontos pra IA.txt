@@ -1,12 +1,6 @@
 Vou lhe mandar dois códigos completos, em duas mensagens diferentes (uma com script.js e outra com index.html). Não mande nada após eu fazer o envio das duas. Depois que eu mandar as duas, vou mandar em uma nova mensagem as intruções do que você vai fazer. Mas não faça nada até eu dizer.
 
-o que vou querer que vc faça é o seguinte:
-Mexa apenas nisso:
-ao final de cada teste, quero que apareça as palavras que respondi naquele teste. As palavras têm que aparecer em lista, igual vc fez para essa lista de palavras que tem no dicionário, ok? Só que sem títulos nas colunas.
-Quero esse padrão:
-Palavra (pronúncia) = significado
-Quero que seja na mesma cor #2a2a2a e ao inves das bordas serem rosa, quero que fique vermelha se errei e verde se acertei. A borda que digo é uma linha ao redor da borda do retangulo.
-Faça uma barra de rolagem tbm, no mesmo estilo da barra de rolagem que vc colocou lá na lista de dicionarios.
-Atente-se:
-eu mandei referências da lista de dicionarios/palavras mas não é pra voce mudar nada na lista de dicionarios. Mandei apenas pra voce pegar como referência, ok? Não mude nada fora 
 
+show. Deu certo. Agora eu quero que quando o usuario faça login, apareça o nome dele no lugar de "Perfil". E que quando ele clicar em cima, apareça apenas uma frase: "Olá, nome", e embaixo apareça o botão Sair (que desconecta o usuario atual).
+
+Quero que quando o usuario fizer login, o nome dele apareça no lugar onde esta Perfil. Assim é como se ele visse que está logado. E onde tem "Welcome Back" fique "Welcome, primeiro_nome_do_usuario". Quando o usuario clicar no nome dele, quero que a tela não vá para a tela de login, pois ele ja esta conectado, e sim pra uma tela que vai aparecer apenas um botão, chamado "Sair". Se ele clicar, ele é desconectado da sessão.

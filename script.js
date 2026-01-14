@@ -8,7 +8,6 @@ const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // SELETORES DE MENUS
 const menuHub = document.getElementById("menu-hub");
-const menuPerfil = document.getElementById("menu-perfil");
 const menuDicionariosRaiz = document.getElementById("menu-dicionarios-raiz");
 const menuGerenciarDicionarios = document.getElementById("menu-gerenciar-dicionarios");
 const areaAdicionarDicionario = document.getElementById("area-adicionar-dicionario");
@@ -24,10 +23,6 @@ const container = document.getElementById("container");
 const tituloCategoriasDicionario = document.getElementById("titulo-categorias-dicionario");
 const btnVoltarRaizDicionario = document.getElementById("btn-voltar-raiz-dicionario");
 
-// ESTADOS DE AUTH
-let usuarioLogado = null;
-let modoCadastro = false;
-
 let categoriasDisponiveis = [];
 let vocabulario = [];
 let palavrasParaOJogo = [];
@@ -39,178 +34,19 @@ let dadosDicionarioAtual = [];
 // --- FUNÇÃO DE FORMATAÇÃO CENTRALIZADA ---
 function formatarItem(palavraRaw, pronunciaRaw, significadoRaw) {
     const palavra = palavraRaw.charAt(0).toUpperCase() + palavraRaw.slice(1).toLowerCase();
-    let pronuncia = (pronunciaRaw || "").toLowerCase().replace(/\(|\)/g, "");
-    const significados = (significadoRaw || "").split(/[/,;=]/).map(s => s.trim().toLowerCase()).join(', ');
+    let pronuncia = pronunciaRaw.toLowerCase().replace(/\(|\)/g, "");
+    const significados = significadoRaw.split(/[/,;=]/).map(s => s.trim().toLowerCase()).join(', ');
     return { palavra, pronuncia, significados };
 }
 
 window.onload = async () => {
-    console.log("Iniciando carregamento do sistema...");
-    try {
-        configurarObservadorAuth(); 
-        await verificarSessao();
-        await carregarCategoriasDoBanco();
-        gerarMenuDicionariosVisualizacao();
-        gerarMenuTemas();
-        irParaHub(); 
-    } catch (err) {
-        console.error("Erro fatal na inicialização:", err);
-    }
+    await carregarCategoriasDoBanco();
+    gerarMenuDicionariosVisualizacao();
+    gerarMenuTemas();
+    irParaHub(); 
     // Test line: Sempre add essa linha de teste no Git 25
     console.log("Sistema de treino carregado com Git 25");
 };
-
-// --- LOGICA DE AUTENTICAÇÃO ---
-
-function configurarObservadorAuth() {
-    _supabase.auth.onAuthStateChange((event, session) => {
-        if (event === 'SIGNED_IN') {
-            usuarioLogado = session.user;
-            document.getElementById("label-perfil").textContent = "Perfil";
-            
-            if (window.location.hash.includes("access_token")) {
-                irParaPerfil();
-                exibirFeedback("E-mail confirmado com sucesso! Bem-vindo.", "sucesso");
-            }
-            carregarDadosPerfil();
-        }
-        if (event === 'SIGNED_OUT') {
-            usuarioLogado = null;
-            document.getElementById("label-perfil").textContent = "Login";
-        }
-    });
-}
-
-function exibirFeedback(mensagem, tipo) {
-    const box = document.getElementById("auth-feedback");
-    if (!box) return;
-    box.textContent = mensagem;
-    box.style.display = "block";
-    box.className = tipo === "erro" ? "feedback-erro" : "feedback-sucesso";
-}
-
-function limparFeedback() {
-    const box = document.getElementById("auth-feedback");
-    if(box) box.style.display = "none";
-}
-
-async function verificarSessao() {
-    const { data: { session } } = await _supabase.auth.getSession();
-    if (session) {
-        usuarioLogado = session.user;
-        document.getElementById("label-perfil").textContent = "Perfil";
-        carregarDadosPerfil();
-    } else {
-        usuarioLogado = null;
-        document.getElementById("label-perfil").textContent = "Login";
-    }
-}
-
-async function carregarDadosPerfil() {
-    if (!usuarioLogado) return;
-    
-    const { data, error } = await _supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', usuarioLogado.id)
-        .single();
-
-    if (data) {
-        document.getElementById("perfil-nome").textContent = data.username || "Usuário";
-        document.getElementById("perfil-email").textContent = data.email;
-        document.getElementById("perfil-xp").textContent = data.xp || 0;
-        
-        document.getElementById("sessao-deslogado").style.display = "none";
-        document.getElementById("sessao-logado").style.display = "block";
-    }
-}
-
-function alternarModoAuth() {
-    modoCadastro = !modoCadastro;
-    const titulo = document.getElementById("titulo-auth");
-    const btnMain = document.getElementById("btn-login-main");
-    const btnSwitch = document.getElementById("btn-cadastro-switch");
-    const inputUser = document.getElementById("auth-username");
-    limparFeedback();
-
-    if (modoCadastro) {
-        titulo.textContent = "Criar Nova Conta";
-        btnMain.textContent = "Cadastrar";
-        btnMain.onclick = fazerCadastro;
-        btnSwitch.textContent = "Já tem conta? Entre aqui";
-        inputUser.style.display = "block";
-    } else {
-        titulo.textContent = "Entrar na Conta";
-        btnMain.textContent = "Entrar";
-        btnMain.onclick = fazerLogin;
-        btnSwitch.textContent = "Não tem conta? Cadastre-se";
-        inputUser.style.display = "none";
-    }
-}
-
-async function fazerCadastro() {
-    const email = document.getElementById("auth-email").value.trim();
-    const senha = document.getElementById("auth-senha").value.trim();
-    const username = document.getElementById("auth-username").value.trim();
-
-    if (!email || !senha || !username) { 
-        exibirFeedback("Preencha todos os campos!", "erro"); 
-        return; 
-    }
-
-    if (senha.length < 6) {
-        exibirFeedback("A senha deve ter no mínimo 6 caracteres.", "erro");
-        return;
-    }
-
-    const { data, error } = await _supabase.auth.signUp({ 
-        email, 
-        password: senha,
-        options: {
-            data: { username: username },
-            emailRedirectTo: window.location.origin + window.location.pathname
-        }
-    });
-
-    if (error) {
-        exibirFeedback(error.message, "erro");
-    } else {
-        if (data.user) {
-            await _supabase
-                .from('profiles')
-                .insert([{ id: data.user.id, email: email, username: username, xp: 0 }]);
-        }
-        exibirFeedback("Conta criada! Verifique seu e-mail para confirmar.", "sucesso");
-    }
-}
-
-async function fazerLogin() {
-    const email = document.getElementById("auth-email").value.trim();
-    const senha = document.getElementById("auth-senha").value.trim();
-
-    if (!email || !senha) { 
-        exibirFeedback("Preencha e-mail e senha!", "erro"); 
-        return; 
-    }
-
-    const { data, error } = await _supabase.auth.signInWithPassword({ email, password: senha });
-
-    if (error) {
-        if (error.message.includes("Email not confirmed")) {
-            exibirFeedback("Por favor, confirme seu e-mail antes de entrar.", "erro");
-        } else {
-            exibirFeedback("E-mail ou senha incorretos.", "erro");
-        }
-    } else {
-        usuarioLogado = data.user;
-        irParaHub(); 
-    }
-}
-
-async function fazerLogout() {
-    await _supabase.auth.signOut();
-    location.reload();
-}
 
 // --- CONTROLE DO MENU LATERAL ---
 function toggleMenu() {
@@ -225,12 +61,11 @@ function handleMenuClick() {
 
 // --- NAVEGAÇÃO ---
 function esconderTodosMenus() {
-    const menus = [menuHub, menuPerfil, menuDicionariosRaiz, menuGerenciarDicionarios, areaAdicionarDicionario, 
+    const menus = [menuHub, menuDicionariosRaiz, menuGerenciarDicionarios, areaAdicionarDicionario, 
                    menuTemas, menuPrincipal, menuNiveis, menuIntervalos, visualizacaoPalavras];
     menus.forEach(m => { if(m) m.style.display = "none"; });
     container.classList.remove("modo-largo");
     interromperJogo();
-    limparFeedback(); 
 }
 
 function interromperJogo() {
@@ -244,7 +79,6 @@ function interromperJogo() {
 function irParaHub() { esconderTodosMenus(); menuHub.style.display = "flex"; }
 function irParaTemas() { esconderTodosMenus(); menuTemas.style.display = "flex"; }
 function irParaDicionariosRaiz() { esconderTodosMenus(); menuDicionariosRaiz.style.display = "flex"; }
-function irParaPerfil() { esconderTodosMenus(); menuPerfil.style.display = "flex"; }
 
 function abrirSubMenuDicionarios() { 
     esconderTodosMenus(); 
@@ -294,15 +128,13 @@ function voltarParaDicionariosRaiz() {
 
 // --- FUNÇÕES DE BANCO ---
 async function carregarCategoriasDoBanco() {
-    const { data, error } = await _supabase.from('dicionarios').select('categoria').order('categoria', { ascending: true });
-    if (error) {
-        console.error("Erro ao carregar categorias:", error.message);
-        return;
-    }
-    if (data) { 
-        const unicas = [...new Set(data.map(item => item.categoria))];
+    const { data, error } = await _supabase.from('dicionarios').select('categoria, id').order('id', { ascending: true });
+    if (!error && data) { 
+        const unicas = [];
+        data.forEach(item => {
+            if (!unicas.includes(item.categoria)) unicas.push(item.categoria);
+        });
         categoriasDisponiveis = unicas;
-        console.log("Categorias carregadas:", categoriasDisponiveis);
     }
 }
 
@@ -370,6 +202,7 @@ function renderizarListaPalavras(lista) {
     }
 }
 
+// LÓGICA DE FILTRAGEM
 function filtrarPalavras() {
     const termo = document.getElementById("campo-busca").value.toLowerCase().trim();
     
@@ -381,7 +214,9 @@ function filtrarPalavras() {
     const filtradas = dadosDicionarioAtual.filter(item => {
         const palavraIngles = item.palavra.toLowerCase();
         const significado = item.significado.toLowerCase();
-        return palavraIngles.startsWith(termo) || significado.includes(termo);
+        const matchIngles = palavraIngles.startsWith(termo);
+        const matchSignificado = significado.includes(termo);
+        return matchIngles || matchSignificado;
     });
 
     renderizarListaPalavras(filtradas);
@@ -437,7 +272,7 @@ async function carregarVocabulario(cat) {
     document.getElementById("status-load").style.display = "block";
     const { data } = await _supabase.from('dicionarios').select('*').eq('categoria', cat);
     
-    vocabulario = (data || []).map(item => {
+    vocabulario = data.map(item => {
         const f = formatarItem(item.palavra, item.pronuncia, item.significado);
         const corretaFormatada = f.significados.split(",")[0].trim();
         const corretaQuiz = corretaFormatada.charAt(0).toUpperCase() + corretaFormatada.slice(1);
@@ -499,7 +334,7 @@ function proximaRodada() {
 
     containerOpcoes.innerHTML = "";
     let opcoes = [atual.correta];
-    while (opcoes.length < 4 && vocabulario.length >= 4) {
+    while (opcoes.length < 4) {
         let sorteioRaw = vocabulario[Math.floor(Math.random() * vocabulario.length)].correta;
         if (!opcoes.includes(sorteioRaw)) opcoes.push(sorteioRaw);
     }
