@@ -39,7 +39,6 @@ function toggleMenu() {
 }
 
 function handleMenuClick() {
-    // Apenas fecha se estiver em modo mobile (onde a largura da tela é pequena)
     if (window.innerWidth <= 768) {
         document.body.classList.remove("menu-aberto");
     }

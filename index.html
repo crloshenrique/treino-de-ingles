@@ -26,6 +26,19 @@
             overflow: hidden; 
         }
 
+        /* OVERLAY (CAMADA PARA FECHAR CLICANDO FORA) */
+        #overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+        body.menu-aberto #overlay { display: block; }
+
         /* --- SIDEBAR BASE --- */
         #sidebar {
             background: var(--bg-color);
@@ -66,7 +79,7 @@
 
         /* --- COMPORTAMENTO DESKTOP (PC) --- */
         @media (min-width: 769px) {
-            #menu-toggle { display: none; } /* Esconde o botão hambúrguer no PC */
+            #menu-toggle, #overlay { display: none !important; }
             
             #sidebar {
                 width: var(--sidebar-width-pc);
@@ -88,7 +101,7 @@
                 position: fixed;
                 top: 15px;
                 left: 15px;
-                z-index: 1100; /* Maior que o sidebar */
+                z-index: 1100;
                 cursor: pointer;
                 background: var(--bg-color);
                 border: 1px solid var(--accent-color);
@@ -104,7 +117,7 @@
             #sidebar {
                 width: 260px;
                 position: fixed;
-                left: -262px; /* Esconde incluindo a borda */
+                left: -262px; 
                 top: 0;
             }
 
@@ -190,6 +203,8 @@
     </style>
 </head>
 <body>
+
+    <div id="overlay" onclick="toggleMenu()"></div>
 
     <div id="menu-toggle" onclick="toggleMenu()">
         <img src="imagens/menus/menu-hamburguer.png" alt="Abrir Menu">
