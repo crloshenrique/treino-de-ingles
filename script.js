@@ -39,18 +39,23 @@ let dadosDicionarioAtual = [];
 // --- FUNÇÃO DE FORMATAÇÃO CENTRALIZADA ---
 function formatarItem(palavraRaw, pronunciaRaw, significadoRaw) {
     const palavra = palavraRaw.charAt(0).toUpperCase() + palavraRaw.slice(1).toLowerCase();
-    let pronuncia = pronunciaRaw.toLowerCase().replace(/\(|\)/g, "");
-    const significados = significadoRaw.split(/[/,;=]/).map(s => s.trim().toLowerCase()).join(', ');
+    let pronuncia = (pronunciaRaw || "").toLowerCase().replace(/\(|\)/g, "");
+    const significados = (significadoRaw || "").split(/[/,;=]/).map(s => s.trim().toLowerCase()).join(', ');
     return { palavra, pronuncia, significados };
 }
 
 window.onload = async () => {
-    configurarObservadorAuth(); // Inicia o "ouvinte" de login/confirmação
-    await verificarSessao();
-    await carregarCategoriasDoBanco();
-    gerarMenuDicionariosVisualizacao();
-    gerarMenuTemas();
-    irParaHub(); 
+    console.log("Iniciando carregamento do sistema...");
+    try {
+        configurarObservadorAuth(); 
+        await verificarSessao();
+        await carregarCategoriasDoBanco();
+        gerarMenuDicionariosVisualizacao();
+        gerarMenuTemas();
+        irParaHub(); 
+    } catch (err) {
+        console.error("Erro fatal na inicialização:", err);
+    }
     // Test line: Sempre add essa linha de teste no Git 25
     console.log("Sistema de treino carregado com Git 25");
 };
@@ -63,7 +68,6 @@ function configurarObservadorAuth() {
             usuarioLogado = session.user;
             document.getElementById("label-perfil").textContent = "Perfil";
             
-            // Se o evento foi via link de confirmação, avisamos o usuário
             if (window.location.hash.includes("access_token")) {
                 irParaPerfil();
                 exibirFeedback("E-mail confirmado com sucesso! Bem-vindo.", "sucesso");
@@ -79,6 +83,7 @@ function configurarObservadorAuth() {
 
 function exibirFeedback(mensagem, tipo) {
     const box = document.getElementById("auth-feedback");
+    if (!box) return;
     box.textContent = mensagem;
     box.style.display = "block";
     box.className = tipo === "erro" ? "feedback-erro" : "feedback-sucesso";
@@ -163,7 +168,6 @@ async function fazerCadastro() {
         password: senha,
         options: {
             data: { username: username },
-            // Redireciona de volta para o GitHub Pages corretamente
             emailRedirectTo: window.location.origin + window.location.pathname
         }
     });
@@ -171,10 +175,11 @@ async function fazerCadastro() {
     if (error) {
         exibirFeedback(error.message, "erro");
     } else {
-        const { error: profileError } = await _supabase
-            .from('profiles')
-            .insert([{ id: data.user.id, email: email, username: username, xp: 0 }]);
-        
+        if (data.user) {
+            await _supabase
+                .from('profiles')
+                .insert([{ id: data.user.id, email: email, username: username, xp: 0 }]);
+        }
         exibirFeedback("Conta criada! Verifique seu e-mail para confirmar.", "sucesso");
     }
 }
@@ -289,13 +294,15 @@ function voltarParaDicionariosRaiz() {
 
 // --- FUNÇÕES DE BANCO ---
 async function carregarCategoriasDoBanco() {
-    const { data, error } = await _supabase.from('dicionarios').select('categoria, id').order('id', { ascending: true });
-    if (!error && data) { 
-        const unicas = [];
-        data.forEach(item => {
-            if (!unicas.includes(item.categoria)) unicas.push(item.categoria);
-        });
+    const { data, error } = await _supabase.from('dicionarios').select('categoria').order('categoria', { ascending: true });
+    if (error) {
+        console.error("Erro ao carregar categorias:", error.message);
+        return;
+    }
+    if (data) { 
+        const unicas = [...new Set(data.map(item => item.categoria))];
         categoriasDisponiveis = unicas;
+        console.log("Categorias carregadas:", categoriasDisponiveis);
     }
 }
 
@@ -374,9 +381,7 @@ function filtrarPalavras() {
     const filtradas = dadosDicionarioAtual.filter(item => {
         const palavraIngles = item.palavra.toLowerCase();
         const significado = item.significado.toLowerCase();
-        const matchIngles = palavraIngles.startsWith(termo);
-        const matchSignificado = significado.includes(termo);
-        return matchIngles || matchSignificado;
+        return palavraIngles.startsWith(termo) || significado.includes(termo);
     });
 
     renderizarListaPalavras(filtradas);
@@ -432,7 +437,7 @@ async function carregarVocabulario(cat) {
     document.getElementById("status-load").style.display = "block";
     const { data } = await _supabase.from('dicionarios').select('*').eq('categoria', cat);
     
-    vocabulario = data.map(item => {
+    vocabulario = (data || []).map(item => {
         const f = formatarItem(item.palavra, item.pronuncia, item.significado);
         const corretaFormatada = f.significados.split(",")[0].trim();
         const corretaQuiz = corretaFormatada.charAt(0).toUpperCase() + corretaFormatada.slice(1);
@@ -494,7 +499,7 @@ function proximaRodada() {
 
     containerOpcoes.innerHTML = "";
     let opcoes = [atual.correta];
-    while (opcoes.length < 4) {
+    while (opcoes.length < 4 && vocabulario.length >= 4) {
         let sorteioRaw = vocabulario[Math.floor(Math.random() * vocabulario.length)].correta;
         if (!opcoes.includes(sorteioRaw)) opcoes.push(sorteioRaw);
     }
