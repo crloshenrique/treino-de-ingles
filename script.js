@@ -45,6 +45,7 @@ function formatarItem(palavraRaw, pronunciaRaw, significadoRaw) {
 }
 
 window.onload = async () => {
+    configurarObservadorAuth(); // Inicia o "ouvinte" de login/confirmação
     await verificarSessao();
     await carregarCategoriasDoBanco();
     gerarMenuDicionariosVisualizacao();
@@ -55,6 +56,27 @@ window.onload = async () => {
 };
 
 // --- LOGICA DE AUTENTICAÇÃO ---
+
+// NOVO: Escuta mudanças de auth (como clicar no link do email)
+function configurarObservadorAuth() {
+    _supabase.auth.onAuthStateChange((event, session) => {
+        if (event === 'SIGNED_IN') {
+            usuarioLogado = session.user;
+            document.getElementById("label-perfil").textContent = "Perfil";
+            
+            // Se o evento foi via link de confirmação, avisamos o usuário
+            if (window.location.hash.includes("access_token")) {
+                irParaPerfil();
+                exibirFeedback("E-mail confirmado com sucesso! Bem-vindo.", "sucesso");
+            }
+            carregarDadosPerfil();
+        }
+        if (event === 'SIGNED_OUT') {
+            usuarioLogado = null;
+            document.getElementById("label-perfil").textContent = "Login";
+        }
+    });
+}
 
 function exibirFeedback(mensagem, tipo) {
     const box = document.getElementById("auth-feedback");
@@ -137,11 +159,18 @@ async function fazerCadastro() {
         return;
     }
 
-    const { data, error } = await _supabase.auth.signUp({ email, password: senha });
+    const { data, error } = await _supabase.auth.signUp({ 
+        email, 
+        password: senha,
+        options: {
+            data: { username: username } // Envia o username para o metadata do auth
+        }
+    });
 
     if (error) {
         exibirFeedback(error.message, "erro");
     } else {
+        // Criar perfil na tabela 'profiles'
         const { error: profileError } = await _supabase
             .from('profiles')
             .insert([{ id: data.user.id, email: email, username: username, xp: 0 }]);
@@ -169,7 +198,7 @@ async function fazerLogin() {
         }
     } else {
         usuarioLogado = data.user;
-        location.reload(); 
+        irParaHub(); // Redireciona ao entrar
     }
 }
 
@@ -196,7 +225,7 @@ function esconderTodosMenus() {
     menus.forEach(m => { if(m) m.style.display = "none"; });
     container.classList.remove("modo-largo");
     interromperJogo();
-    limparFeedback(); // Limpa as mensagens ao navegar para qualquer lugar
+    limparFeedback(); 
 }
 
 function interromperJogo() {
