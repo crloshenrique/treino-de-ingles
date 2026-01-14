@@ -38,6 +38,13 @@ function toggleMenu() {
     document.body.classList.toggle("menu-aberto");
 }
 
+function handleMenuClick() {
+    // Apenas fecha se estiver em modo mobile (onde a largura da tela é pequena)
+    if (window.innerWidth <= 768) {
+        document.body.classList.remove("menu-aberto");
+    }
+}
+
 // --- NAVEGAÇÃO ---
 function esconderTodosMenus() {
     const menus = [menuHub, menuDicionariosRaiz, menuGerenciarDicionarios, areaAdicionarDicionario, 
