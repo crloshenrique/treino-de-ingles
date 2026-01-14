@@ -200,6 +200,16 @@
 
         .item-dicionario { width: 100%; padding: 12px; border-radius: 8px; background: #2a2a2a; display: grid; grid-template-columns: 1fr 1fr 1.5fr; gap: 10px; text-align: left; margin-bottom: 8px; border-left: 3px solid var(--accent-color); box-sizing: border-box; }
         .header-dicionario { width: 100%; display: grid; grid-template-columns: 1fr 1fr 1.5fr; gap: 10px; padding: 10px; font-weight: bold; color: var(--accent-color); border-bottom: 1px solid #444; box-sizing: border-box; margin-bottom: 10px; }
+
+        #area-lista-palavras {
+            max-height: 450px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        #area-lista-palavras::-webkit-scrollbar { width: 8px; }
+        #area-lista-palavras::-webkit-scrollbar-track { background: #2a2a2a; border-radius: 10px; }
+        #area-lista-palavras::-webkit-scrollbar-thumb { background: var(--accent-color); border-radius: 10px; }
     </style>
 </head>
 <body>
@@ -277,7 +287,7 @@
             </div>
 
             <div id="menu-gerenciar-dicionarios" class="menu" style="display:none">
-                <h2>Escolha a Categoria</h2>
+                <h2 id="titulo-categorias-dicionario">Escolha a Categoria</h2>
                 <div id="lista-dicionarios-visualizar" class="menu"></div>
                 <div id="visualizacao-palavras" style="display:none; width: 100%;">
                     <input type="text" id="campo-busca" placeholder="Pesquisar..." oninput="filtrarPalavras()">

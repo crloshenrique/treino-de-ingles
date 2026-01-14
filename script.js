@@ -20,6 +20,7 @@ const listaDicionariosVisualizar = document.getElementById("lista-dicionarios-vi
 const areaListaPalavras = document.getElementById("area-lista-palavras");
 const listaTemasBotoes = document.getElementById("lista-temas-botoes");
 const container = document.getElementById("container");
+const tituloCategoriasDicionario = document.getElementById("titulo-categorias-dicionario");
 
 let categoriasDisponiveis = [];
 let vocabulario = [];
@@ -69,6 +70,7 @@ function abrirSubMenuDicionarios() {
     menuGerenciarDicionarios.style.display = "flex"; 
     visualizacaoPalavras.style.display = "none"; 
     listaDicionariosVisualizar.style.display = "flex"; 
+    if (tituloCategoriasDicionario) tituloCategoriasDicionario.style.display = "block";
 }
 
 function abrirEscolhaTipoAdicao() { 
@@ -112,6 +114,7 @@ function gerarMenuDicionariosVisualizacao() {
 
 async function carregarEExibirVarios(cat) {
     listaDicionariosVisualizar.style.display = "none";
+    if (tituloCategoriasDicionario) tituloCategoriasDicionario.style.display = "none";
     visualizacaoPalavras.style.display = "block";
     areaListaPalavras.innerHTML = "Carregando...";
     container.classList.add("modo-largo");
