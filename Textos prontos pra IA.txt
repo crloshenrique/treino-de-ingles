@@ -1,0 +1,12 @@
+Vou lhe mandar dois códigos completos, em duas mensagens diferentes (uma com script.js e outra com index.html). Não mande nada após eu fazer o envio das duas. Depois que eu mandar as duas, vou mandar em uma nova mensagem as intruções do que você vai fazer. Mas não faça nada até eu dizer.
+
+o que vou querer que vc faça é o seguinte:
+Mexa apenas nisso:
+ao final de cada teste, quero que apareça as palavras que respondi naquele teste. As palavras têm que aparecer em lista, igual vc fez para essa lista de palavras que tem no dicionário, ok? Só que sem títulos nas colunas.
+Quero esse padrão:
+Palavra (pronúncia) = significado
+Quero que seja na mesma cor #2a2a2a e ao inves das bordas serem rosa, quero que fique vermelha se errei e verde se acertei. A borda que digo é uma linha ao redor da borda do retangulo.
+Faça uma barra de rolagem tbm, no mesmo estilo da barra de rolagem que vc colocou lá na lista de dicionarios.
+Atente-se:
+eu mandei referências da lista de dicionarios/palavras mas não é pra voce mudar nada na lista de dicionarios. Mandei apenas pra voce pegar como referência, ok? Não mude nada fora 
+
