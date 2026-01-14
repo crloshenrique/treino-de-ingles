@@ -8,6 +8,7 @@ const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // SELETORES DE MENUS
 const menuHub = document.getElementById("menu-hub");
+const menuPerfil = document.getElementById("menu-perfil");
 const menuDicionariosRaiz = document.getElementById("menu-dicionarios-raiz");
 const menuGerenciarDicionarios = document.getElementById("menu-gerenciar-dicionarios");
 const areaAdicionarDicionario = document.getElementById("area-adicionar-dicionario");
@@ -22,6 +23,10 @@ const listaTemasBotoes = document.getElementById("lista-temas-botoes");
 const container = document.getElementById("container");
 const tituloCategoriasDicionario = document.getElementById("titulo-categorias-dicionario");
 const btnVoltarRaizDicionario = document.getElementById("btn-voltar-raiz-dicionario");
+
+// ESTADOS DE AUTH
+let usuarioLogado = null;
+let modoCadastro = false;
 
 let categoriasDisponiveis = [];
 let vocabulario = [];
@@ -40,6 +45,7 @@ function formatarItem(palavraRaw, pronunciaRaw, significadoRaw) {
 }
 
 window.onload = async () => {
+    await verificarSessao();
     await carregarCategoriasDoBanco();
     gerarMenuDicionariosVisualizacao();
     gerarMenuTemas();
@@ -47,6 +53,130 @@ window.onload = async () => {
     // Test line: Sempre add essa linha de teste no Git 25
     console.log("Sistema de treino carregado com Git 25");
 };
+
+// --- LOGICA DE AUTENTICAÇÃO ---
+
+function exibirFeedback(mensagem, tipo) {
+    const box = document.getElementById("auth-feedback");
+    box.textContent = mensagem;
+    box.style.display = "block";
+    box.className = tipo === "erro" ? "feedback-erro" : "feedback-sucesso";
+}
+
+function limparFeedback() {
+    const box = document.getElementById("auth-feedback");
+    box.style.display = "none";
+}
+
+async function verificarSessao() {
+    const { data: { session } } = await _supabase.auth.getSession();
+    if (session) {
+        usuarioLogado = session.user;
+        document.getElementById("label-perfil").textContent = "Perfil";
+        carregarDadosPerfil();
+    } else {
+        usuarioLogado = null;
+        document.getElementById("label-perfil").textContent = "Login";
+    }
+}
+
+async function carregarDadosPerfil() {
+    if (!usuarioLogado) return;
+    
+    const { data, error } = await _supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', usuarioLogado.id)
+        .single();
+
+    if (data) {
+        document.getElementById("perfil-nome").textContent = data.username || "Usuário";
+        document.getElementById("perfil-email").textContent = data.email;
+        document.getElementById("perfil-xp").textContent = data.xp || 0;
+        
+        document.getElementById("sessao-deslogado").style.display = "none";
+        document.getElementById("sessao-logado").style.display = "block";
+    }
+}
+
+function alternarModoAuth() {
+    modoCadastro = !modoCadastro;
+    const titulo = document.getElementById("titulo-auth");
+    const btnMain = document.getElementById("btn-login-main");
+    const btnSwitch = document.getElementById("btn-cadastro-switch");
+    const inputUser = document.getElementById("auth-username");
+    limparFeedback();
+
+    if (modoCadastro) {
+        titulo.textContent = "Criar Nova Conta";
+        btnMain.textContent = "Cadastrar";
+        btnMain.onclick = fazerCadastro;
+        btnSwitch.textContent = "Já tem conta? Entre aqui";
+        inputUser.style.display = "block";
+    } else {
+        titulo.textContent = "Entrar na Conta";
+        btnMain.textContent = "Entrar";
+        btnMain.onclick = fazerLogin;
+        btnSwitch.textContent = "Não tem conta? Cadastre-se";
+        inputUser.style.display = "none";
+    }
+}
+
+async function fazerCadastro() {
+    const email = document.getElementById("auth-email").value.trim();
+    const senha = document.getElementById("auth-senha").value.trim();
+    const username = document.getElementById("auth-username").value.trim();
+
+    if (!email || !senha || !username) { 
+        exibirFeedback("Preencha todos os campos!", "erro"); 
+        return; 
+    }
+
+    if (senha.length < 6) {
+        exibirFeedback("A senha deve ter no mínimo 6 caracteres.", "erro");
+        return;
+    }
+
+    const { data, error } = await _supabase.auth.signUp({ email, password: senha });
+
+    if (error) {
+        exibirFeedback(error.message, "erro");
+    } else {
+        const { error: profileError } = await _supabase
+            .from('profiles')
+            .insert([{ id: data.user.id, email: email, username: username, xp: 0 }]);
+        
+        exibirFeedback("Conta criada! Verifique seu e-mail para confirmar.", "sucesso");
+    }
+}
+
+async function fazerLogin() {
+    const email = document.getElementById("auth-email").value.trim();
+    const senha = document.getElementById("auth-senha").value.trim();
+
+    if (!email || !senha) { 
+        exibirFeedback("Preencha e-mail e senha!", "erro"); 
+        return; 
+    }
+
+    const { data, error } = await _supabase.auth.signInWithPassword({ email, password: senha });
+
+    if (error) {
+        if (error.message.includes("Email not confirmed")) {
+            exibirFeedback("Por favor, confirme seu e-mail antes de entrar.", "erro");
+        } else {
+            exibirFeedback("E-mail ou senha incorretos.", "erro");
+        }
+    } else {
+        usuarioLogado = data.user;
+        location.reload(); 
+    }
+}
+
+async function fazerLogout() {
+    await _supabase.auth.signOut();
+    location.reload();
+}
 
 // --- CONTROLE DO MENU LATERAL ---
 function toggleMenu() {
@@ -61,11 +191,12 @@ function handleMenuClick() {
 
 // --- NAVEGAÇÃO ---
 function esconderTodosMenus() {
-    const menus = [menuHub, menuDicionariosRaiz, menuGerenciarDicionarios, areaAdicionarDicionario, 
+    const menus = [menuHub, menuPerfil, menuDicionariosRaiz, menuGerenciarDicionarios, areaAdicionarDicionario, 
                    menuTemas, menuPrincipal, menuNiveis, menuIntervalos, visualizacaoPalavras];
     menus.forEach(m => { if(m) m.style.display = "none"; });
     container.classList.remove("modo-largo");
     interromperJogo();
+    limparFeedback(); // Limpa as mensagens ao navegar para qualquer lugar
 }
 
 function interromperJogo() {
@@ -79,6 +210,7 @@ function interromperJogo() {
 function irParaHub() { esconderTodosMenus(); menuHub.style.display = "flex"; }
 function irParaTemas() { esconderTodosMenus(); menuTemas.style.display = "flex"; }
 function irParaDicionariosRaiz() { esconderTodosMenus(); menuDicionariosRaiz.style.display = "flex"; }
+function irParaPerfil() { esconderTodosMenus(); menuPerfil.style.display = "flex"; }
 
 function abrirSubMenuDicionarios() { 
     esconderTodosMenus(); 
@@ -128,16 +260,21 @@ function voltarParaDicionariosRaiz() {
 
 // --- FUNÇÕES DE BANCO ---
 async function carregarCategoriasDoBanco() {
-    const { data, error } = await _supabase.from('dicionarios').select('categoria');
-    if (!error && data) { categoriasDisponiveis = [...new Set(data.map(item => item.categoria))]; }
+    const { data, error } = await _supabase.from('dicionarios').select('categoria, id').order('id', { ascending: true });
+    if (!error && data) { 
+        const unicas = [];
+        data.forEach(item => {
+            if (!unicas.includes(item.categoria)) unicas.push(item.categoria);
+        });
+        categoriasDisponiveis = unicas;
+    }
 }
 
 function gerarMenuDicionariosVisualizacao() {
     listaDicionariosVisualizar.innerHTML = "";
     
     const btnTodos = document.createElement("div");
-    btnTodos.className = "card-dicionario";
-    btnTodos.style.borderColor = "#10a2dd"; 
+    btnTodos.className = "card-dicionario card-todos";
     btnTodos.textContent = "Todos"; 
     btnTodos.onclick = () => carregarEExibirVarios('todos');
     listaDicionariosVisualizar.appendChild(btnTodos);
