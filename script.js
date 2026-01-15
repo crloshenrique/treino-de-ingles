@@ -7,6 +7,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // SELETORES DE MENUS
+const menuBoasVindas = document.getElementById("menu-boas-vindas");
 const menuHub = document.getElementById("menu-hub");
 const menuDicionariosRaiz = document.getElementById("menu-dicionarios-raiz");
 const menuGerenciarDicionarios = document.getElementById("menu-gerenciar-dicionarios");
@@ -22,6 +23,7 @@ const listaTemasBotoes = document.getElementById("lista-temas-botoes");
 const container = document.getElementById("container");
 const tituloCategoriasDicionario = document.getElementById("titulo-categorias-dicionario");
 const btnVoltarRaizDicionario = document.getElementById("btn-voltar-raiz-dicionario");
+const menuPerfil = document.getElementById("menu-perfil");
 
 let categoriasDisponiveis = [];
 let vocabulario = [];
@@ -40,13 +42,167 @@ function formatarItem(palavraRaw, pronunciaRaw, significadoRaw) {
 }
 
 window.onload = async () => {
+    // Verificação de Sessão Real
+    const { data: { session } } = await _supabase.auth.getSession();
+    
+    if (session) {
+        // Se já estiver logado, garante o nome antes de mostrar o dashboard
+        await carregarNomeUsuario(session.user.id);
+        mostrarDashboard();
+    } else {
+        document.getElementById("tela-login").style.display = "flex";
+        document.getElementById("app-content").style.display = "none";
+    }
+
     await carregarCategoriasDoBanco();
     gerarMenuDicionariosVisualizacao();
     gerarMenuTemas();
-    irParaHub(); 
+    
+    // Lógica com animação de saída suave
+    const userNameSpan = document.getElementById("user-name");
+    const welcomeWrapper = document.getElementById("welcome-wrapper");
+
+    userNameSpan.addEventListener('animationend', (event) => {
+        if (event.animationName === 'typing') {
+            // Adiciona a classe de fade out no container de texto
+            welcomeWrapper.classList.add("fade-out");
+            
+            // Aguarda o fim do fade (500ms) para trocar o menu
+            setTimeout(() => {
+                irParaHub();
+                // Remove a classe para estar pronto para a próxima vez
+                welcomeWrapper.classList.remove("fade-out");
+            }, 500);
+        }
+    });
+
     // Test line: Sempre add essa linha de teste no Git 25
     console.log("Sistema de treino carregado com Git 25");
 };
+
+// --- BUSCA NOME COMPLETO DO BANCO ---
+async function carregarNomeUsuario(userId) {
+    try {
+        const { data, error } = await _supabase
+            .from('usuarios') 
+            .select('nome')
+            .eq('id', userId)
+            .single();
+
+        if (!error && data) {
+            document.getElementById("user-name").textContent = data.nome;
+        } else {
+            const { data: { user } } = await _supabase.auth.getUser();
+            document.getElementById("user-name").textContent = user.email.split('@')[0];
+        }
+    } catch (e) {
+        console.error("Erro ao buscar nome:", e);
+        document.getElementById("user-name").textContent = "User";
+    }
+}
+
+// --- LOGICA DE LOGIN REAL COM FEEDBACK ---
+function exibirFeedbackLogin(mensagem, tipo) {
+    let feedbackArea = document.getElementById("feedback-login");
+    if (!feedbackArea) {
+        feedbackArea = document.createElement("div");
+        feedbackArea.id = "feedback-login";
+        const loginBox = document.querySelector(".login-box");
+        loginBox.insertBefore(feedbackArea, loginBox.firstChild);
+    }
+
+    feedbackArea.textContent = mensagem;
+    feedbackArea.style.display = "block";
+    feedbackArea.style.padding = "12px";
+    feedbackArea.style.marginBottom = "15px";
+    feedbackArea.style.borderRadius = "10px";
+    feedbackArea.style.fontSize = "14px";
+    feedbackArea.style.fontWeight = "bold";
+    feedbackArea.style.textAlign = "center";
+
+    if (tipo === "sucesso") {
+        feedbackArea.style.background = "rgba(90, 187, 106, 0.2)";
+        feedbackArea.style.border = "1px solid #5abb6a";
+        feedbackArea.style.color = "#5abb6a";
+    } else {
+        feedbackArea.style.background = "rgba(241, 71, 56, 0.2)";
+        feedbackArea.style.border = "1px solid #f14738";
+        feedbackArea.style.color = "#f14738";
+    }
+}
+
+async function efetuarLoginReal() {
+    const email = document.getElementById("login-email").value;
+    const senha = document.getElementById("login-senha").value;
+    const btnLogin = document.getElementById("btn-login-confirm");
+
+    if (!email || !senha) {
+        exibirFeedbackLogin("Preencha todos os campos!", "erro");
+        return;
+    }
+
+    btnLogin.disabled = true;
+    btnLogin.textContent = "Autenticando...";
+
+    const { data, error } = await _supabase.auth.signInWithPassword({
+        email: email,
+        password: senha,
+    });
+
+    if (error) {
+        exibirFeedbackLogin("Erro: " + error.message, "erro");
+        btnLogin.disabled = false;
+        btnLogin.textContent = "Entrar";
+    } else {
+        exibirFeedbackLogin("Login efetuado! Buscando perfil...", "sucesso");
+        
+        await carregarNomeUsuario(data.user.id);
+        
+        exibirFeedbackLogin("Pronto! Entrando...", "sucesso");
+        
+        setTimeout(() => {
+            mostrarDashboard();
+            btnLogin.disabled = false;
+            btnLogin.textContent = "Entrar";
+        }, 800);
+    }
+}
+
+function mostrarDashboard() {
+    document.getElementById("tela-login").style.display = "none";
+    document.getElementById("app-content").style.display = "flex";
+    iniciarBoasVindas();
+}
+
+function iniciarBoasVindas() {
+    esconderTodosMenus();
+    const welcomeWrapper = document.getElementById("welcome-wrapper");
+    welcomeWrapper.classList.remove("fade-out"); // Garante que esteja visível
+    menuBoasVindas.style.display = "flex";
+    
+    const userNameSpan = document.getElementById("user-name");
+    userNameSpan.style.animation = 'none';
+    userNameSpan.offsetHeight; 
+    userNameSpan.style.animation = null; 
+}
+
+async function logout() {
+    await _supabase.auth.signOut();
+    location.reload();
+}
+
+function togglePasswordVisibility() {
+    const passInput = document.getElementById("login-senha");
+    const addon = document.querySelector(".input-addon");
+    
+    if (passInput.type === "password") {
+        passInput.type = "text";
+        addon.classList.add("active");
+    } else {
+        passInput.type = "password";
+        addon.classList.remove("active");
+    }
+}
 
 // --- CONTROLE DO MENU LATERAL ---
 function toggleMenu() {
@@ -61,8 +217,8 @@ function handleMenuClick() {
 
 // --- NAVEGAÇÃO ---
 function esconderTodosMenus() {
-    const menus = [menuHub, menuDicionariosRaiz, menuGerenciarDicionarios, areaAdicionarDicionario, 
-                   menuTemas, menuPrincipal, menuNiveis, menuIntervalos, visualizacaoPalavras];
+    const menus = [menuBoasVindas, menuHub, menuDicionariosRaiz, menuGerenciarDicionarios, areaAdicionarDicionario, 
+                   menuTemas, menuPrincipal, menuNiveis, menuIntervalos, visualizacaoPalavras, menuPerfil];
     menus.forEach(m => { if(m) m.style.display = "none"; });
     container.classList.remove("modo-largo");
     interromperJogo();
@@ -80,6 +236,29 @@ function irParaHub() { esconderTodosMenus(); menuHub.style.display = "flex"; }
 function irParaTemas() { esconderTodosMenus(); menuTemas.style.display = "flex"; }
 function irParaDicionariosRaiz() { esconderTodosMenus(); menuDicionariosRaiz.style.display = "flex"; }
 
+function irParaPerfil() {
+    esconderTodosMenus();
+    
+    menuPerfil.innerHTML = `
+        <h2>Meu Perfil</h2>
+        <div style="background: #2a2a2a; padding: 20px; border-radius: 15px; border-left: 4px solid var(--accent-color); width: 100%; margin-bottom: 20px;">
+            <p style="margin: 0; opacity: 0.7;">Sessão Ativa</p>
+            <p id="perfil-email" style="font-weight: bold; margin: 5px 0 0 0;">Carregando...</p>
+        </div>
+        <button onclick="logout()" class="btn-custom-lateral border-red" style="width: 100%;">Sair da Conta</button>
+        <div class="btn-voltar-icone" onclick="irParaHub()">
+            <img src="imagens/voltar.png" alt="Voltar">
+            <span>Voltar</span>
+        </div>
+    `;
+    
+    menuPerfil.style.display = "flex";
+    
+    _supabase.auth.getUser().then(({data}) => {
+        if(data?.user) document.getElementById("perfil-email").textContent = data.user.email;
+    });
+}
+
 function abrirSubMenuDicionarios() { 
     esconderTodosMenus(); 
     menuGerenciarDicionarios.style.display = "flex"; 
@@ -89,7 +268,6 @@ function abrirSubMenuDicionarios() {
     if (btnVoltarRaizDicionario) btnVoltarRaizDicionario.style.display = "flex";
 }
 
-// --- LÓGICA DE ADIÇÃO DE PALAVRAS ---
 function abrirEscolhaTipoAdicao() { 
     esconderTodosMenus();
     areaAdicionarDicionario.style.display = "flex"; 
@@ -126,7 +304,6 @@ function voltarParaDicionariosRaiz() {
     abrirSubMenuDicionarios();
 }
 
-// --- FUNÇÕES DE BANCO ---
 async function carregarCategoriasDoBanco() {
     const { data, error } = await _supabase.from('dicionarios').select('categoria, id').order('id', { ascending: true });
     if (!error && data) { 
@@ -159,7 +336,7 @@ function gerarMenuDicionariosVisualizacao() {
 async function carregarEExibirVarios(cat) {
     listaDicionariosVisualizar.style.display = "none";
     if (tituloCategoriasDicionario) tituloCategoriasDicionario.style.display = "none";
-    if (btnVoltarRaizDicionario) btnVoltarRaizDicionario.style.display = "none";
+    if (btnVoltarRaizDicionario) btnVoltarRaizDicionario.style.display = "flex";
     
     visualizacaoPalavras.style.display = "flex";
     areaListaPalavras.innerHTML = "Carregando...";
@@ -202,7 +379,6 @@ function renderizarListaPalavras(lista) {
     }
 }
 
-// LÓGICA DE FILTRAGEM
 function filtrarPalavras() {
     const termo = document.getElementById("campo-busca").value.toLowerCase().trim();
     
@@ -222,7 +398,6 @@ function filtrarPalavras() {
     renderizarListaPalavras(filtradas);
 }
 
-// --- SALVAMENTO ---
 async function salvarNoBancoLocal() {
     const palavra = document.getElementById("add-palavra").value.trim();
     const pronuncia = document.getElementById("add-pronuncia").value.trim();
@@ -238,9 +413,9 @@ async function salvarEmMassa() {
     const categoria = document.getElementById("add-categoria-massa").value.trim();
     const text = document.getElementById("texto-massa").value.trim();
     if (!categoria || !text) { alert("Preencha categoria e texto!"); return; }
-    const linhas = text.split('\n');
+    const lines = text.split('\n');
     const objetosParaEnviar = [];
-    linhas.forEach(linha => {
+    lines.forEach(linha => {
         if (linha.includes('=') && linha.includes('(')) {
             const partes = linha.split('=');
             const significado = partes[1].trim();
@@ -256,7 +431,6 @@ async function salvarEmMassa() {
     else { alert(`${objetosParaEnviar.length} palavras cadastradas!`); location.reload(); }
 }
 
-// --- JOGO ---
 function gerarMenuTemas() {
     listaTemasBotoes.innerHTML = "";
     categoriasDisponiveis.forEach(cat => {
