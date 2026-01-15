@@ -24,6 +24,8 @@ const container = document.getElementById("container");
 const tituloCategoriasDicionario = document.getElementById("titulo-categorias-dicionario");
 const btnVoltarRaizDicionario = document.getElementById("btn-voltar-raiz-dicionario");
 const menuPerfil = document.getElementById("menu-perfil");
+const menuMeusErros = document.getElementById("menu-meus-erros");
+const listaMeusErros = document.getElementById("lista-meus-erros");
 
 let categoriasDisponiveis = [];
 let vocabulario = [];
@@ -101,15 +103,10 @@ async function carregarNomeUsuario(userId) {
     }
 }
 
-// --- LOGICA DE LOGIN REAL COM FEEDBACK ---
-function exibirFeedbackLogin(mensagem, tipo) {
-    let feedbackArea = document.getElementById("feedback-login");
-    if (!feedbackArea) {
-        feedbackArea = document.createElement("div");
-        feedbackArea.id = "feedback-login";
-        const loginBox = document.querySelector(".login-box");
-        loginBox.insertBefore(feedbackArea, loginBox.firstChild);
-    }
+// --- LOGICA DE FEEDBACK VISUAL REUTILIZÁVEL ---
+function exibirFeedback(idElemento, mensagem, tipo) {
+    let feedbackArea = document.getElementById(idElemento);
+    if (!feedbackArea) return;
 
     feedbackArea.textContent = mensagem;
     feedbackArea.style.display = "block";
@@ -129,6 +126,17 @@ function exibirFeedbackLogin(mensagem, tipo) {
         feedbackArea.style.border = "1px solid #f14738";
         feedbackArea.style.color = "#f14738";
     }
+}
+
+function exibirFeedbackLogin(mensagem, tipo) {
+    let feedbackArea = document.getElementById("feedback-login");
+    if (!feedbackArea) {
+        feedbackArea = document.createElement("div");
+        feedbackArea.id = "feedback-login";
+        const loginBox = document.querySelector(".login-box");
+        loginBox.insertBefore(feedbackArea, loginBox.firstChild);
+    }
+    exibirFeedback("feedback-login", mensagem, tipo);
 }
 
 async function efetuarLoginReal() {
@@ -218,7 +226,7 @@ function handleMenuClick() {
 // --- NAVEGAÇÃO ---
 function esconderTodosMenus() {
     const menus = [menuBoasVindas, menuHub, menuDicionariosRaiz, menuGerenciarDicionarios, areaAdicionarDicionario, 
-                   menuTemas, menuPrincipal, menuNiveis, menuIntervalos, visualizacaoPalavras, menuPerfil];
+                   menuTemas, menuPrincipal, menuNiveis, menuIntervalos, visualizacaoPalavras, menuPerfil, menuMeusErros];
     menus.forEach(m => { if(m) m.style.display = "none"; });
     container.classList.remove("modo-largo");
     interromperJogo();
@@ -241,9 +249,9 @@ function irParaPerfil() {
     
     menuPerfil.innerHTML = `
         <h2>Meu Perfil</h2>
-        <div style="background: #2a2a2a; padding: 20px; border-radius: 15px; border-left: 4px solid var(--accent-color); width: 100%; margin-bottom: 20px;">
+        <div style="background: #2a2a2a; padding: 20px; border-radius: 15px; border-left: 4px solid var(--accent-color); width: 100%; box-sizing: border-box; margin-bottom: 20px;">
             <p style="margin: 0; opacity: 0.7;">Sessão Ativa</p>
-            <p id="perfil-email" style="font-weight: bold; margin: 5px 0 0 0;">Carregando...</p>
+            <p id="perfil-email" style="font-weight: bold; margin: 5px 0 0 0; word-break: break-all;">Carregando...</p>
         </div>
         <button onclick="logout()" class="btn-custom-lateral border-red" style="width: 100%;">Sair da Conta</button>
         <div class="btn-voltar-icone" onclick="irParaHub()">
@@ -275,18 +283,19 @@ function abrirEscolhaTipoAdicao() {
     document.getElementById("form-individual").style.display = "none";
     document.getElementById("form-massa").style.display = "none";
     document.getElementById("titulo-adicao").textContent = "Adicionar dicionário";
+    document.getElementById("feedback-adicao").style.display = "none";
 }
 
 function mostrarFormIndividual() { 
     document.getElementById("selecao-tipo-adicao").style.display = "none";
     document.getElementById("form-individual").style.display = "block"; 
-    document.getElementById("titulo-adicao").textContent = "Cadastro Individual";
+    document.getElementById("titulo-adicao").textContent = "Cadastro individual";
 }
 
 function mostrarFormMassa() { 
     document.getElementById("selecao-tipo-adicao").style.display = "none";
     document.getElementById("form-massa").style.display = "block"; 
-    document.getElementById("titulo-adicao").textContent = "Cadastro em Massa";
+    document.getElementById("titulo-adicao").textContent = "Cadastro em massa";
 }
 
 function voltarBotaoAdicao() {
@@ -403,16 +412,42 @@ async function salvarNoBancoLocal() {
     const pronuncia = document.getElementById("add-pronuncia").value.trim();
     const significado = document.getElementById("add-significado").value.trim();
     const categoria = document.getElementById("add-categoria").value.trim();
-    if (!palavra || !significado || !categoria) { alert("Preencha os campos!"); return; }
+    const btn = document.getElementById("btn-salvar-individual");
+
+    if (!palavra || !significado || !categoria) { 
+        exibirFeedback("feedback-adicao", "Preencha os campos obrigatórios!", "erro"); 
+        return; 
+    }
+
+    btn.disabled = true;
+    btn.textContent = "Salvando...";
+
     const { error } = await _supabase.from('dicionarios').insert([{ palavra, pronuncia, significado, categoria }]);
-    if (error) alert("Erro: " + error.message);
-    else { alert("Cadastrada!"); location.reload(); }
+    
+    if (error) {
+        exibirFeedback("feedback-adicao", "Erro: " + error.message, "erro");
+        btn.disabled = false;
+        btn.textContent = "Salvar";
+    } else { 
+        exibirFeedback("feedback-adicao", "Palavra adicionada com sucesso!", "sucesso");
+        document.getElementById("add-palavra").value = "";
+        document.getElementById("add-pronuncia").value = "";
+        document.getElementById("add-significado").value = "";
+        
+        setTimeout(() => { location.reload(); }, 1500);
+    }
 }
 
 async function salvarEmMassa() {
     const categoria = document.getElementById("add-categoria-massa").value.trim();
     const text = document.getElementById("texto-massa").value.trim();
-    if (!categoria || !text) { alert("Preencha categoria e texto!"); return; }
+    const btn = document.getElementById("btn-salvar-massa");
+
+    if (!categoria || !text) { 
+        exibirFeedback("feedback-adicao", "Preencha categoria e texto!", "erro"); 
+        return; 
+    }
+
     const lines = text.split('\n');
     const objetosParaEnviar = [];
     lines.forEach(linha => {
@@ -425,10 +460,25 @@ async function salvarEmMassa() {
             objetosParaEnviar.push({ palavra, pronuncia: pronunciaRaw, significado, categoria });
         }
     });
-    if (objetosParaEnviar.length === 0) { alert("Formato inválido!"); return; }
+
+    if (objetosParaEnviar.length === 0) { 
+        exibirFeedback("feedback-adicao", "Formato inválido! Use: Palavra (pronúncia) = significado", "erro"); 
+        return; 
+    }
+
+    btn.disabled = true;
+    btn.textContent = "Salvando...";
+
     const { error } = await _supabase.from('dicionarios').insert(objetosParaEnviar);
-    if (error) alert("Erro: " + error.message);
-    else { alert(`${objetosParaEnviar.length} palavras cadastradas!`); location.reload(); }
+    
+    if (error) {
+        exibirFeedback("feedback-adicao", "Erro: " + error.message, "erro");
+        btn.disabled = false;
+        btn.textContent = "Salvar";
+    } else { 
+        exibirFeedback("feedback-adicao", "Palavras adicionadas com sucesso!", "sucesso");
+        setTimeout(() => { location.reload(); }, 1500);
+    }
 }
 
 function gerarMenuTemas() {
@@ -516,7 +566,7 @@ function proximaRodada() {
     opcoes.sort(() => Math.random() - 0.5).forEach(op => {
         const btn = document.createElement("button");
         btn.className = "opcao-btn"; btn.textContent = op;
-        btn.onclick = () => {
+        btn.onclick = async () => {
             const todosBotoes = containerOpcoes.querySelectorAll("button");
             todosBotoes.forEach(b => b.style.pointerEvents = "none");
 
@@ -539,6 +589,17 @@ function proximaRodada() {
                 document.getElementById("num-erros").textContent = erros;
                 btn.classList.add("errado");
                 Array.from(todosBotoes).find(b => b.textContent === atual.correta).classList.add("correto");
+                
+                // REGISTRAR ERRO NO BANCO DE DADOS
+                try {
+                    const { data: { user } } = await _supabase.auth.getUser();
+                    if (user) {
+                        await _supabase.from('erros_usuarios').insert([{
+                            user_id: user.id,
+                            dicionario_id: atual.original.id
+                        }]);
+                    }
+                } catch (e) { console.error("Erro ao registrar erro no banco:", e); }
             }
             setTimeout(proximaRodada, 800);
         };
@@ -580,5 +641,82 @@ function voltarDoTeste() {
         menuNiveis.style.display = "flex";
     } else {
         menuIntervalos.style.display = "flex";
+    }
+}
+
+// --- FUNCIONALIDADE MEUS ERROS ---
+async function irParaMeusErros() {
+    esconderTodosMenus();
+    menuMeusErros.style.display = "flex";
+    listaMeusErros.innerHTML = "Carregando seus erros...";
+    container.classList.add("modo-largo");
+
+    const { data: { user } } = await _supabase.auth.getUser();
+    if (!user) return;
+
+    // Busca os erros fazendo join com a tabela dicionarios
+    const { data, error } = await _supabase
+        .from('erros_usuarios')
+        .select(`
+            id,
+            dicionarios (
+                id,
+                palavra,
+                pronuncia,
+                significado
+            )
+        `)
+        .eq('user_id', user.id);
+
+    if (error) {
+        listaMeusErros.innerHTML = "Erro ao carregar lista.";
+        return;
+    }
+
+    listaMeusErros.innerHTML = "";
+    if (data && data.length > 0) {
+        // Remover duplicados (caso o usuário erre a mesma palavra várias vezes)
+        const errosUnicos = [];
+        const idsVistos = new Set();
+
+        data.forEach(reg => {
+            const dic = reg.dicionarios;
+            if (dic && !idsVistos.has(dic.id)) {
+                errosUnicos.push(dic);
+                idsVistos.add(dic.id);
+            }
+        });
+
+        errosUnicos.forEach(item => {
+            const f = formatarItem(item.palavra, item.pronuncia, item.significado);
+            const div = document.createElement("div");
+            div.className = "item-erro"; // Estilo igual ao dicionário
+            div.innerHTML = `
+                <div class="col-palavra-info">
+                    <span>${f.palavra}</span>
+                    <span class="pronuncia-pequena">${f.pronuncia}</span>
+                </div>
+                <span>${f.significados}</span>
+            `;
+            listaMeusErros.appendChild(div);
+        });
+    } else {
+        listaMeusErros.innerHTML = "<div style='padding:20px'>Sua lista de erros está vazia.</div>";
+    }
+}
+
+async function limparErrosBanco() {
+    const { data: { user } } = await _supabase.auth.getUser();
+    if (!user) return;
+
+    const { error } = await _supabase
+        .from('erros_usuarios')
+        .delete()
+        .eq('user_id', user.id);
+
+    if (error) {
+        alert("Erro ao limpar: " + error.message);
+    } else {
+        listaMeusErros.innerHTML = "<div style='padding:20px'>Sua lista de erros está vazia.</div>";
     }
 }

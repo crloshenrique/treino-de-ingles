@@ -145,11 +145,11 @@
 
         @keyframes typing {
             0% { width: 0; }
-            10% { width: 0; }    /* Pausa Inicial (1s aprox) */
-            45% { width: 100%; } /* Digitando */
-            50% { width: 100%; } /* Segura Visível */
-            80% { width: 0; }    /* Apagando */
-            100% { width: 0; }   /* Pausa Final */
+            10% { width: 0; }
+            45% { width: 100%; }
+            50% { width: 100%; }
+            80% { width: 0; }
+            100% { width: 0; }
         }
 
         @keyframes blink-caret {
@@ -336,7 +336,7 @@
         .btn-voltar-icone:hover { transform: scale(1.1); }
         .btn-voltar-icone img { width: 28px; height: 28px; object-fit: contain; }
 
-        input, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 10px; border: 1px solid #444; background: #2a2a2a; color: white; box-sizing: border-box; outline: none; transition: border-color 0.2s; }
+        input, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 10px; border: 1px solid #444; background: #2a2a2a; color: white; box-sizing: border-box; outline: none; transition: border-color 0.2s; font-family: Arial, sans-serif;}
         
         #campo-busca:focus { border: 1px solid var(--accent-color); }
 
@@ -405,7 +405,7 @@
         #num-erros { color: var(--error-color); }
         .contador-erro { border-left: 5px solid var(--error-color); }
 
-        .item-dicionario, .item-revisao { 
+        .item-dicionario, .item-revisao, .item-erro { 
             width: 100%; 
             padding: 12px; 
             border-radius: 8px; 
@@ -437,8 +437,8 @@
             text-align: left; 
         }
 
-        #revisao-teste { width: 100%; display: none; margin-top: 5px; text-align: left; }
-        #lista-revisao { 
+        #revisao-teste, #area-meus-erros { width: 100%; display: none; margin-top: 5px; text-align: left; }
+        #lista-revisao, #lista-meus-erros { 
             max-height: 350px; 
             overflow-y: auto; 
             padding-right: 5px; 
@@ -448,9 +448,9 @@
         .revisao-correto { border-left: 5px solid var(--success-color) !important; }
         .revisao-errado { border-left: 5px solid var(--error-color) !important; }
 
-        #area-lista-palavras::-webkit-scrollbar, #lista-revisao::-webkit-scrollbar { width: 8px; }
-        #area-lista-palavras::-webkit-scrollbar-track, #lista-revisao::-webkit-scrollbar-track { background: #2a2a2a; border-radius: 10px; }
-        #area-lista-palavras::-webkit-scrollbar-thumb, #lista-revisao::-webkit-scrollbar-thumb { background: var(--accent-color); border-radius: 10px; }
+        #area-lista-palavras::-webkit-scrollbar, #lista-revisao::-webkit-scrollbar, #lista-meus-erros::-webkit-scrollbar { width: 8px; }
+        #area-lista-palavras::-webkit-scrollbar-track, #lista-revisao::-webkit-scrollbar-track, #lista-meus-erros::-webkit-scrollbar-track { background: #2a2a2a; border-radius: 10px; }
+        #area-lista-palavras::-webkit-scrollbar-thumb, #lista-revisao::-webkit-scrollbar-thumb, #lista-meus-erros::-webkit-scrollbar-thumb { background: var(--accent-color); border-radius: 10px; }
 
         #area-lista-palavras {
             width: 100%;
@@ -509,9 +509,9 @@
                 <img src="imagens/menus/menu-dicionarios.png" alt="Dicionários">
                 <span>Dicionários</span>
             </div>
-            <div class="sidebar-item">
+            <div class="sidebar-item" onclick="irParaMeusErros(); handleMenuClick();">
                 <img src="imagens/menus/menu-erros.png" alt="Erros">
-                <span>Meus Erros</span>
+                <span>Revisão</span>
             </div>
             <div class="sidebar-bottom">
                 <div class="sidebar-item" onclick="irParaPerfil(); handleMenuClick();">
@@ -531,7 +531,7 @@
                 </div>
 
                 <div id="menu-hub" class="menu" style="display:none">
-                <h1 style="color: white;">Tela inicial</h1>
+                    <h1 style="color: white;">Tela inicial</h1>
                 </div>
 
                 <div id="menu-perfil" class="menu" style="display:none">
@@ -539,8 +539,8 @@
 
                 <div id="menu-dicionarios-raiz" class="menu" style="display:none">
                     <h2>Dicionários</h2>
-                    <button class="btn-custom-lateral" onclick="abrirEscolhaTipoAdicao()">Adicionar Palavras</button>
-                    <button class="btn-custom-lateral" onclick="abrirSubMenuDicionarios()">Ver Listas</button>
+                    <button class="btn-custom-lateral" onclick="abrirEscolhaTipoAdicao()">Adicionar palavras</button>
+                    <button class="btn-custom-lateral" onclick="abrirSubMenuDicionarios()">Ver listas</button>
                     <div class="btn-voltar-icone" onclick="irParaHub()">
                         <img src="imagens/voltar.png" alt="Voltar">
                         <span>Voltar</span>
@@ -549,6 +549,7 @@
 
                 <div id="area-adicionar-dicionario" class="menu" style="display:none">
                     <h2 id="titulo-adicao">Adicionar dicionário</h2>
+                    <div id="feedback-adicao" style="display:none; width: 100%;"></div>
                     <div id="selecao-tipo-adicao" style="display:flex; justify-content:center; gap:20px; margin-bottom:20px">
                         <button class="btn-quadrado" onclick="mostrarFormIndividual()">1</button>
                         <button class="btn-quadrado" onclick="mostrarFormMassa()">N</button>
@@ -558,12 +559,12 @@
                         <input type="text" id="add-pronuncia" placeholder="Pronúncia">
                         <input type="text" id="add-significado" placeholder="Significado">
                         <input type="text" id="add-categoria" placeholder="Categoria">
-                        <button class="btn-custom-lateral" style="width:100%" onclick="salvarNoBancoLocal()">Salvar</button>
+                        <button id="btn-salvar-individual" class="btn-custom-lateral" style="width:100%" onclick="salvarNoBancoLocal()">Salvar</button>
                     </div>
                     <div id="form-massa" style="display:none; width: 100%;">
                         <input type="text" id="add-categoria-massa" placeholder="Categoria">
                         <textarea id="texto-massa" rows="8" placeholder="Palavra (pronúncia) = significado"></textarea>
-                        <button class="btn-custom-lateral" style="width:100%" onclick="salvarEmMassa()">Salvar Tudo</button>
+                        <button id="btn-salvar-massa" class="btn-custom-lateral" style="width:100%" onclick="salvarEmMassa()">Salvar</button>
                     </div>
                     <div class="btn-voltar-icone" onclick="voltarBotaoAdicao()">
                         <img src="imagens/voltar.png" alt="Voltar">
@@ -572,7 +573,7 @@
                 </div>
 
                 <div id="menu-gerenciar-dicionarios" class="menu" style="display:none">
-                    <h2 id="titulo-categorias-dicionario">Escolha a Categoria</h2>
+                    <h2 id="titulo-categorias-dicionario">Lista de dicionários</h2>
                     <div id="lista-dicionarios-visualizar" class="grid-temas"></div>
                     <div id="visualizacao-palavras" style="display:none; width: 100%;">
                         <input type="text" id="campo-busca" placeholder="Pesquisar..." oninput="filtrarPalavras()">
@@ -585,8 +586,26 @@
                     </div>
                 </div>
 
+                <div id="menu-meus-erros" class="menu" style="display:none">
+                    <h2>Lista de erros</h2>
+                    <div id="area-meus-erros" style="display: block;">
+                        <div class="header-dicionario"><span>Palavra</span><span>Significado</span></div>
+                        <div id="lista-meus-erros"></div>
+                    </div>
+                    <div style="display: flex; gap: 40px; justify-content: center; width: 100%;">
+                        <div class="btn-voltar-icone" onclick="irParaHub()">
+                            <img src="imagens/voltar.png" alt="Voltar">
+                            <span>Voltar</span>
+                        </div>
+                        <div class="btn-voltar-icone" onclick="limparErrosBanco()">
+                            <img src="imagens/limpar.png" alt="Limpar">
+                            <span>Limpar</span>
+                        </div>
+                    </div>
+                </div>
+
                 <div id="menu-temas" class="menu" style="display:none">
-                    <h2>Categorias para Praticar</h2>
+                    <h2>Escolha o dicionário</h2>
                     <div id="lista-temas-botoes" class="grid-temas"></div>
                     <div class="btn-voltar-icone" onclick="irParaHub()">
                         <img src="imagens/voltar.png" alt="Voltar">
@@ -595,10 +614,10 @@
                 </div>
 
                 <div id="menu-principal" class="menu" style="display:none">
-                    <h2>Modo de Treino</h2>
+                    <h2>Escolha o modo</h2>
                     <p id="status-load" style="display:none">Carregando...</p>
-                    <button onclick="abrirMenuIntervalos()" class="btn-custom-lateral">Escolher Intervalo</button>
-                    <button onclick="abrirMenuNiveis()" class="btn-custom-lateral">Níveis Sugeridos</button>
+                    <button onclick="abrirMenuIntervalos()" class="btn-custom-lateral">Intervalos</button>
+                    <button onclick="abrirMenuNiveis()" class="btn-custom-lateral">Níveis</button>
                     <div class="btn-voltar-icone" onclick="irParaTemas()">
                         <img src="imagens/voltar.png" alt="Voltar">
                         <span>Voltar</span>

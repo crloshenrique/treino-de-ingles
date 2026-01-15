@@ -1,2 +1,21 @@
 Vou lhe mandar dois códigos completos, em duas mensagens diferentes (uma com script.js e outra com index.html). Não mande nada após eu fazer o envio das duas. Depois que eu mandar as duas, vou mandar em uma nova mensagem as intruções do que você vai fazer. Mas não faça nada até eu dizer.
 
+sabe aquela lista de "Palavras" do dicionário? aquela que aparece no menu "Ver lista"?
+Eu quero que vc copie aquele estilo de lista. 
+Vamos usar ela agora no menu "Meus erros" que aparece na barra lateral do site, ok?
+Só que com uma diferença: Nesse menu vai aparecer a lista somente das respostas que o usuario errar nos quiz. 
+Eu tenho no supabase uma tabela chamada erros_usuario, que tem as colunas: 
+id uuid
+user_id (Foreign key relation: user_id
+auth.users.id)
+dicionario_id int8
+(Foreign key relation: dicionario_id
+public.dicionarios.id)
+Quando o usuario errar uma palavra, voce armazena ela e faz ela aparecer nesse menu de Meus erros. Lembrando que a lista deve aparecer no mesmo estilo da lista de palavras do dicionario, como falei no inicio dessa mensagem.
+NÃO CORTE NADA DO MEU CÓDIGO E NEM EXCLUA NADA. APENAS FAÇA ESSE MENU DE MEUS ERROS.
+tenho essas policies na tabela erros_usuarios:
+Users can insert their own errors
+INSERTpublic
+Users can see their own errors
+SELECTpublic
+mande tudo corrigido
