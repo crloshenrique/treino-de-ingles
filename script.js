@@ -778,28 +778,31 @@ function finalizarTeste() {
 }
 
 function voltarDoTeste() {
-    // 1. Esconde TUDO que pertence ao quiz ou revisão
-    document.getElementById('revisao-teste').style.display = 'none';
-    document.getElementById('btn-voltar-final').style.display = 'none';
-    document.getElementById('contador-container').style.display = 'none';
-    document.getElementById('palavra-box').style.display = 'none';
-    document.getElementById('opcoes-container').style.display = 'none';
-
-    // 2. Reseta o layout do container para o padrão (Centro e Estreito)
-    const container = document.getElementById('container');
+    // 1. Resetar variáveis de estado do jogo
+    palavrasParaOJogo = [];
+    historicoSessao = [];
+    acertos = 0;
+    erros = 0;
+    document.getElementById("lista-revisao").innerHTML = "";
+    document.getElementById("palavra-box").innerHTML = "";
+    const elementosQuiz = [
+        'revisao-teste', 'btn-voltar-final', 'contador-container', 
+        'palavra-box', 'opcoes-container'
+    ];
+    elementosQuiz.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+    });
+    container.classList.remove('modo-largo');
+    container.style.maxWidth = "";
     const mainContent = document.getElementById('main-content');
-
-    container.classList.remove('modo-largo'); // Remove a largura de 850px
-    container.style.maxWidth = "450px";       // Força o tamanho do menu inicial
-    
-    // 3. Força a centralização vertical e horizontal no pai
-    mainContent.style.display = "flex";
-    mainContent.style.justifyContent = "center"; 
-    mainContent.style.alignItems = "center";
-    mainContent.scrollTop = 0; // Garante que não comece com scroll no meio da tela
-
-    // 4. Chama a função que mostra a Tela Inicial
-    irParaHub(); 
+    if (mainContent) {
+        mainContent.style.display = ""; 
+        mainContent.style.justifyContent = "";
+        mainContent.style.alignItems = "";
+    }
+    irParaHub();
+    console.log("Sistema resetado com sucesso sem atualizar a página.");
 }
 
 async function irParaMeusErros() {
