@@ -43,12 +43,14 @@
             box-shadow: 0 0 15px rgba(241, 71, 56, 0.4);
         }
 
-        #titulo-adicao {
-            width: 100%;
-            white-space: nowrap; /* Impede a quebra de linha */
-            font-size: 1.5rem;    /* Ajusta o tamanho se o texto for muito longo */
-            margin-top: 0;       /* Remove excesso de espaço no topo */
-        }
+#titulo-adicao {
+    width: 100%;
+    white-space: normal; /* Removido o nowrap: agora o texto QUEBRA linha se não couber */
+    text-align: center;  /* Garante que o texto fique sempre no meio */
+    font-size: 1.5rem;   
+    margin-top: 0;       
+    box-sizing: border-box;
+}
 
         /* --- TELA DE LOGIN --- */
         #tela-login {
@@ -642,10 +644,6 @@
                 <div id="menu-gerenciar-dicionarios" class="menu" style="display:none">
                     <h2 id="titulo-categorias-dicionario">Qual dicionário você deseja visualizar?</h2>
                     <div id="lista-dicionarios-visualizar" class="grid-temas"></div>
-                    <div class="btn-voltar-icone" onclick="irParaDicionariosRaiz()">
-                        <img src="imagens/voltar.png" alt="Voltar">
-                        <span>Voltar</span>
-                    </div>
                     <div id="visualizacao-palavras" style="display:none; width: 100%;">
                         <input type="text" id="campo-busca" placeholder="Pesquisar..." oninput="filtrarPalavras()">
                         <div class="header-dicionario"><span>Palavra</span><span>Significado</span></div>

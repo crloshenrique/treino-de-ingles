@@ -388,7 +388,7 @@ function abrirEscolhaTipoAdicao() {
     document.getElementById("selecao-tipo-adicao").style.display = "flex";
     document.getElementById("form-individual").style.display = "none";
     document.getElementById("form-massa").style.display = "none";
-    document.getElementById("titulo-adicao").textContent = "Escolha a quantidade";
+    document.getElementById("titulo-adicao").textContent = "Quantas palavras você deseja adicionar?";
     document.getElementById("feedback-adicao").style.display = "none";
 }
 
