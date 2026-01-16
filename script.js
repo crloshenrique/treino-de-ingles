@@ -245,9 +245,21 @@ function interromperJogo() {
     document.getElementById("revisao-teste").style.display = "none"; 
 }
 
-function irParaHub() { esconderTodosMenus(); menuHub.style.display = "flex"; }
+function irParaHub() { 
+    esconderTodosMenus(); 
+    if(document.getElementById('area-selecao-dicionario')) {
+        document.getElementById('area-selecao-dicionario').style.display = "block";
+    }
+    if(tituloCategoriasDicionario) tituloCategoriasDicionario.style.display = "block";
+    if(listaDicionariosVisualizar) listaDicionariosVisualizar.style.display = "grid";
+    if(visualizacaoPalavras) visualizacaoPalavras.style.display = "none";
+    menuHub.style.display = "flex"; 
+}
 function irParaTemas() { esconderTodosMenus(); menuTemas.style.display = "flex"; }
-function irParaDicionariosRaiz() { esconderTodosMenus(); menuDicionariosRaiz.style.display = "flex"; }
+function irParaDicionariosRaiz() { 
+    esconderTodosMenus(); 
+    menuDicionariosRaiz.style.display = "flex"; 
+}
 
 function irParaPerfil() {
     esconderTodosMenus();
@@ -271,11 +283,15 @@ function irParaPerfil() {
 
 function abrirSubMenuDicionarios() { 
     esconderTodosMenus(); 
+    if (document.getElementById('area-selecao-dicionario')) {
+        document.getElementById('area-selecao-dicionario').style.display = "block";
+    }
     menuGerenciarDicionarios.style.display = "flex"; 
     visualizacaoPalavras.style.display = "none"; 
     listaDicionariosVisualizar.style.display = "grid"; 
     if (tituloCategoriasDicionario) tituloCategoriasDicionario.style.display = "block";
     if (btnVoltarRaizDicionario) btnVoltarRaizDicionario.style.display = "flex";
+    container.classList.remove("modo-largo");
 }
 
 // --- LOGICA PARA ALTERAR PALAVRAS (CORRIGIDO) ---
@@ -415,9 +431,6 @@ function voltarBotaoAdicao() {
 }
 
 function voltarParaDicionariosRaiz() { 
-    if(document.getElementById('area-selecao-dicionario')) document.getElementById('area-selecao-dicionario').style.display = "block";
-    if(visualizacaoPalavras) visualizacaoPalavras.style.display = "none";
-    container.classList.remove("modo-largo");
     abrirSubMenuDicionarios();
 }
 
@@ -778,31 +791,18 @@ function finalizarTeste() {
 }
 
 function voltarDoTeste() {
-    // 1. Resetar variáveis de estado do jogo
-    palavrasParaOJogo = [];
-    historicoSessao = [];
-    acertos = 0;
-    erros = 0;
-    document.getElementById("lista-revisao").innerHTML = "";
-    document.getElementById("palavra-box").innerHTML = "";
-    const elementosQuiz = [
+    const elementosParaEsconder = [
         'revisao-teste', 'btn-voltar-final', 'contador-container', 
-        'palavra-box', 'opcoes-container'
+        'palavra-box', 'opcoes-container', 'status-load'
     ];
-    elementosQuiz.forEach(id => {
+    elementosParaEsconder.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = 'none';
     });
+
     container.classList.remove('modo-largo');
-    container.style.maxWidth = "";
-    const mainContent = document.getElementById('main-content');
-    if (mainContent) {
-        mainContent.style.display = ""; 
-        mainContent.style.justifyContent = "";
-        mainContent.style.alignItems = "";
-    }
-    irParaHub();
-    console.log("Sistema resetado com sucesso sem atualizar a página.");
+    
+    irParaHub(); 
 }
 
 async function irParaMeusErros() {
