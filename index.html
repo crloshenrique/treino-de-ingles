@@ -293,13 +293,15 @@
         .menu { display: flex; flex-direction: column; gap: 15px; width: 100%; align-items: center; }
         .menu button { width: 100%; }
 
-        .grid-temas {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            gap: 15px;
-            width: 100%;
-            margin-top: 20px;
-        }
+.grid-temas {
+    display: grid;
+    /* No celular, força 2 colunas lado a lado sempre */
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 12px;
+    width: 100%;
+    margin-top: 20px;
+    box-sizing: border-box;
+}
 
         .card-dicionario {
             min-height: 100px;
