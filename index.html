@@ -28,6 +28,28 @@
             overflow: hidden; 
         }
 
+        /* Animação de tremer */
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            50% { transform: translateX(8px); }
+            75% { transform: translateX(-8px); }
+            100% { transform: translateX(0); }
+        }
+
+        .shake-error {
+            animation: shake 0.4s ease-in-out;
+            border-color: var(--error-color) !important; /* Fica vermelho enquanto treme */
+            box-shadow: 0 0 15px rgba(241, 71, 56, 0.4);
+        }
+
+        #titulo-adicao {
+            width: 100%;
+            white-space: nowrap; /* Impede a quebra de linha */
+            font-size: 1.5rem;    /* Ajusta o tamanho se o texto for muito longo */
+            margin-top: 0;       /* Remove excesso de espaço no topo */
+        }
+
         /* --- TELA DE LOGIN --- */
         #tela-login {
             position: fixed;
@@ -206,7 +228,7 @@
             border: 1px solid var(--accent-color); 
             border-radius: 8px; 
             margin: 0 5px;
-            transform: scale(1.05);
+            transform: scale(1.03); /* Reduzido levemente */
         }
 
         .sidebar-item img { width: 40px; height: 40px; min-width: 40px; object-fit: contain; }
@@ -264,6 +286,7 @@
             margin: auto; 
             height: auto;
             min-height: min-content;
+            padding: 0 10px; /* Adicionado respiro lateral */
         }
         #container.modo-largo { max-width: 850px; justify-content: flex-start; margin-top: 20px; }
 
@@ -338,7 +361,7 @@
 
         input, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 10px; border: 1px solid #444; background: #2a2a2a; color: white; box-sizing: border-box; outline: none; transition: border-color 0.2s; font-family: Arial, sans-serif;}
         
-        #campo-busca:focus { border: 1px solid var(--accent-color); }
+        input:focus, textarea:focus { border: 1px solid var(--accent-color); }
 
         #palavra-box { 
             width: 100%; 
@@ -401,10 +424,17 @@
         }
 
         #num-acertos { color: var(--success-color); }
-        .contador-acerto { border-left: 5px solid var(--success-color); }
+        .contador-acerto { 
+            border-left: 5px solid var(--success-color); 
+            border-right: none;
+        }
         #num-erros { color: var(--error-color); }
-        .contador-erro { border-left: 5px solid var(--error-color); }
+        .contador-erro { 
+            border-right: 5px solid var(--error-color); 
+            border-left: none; /* Remove a borda da esquerda que estava lá */
+        }
 
+        /* CORREÇÃO DO EFEITO CLICÁVEL AQUI */
         .item-dicionario, .item-revisao, .item-erro { 
             width: 100%; 
             padding: 12px; 
@@ -418,8 +448,18 @@
             border-left: 3px solid var(--accent-color); 
             box-sizing: border-box; 
             align-items: center; 
+            transition: transform 0.2s ease, margin-left 0.2s ease, background 0.2s; /* Transições suaves */
         }
         
+        .item-clicavel { cursor: pointer; }
+        
+        /* Reduzido de 1.02 para 1.01 e adicionado margin-left para não cortar na borda */
+        .item-clicavel:hover { 
+            background: #333; 
+            transform: scale(1.01); 
+            margin-left: 5px; 
+        }
+
         .col-palavra-info { display: flex; flex-direction: column; gap: 2px; text-align: left; }
         .pronuncia-pequena { color: rgba(255, 255, 255, 0.6); font-size: 0.85rem; }
         
@@ -438,25 +478,26 @@
         }
 
         #revisao-teste, #area-meus-erros { width: 100%; display: none; margin-top: 5px; text-align: left; }
-        #lista-revisao, #lista-meus-erros { 
+        #lista-revisao, #lista-meus-erros, #lista-alterar-palavras { 
             max-height: 350px; 
             overflow-y: auto; 
             padding-right: 5px; 
             margin-bottom: 15px; 
+            padding-left: 5px; /* Adicionado para dar espaço ao crescimento do item */
         }
         
         .revisao-correto { border-left: 5px solid var(--success-color) !important; }
         .revisao-errado { border-left: 5px solid var(--error-color) !important; }
 
-        #area-lista-palavras::-webkit-scrollbar, #lista-revisao::-webkit-scrollbar, #lista-meus-erros::-webkit-scrollbar { width: 8px; }
-        #area-lista-palavras::-webkit-scrollbar-track, #lista-revisao::-webkit-scrollbar-track, #lista-meus-erros::-webkit-scrollbar-track { background: #2a2a2a; border-radius: 10px; }
-        #area-lista-palavras::-webkit-scrollbar-thumb, #lista-revisao::-webkit-scrollbar-thumb, #lista-meus-erros::-webkit-scrollbar-thumb { background: var(--accent-color); border-radius: 10px; }
+        #area-lista-palavras::-webkit-scrollbar, #lista-revisao::-webkit-scrollbar, #lista-meus-erros::-webkit-scrollbar, #lista-alterar-palavras::-webkit-scrollbar { width: 8px; }
+        #area-lista-palavras::-webkit-scrollbar-track, #lista-revisao::-webkit-scrollbar-track, #lista-meus-erros::-webkit-scrollbar-track, #lista-alterar-palavras::-webkit-scrollbar-track { background: #2a2a2a; border-radius: 10px; }
+        #area-lista-palavras::-webkit-scrollbar-thumb, #lista-revisao::-webkit-scrollbar-thumb, #lista-meus-erros::-webkit-scrollbar-thumb, #lista-alterar-palavras::-webkit-scrollbar-thumb { background: var(--accent-color); border-radius: 10px; }
 
         #area-lista-palavras {
             width: 100%;
             max-height: 450px;
             overflow-y: auto;
-            padding-right: 5px;
+            padding: 0 5px; /* Adicionado padding lateral */
         }
 
         #visualizacao-palavras {
@@ -539,16 +580,40 @@
 
                 <div id="menu-dicionarios-raiz" class="menu" style="display:none">
                     <h2>Dicionários</h2>
-                    <button class="btn-custom-lateral" onclick="abrirEscolhaTipoAdicao()">Adicionar palavras</button>
-                    <button class="btn-custom-lateral" onclick="abrirSubMenuDicionarios()">Ver listas</button>
+                    <button class="btn-custom-lateral" onclick="abrirSubMenuDicionarios()">Visualizar</button>
+                    <button class="btn-custom-lateral" onclick="abrirEscolhaTipoAdicao()">Adicionar</button>
+                    <button class="btn-custom-lateral" onclick="abrirMenuAlterarPalavras()">Editar</button>
                     <div class="btn-voltar-icone" onclick="irParaHub()">
                         <img src="imagens/voltar.png" alt="Voltar">
                         <span>Voltar</span>
                     </div>
                 </div>
 
+                <div id="menu-alterar-palavras" class="menu" style="display:none">
+                    <h2 id="titulo-alterar-lista">Qual palavra você deseja alterar?</h2>
+                    <input type="text" id="busca-alterar" placeholder="Pesquisar..." oninput="filtrarAlterarPalavras()">
+                    <div class="header-dicionario"><span>Palavra</span><span>Significado</span></div>
+                    <div id="lista-alterar-palavras" style="width: 100%;"></div>
+                    <div class="btn-voltar-icone" onclick="irParaDicionariosRaiz()">
+                        <img src="imagens/voltar.png" alt="Voltar">
+                        <span>Voltar</span>
+                    </div>
+                </div>
+
+                <div id="tela-edicao-campos" class="menu" style="display:none">
+                    <div id="feedback-edicao" style="display:none; width: 100%;"></div>
+                    <input type="text" id="edit-palavra" placeholder="Palavra">
+                    <input type="text" id="edit-pronuncia" placeholder="Pronúncia">
+                    <input type="text" id="edit-significado" placeholder="Significado">
+                    <button id="btn-salvar-alteracao" class="btn-custom-lateral" style="width:100%" onclick="processarAlteracaoBanco()">Alterar</button>
+                    <div class="btn-voltar-icone" onclick="abrirMenuAlterarPalavras()">
+                        <img src="imagens/voltar.png" alt="Voltar">
+                        <span>Voltar</span>
+                    </div>
+                </div>
+
                 <div id="area-adicionar-dicionario" class="menu" style="display:none">
-                    <h2 id="titulo-adicao">Adicionar dicionário</h2>
+                    <h2 id="titulo-adicao">Quantas palavras você deseja adicionar?</h2>
                     <div id="feedback-adicao" style="display:none; width: 100%;"></div>
                     <div id="selecao-tipo-adicao" style="display:flex; justify-content:center; gap:20px; margin-bottom:20px">
                         <button class="btn-quadrado" onclick="mostrarFormIndividual()">1</button>
@@ -573,8 +638,12 @@
                 </div>
 
                 <div id="menu-gerenciar-dicionarios" class="menu" style="display:none">
-                    <h2 id="titulo-categorias-dicionario">Lista de dicionários</h2>
+                    <h2 id="titulo-categorias-dicionario">Qual dicionário você deseja visualizar?</h2>
                     <div id="lista-dicionarios-visualizar" class="grid-temas"></div>
+                    <div class="btn-voltar-icone" onclick="irParaDicionariosRaiz()">
+                        <img src="imagens/voltar.png" alt="Voltar">
+                        <span>Voltar</span>
+                    </div>
                     <div id="visualizacao-palavras" style="display:none; width: 100%;">
                         <input type="text" id="campo-busca" placeholder="Pesquisar..." oninput="filtrarPalavras()">
                         <div class="header-dicionario"><span>Palavra</span><span>Significado</span></div>
@@ -660,7 +729,7 @@
 
                 <div id="btn-voltar-final" class="btn-voltar-icone" style="display:none; width: 100%;" onclick="voltarDoTeste()">
                     <img src="imagens/voltar.png" alt="Voltar">
-                    <span>Voltar</span>
+                    <span>Início</span>
                 </div>
             </div>
         </main>
