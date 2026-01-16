@@ -415,6 +415,9 @@ function voltarBotaoAdicao() {
 }
 
 function voltarParaDicionariosRaiz() { 
+    if(document.getElementById('area-selecao-dicionario')) document.getElementById('area-selecao-dicionario').style.display = "block";
+    if(visualizacaoPalavras) visualizacaoPalavras.style.display = "none";
+    container.classList.remove("modo-largo");
     abrirSubMenuDicionarios();
 }
 
@@ -447,6 +450,7 @@ function gerarMenuDicionariosVisualizacao() {
 }
 
 async function carregarEExibirVarios(cat) {
+    if(document.getElementById('area-selecao-dicionario')) document.getElementById('area-selecao-dicionario').style.display = "none";
     listaDicionariosVisualizar.style.display = "none";
     if (tituloCategoriasDicionario) tituloCategoriasDicionario.style.display = "none";
     if (btnVoltarRaizDicionario) btnVoltarRaizDicionario.style.display = "flex";

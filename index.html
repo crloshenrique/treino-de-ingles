@@ -43,14 +43,14 @@
             box-shadow: 0 0 15px rgba(241, 71, 56, 0.4);
         }
 
-#titulo-adicao {
-    width: 100%;
-    white-space: normal; /* Removido o nowrap: agora o texto QUEBRA linha se não couber */
-    text-align: center;  /* Garante que o texto fique sempre no meio */
-    font-size: 1.5rem;   
-    margin-top: 0;       
-    box-sizing: border-box;
-}
+        #titulo-adicao {
+            width: 100%;
+            white-space: normal; /* Removido o nowrap: agora o texto QUEBRA linha se não couber */
+            text-align: center;  /* Garante que o texto fique sempre no meio */
+            font-size: 1.5rem;   
+            margin-top: 0;       
+            box-sizing: border-box;
+        }
 
         /* --- TELA DE LOGIN --- */
         #tela-login {
@@ -617,7 +617,7 @@
                 </div>
 
                 <div id="area-adicionar-dicionario" class="menu" style="display:none">
-                    <h2 id="titulo-adicao">Escolha a quantidade</h2>
+                    <h2 id="titulo-adicao">Quantas palavras você deseja adicionar?</h2>
                     <div id="feedback-adicao" style="display:none; width: 100%;"></div>
                     <div id="selecao-tipo-adicao" style="display:flex; justify-content:center; gap:20px; margin-bottom:20px">
                         <button class="btn-quadrado" onclick="mostrarFormIndividual()">1</button>
@@ -642,8 +642,14 @@
                 </div>
 
                 <div id="menu-gerenciar-dicionarios" class="menu" style="display:none">
-                    <h2 id="titulo-categorias-dicionario">Qual dicionário você deseja visualizar?</h2>
-                    <div id="lista-dicionarios-visualizar" class="grid-temas"></div>
+                    <div id="area-selecao-dicionario" style="width: 100%;">
+                        <h2 id="titulo-categorias-dicionario">Qual dicionário você deseja visualizar?</h2>
+                        <div id="lista-dicionarios-visualizar" class="grid-temas"></div>
+                        <div class="btn-voltar-icone" onclick="irParaDicionariosRaiz()" style="margin-top: 20px;">
+                            <img src="imagens/voltar.png" alt="Voltar">
+                            <span>Voltar</span>
+                        </div>
+                    </div>
                     <div id="visualizacao-palavras" style="display:none; width: 100%;">
                         <input type="text" id="campo-busca" placeholder="Pesquisar..." oninput="filtrarPalavras()">
                         <div class="header-dicionario"><span>Palavra</span><span>Significado</span></div>
