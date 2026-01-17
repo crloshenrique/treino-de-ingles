@@ -7,20 +7,67 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
 
-        /* Alvo específico: apenas campos de senha */
-input[type="password"] {
-    font-family: Arial, sans-serif !important; 
-    font-size: 16px !important;
-    letter-spacing: 1px;
-    border-top-right-radius: 0 !important;
-    border-bottom-right-radius: 0 !important;
+.word-card {
+    background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+    border: 1px solid #333;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    text-align: left;
+    width: 100%; /* Garante que ocupe a largura do container */
+    box-sizing: border-box;
 }
 
-/* Alvo específico: apenas campos de email */
-input[type="email"] {
-    font-family: Arial, sans-serif !important;
-    font-size: 16px !important;
+.word-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center; /* Alinha o texto e o ícone no meio verticalmente */
+    font-size: 12px;
+    color: var(--accent-color);
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-bottom: 5px;
 }
+
+/* AQUI ESTÁ A CORREÇÃO DO ÍCONE */
+#play-word-day {
+    width: 24px !important;  /* Define um tamanho fixo pequeno */
+    height: 24px !important;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+#play-word-day:hover {
+    transform: scale(1.2);
+}
+
+/* AQUI ESTÁ O DESTAQUE DA PALAVRA */
+#word-day-title {
+    font-size: 32px !important; /* Aumenta o tamanho da palavra */
+    margin: 5px 0 !important;
+    color: #fff;
+    font-weight: bold;
+}
+
+#word-day-meaning {
+    color: #bbb;
+    font-size: 16px;
+    font-style: italic;
+    margin: 0;
+}
+
+        input[type="password"] {
+            font-family: Arial, sans-serif !important; 
+            font-size: 16px !important;
+            letter-spacing: 1px;
+            border-top-right-radius: 0 !important;
+            border-bottom-right-radius: 0 !important;
+        }
+
+        input[type="email"] {
+            font-family: Arial, sans-serif !important;
+            font-size: 16px !important;
+        }
 
         :root {
             --bg-color: #1f1f1f;
@@ -635,7 +682,14 @@ input[type="email"] {
                 </div>
 
                 <div id="menu-hub" class="menu" style="display:none">
-                    <h1 style="color: white;">Tela inicial</h1>
+                    <div id="word-of-the-day-container" class="word-card">
+                        <div class="word-header">
+                            <span>Palavra do dia</span>
+                            <img src="imagens/pronuncia.png" id="play-word-day" alt="Ouvir">
+                        </div>
+                        <h2 id="word-day-title">Loading...</h2>
+                        <p id="word-day-meaning">...</p>
+                    </div>
                 </div>
 
                 <div id="menu-perfil" class="menu" style="display:none">

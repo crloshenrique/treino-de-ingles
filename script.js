@@ -254,6 +254,7 @@ function irParaHub() {
     if(listaDicionariosVisualizar) listaDicionariosVisualizar.style.display = "grid";
     if(visualizacaoPalavras) visualizacaoPalavras.style.display = "none";
     menuHub.style.display = "flex"; 
+    carregarPalavraDoDia();
 }
 function irParaTemas() { esconderTodosMenus(); menuTemas.style.display = "flex"; }
 function irParaDicionariosRaiz() { 
@@ -871,3 +872,45 @@ function aplicarEfeitoNegativo(elemento) {
         elemento.classList.remove('shake-error');
     }, 400); // 400ms coincide com a animação CSS
 }
+
+async function carregarPalavraDoDia() {
+    try {
+        // 1. Pega todas as palavras do seu dicionário principal
+        const { data: palavras, error } = await _supabase
+            .from('dicionarios')
+            .select('*');
+
+        if (error || !palavras.length) return;
+
+        // 2. Lógica da Data: Criamos uma string baseada no ano-mês-dia
+        const hoje = new Date();
+        const dataString = hoje.getFullYear() + "-" + hoje.getMonth() + "-" + hoje.getDate();
+        
+        // 3. Geramos um número baseado na data para ser o índice
+        // Isso garante que hoje o resultado seja 'X', e amanhã seja 'Y'
+        let seed = 0;
+        for (let i = 0; i < dataString.length; i++) {
+            seed += dataString.charCodeAt(i);
+        }
+        
+        const indice = seed % palavras.length;
+        const palavraDoDia = palavras[indice];
+
+        // 4. Preenche o HTML
+        document.getElementById('word-day-title').innerText = palavraDoDia.palavra;
+        document.getElementById('word-day-meaning').innerText = palavraDoDia.significado;
+        
+        // Configura o som
+        document.getElementById('play-word-day').onclick = () => {
+            const msg = new SpeechSynthesisUtterance(palavraDoDia.palavra);
+            msg.lang = 'en-US';
+            window.speechSynthesis.speak(msg);
+        };
+
+    } catch (err) {
+        console.error("Erro ao carregar palavra do dia:", err);
+    }
+}
+
+// Chame essa função quando o usuário fizer login ou abrir o hub
+// Exemplo: dentro da função mostrarMenuHub() que você já tem
