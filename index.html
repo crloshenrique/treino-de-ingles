@@ -41,9 +41,14 @@ input[type="email"] {
             margin: 0; 
             display: flex; 
             height: 100vh; 
-            overflow: hidden; 
+            height: -webkit-fill-available; /* Ajuste para iOS não criar barra de rolagem */
+            overflow: hidden; /* Impede que o corpo do site role, apenas as áreas internas */
         }
 
+        html {
+            height: -webkit-fill-available;
+        }
+        
         /* Animação de tremer */
         @keyframes shake {
             0% { transform: translateX(0); }
