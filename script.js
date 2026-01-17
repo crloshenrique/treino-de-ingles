@@ -255,6 +255,7 @@ function irParaHub() {
     if(visualizacaoPalavras) visualizacaoPalavras.style.display = "none";
     menuHub.style.display = "flex"; 
     carregarPalavraDoDia();
+    carregarEstatisticas();
 }
 function irParaTemas() { esconderTodosMenus(); menuTemas.style.display = "flex"; }
 function irParaDicionariosRaiz() { 
@@ -887,7 +888,6 @@ async function carregarPalavraDoDia() {
         const dataString = hoje.getFullYear() + "-" + hoje.getMonth() + "-" + hoje.getDate();
         
         // 3. Geramos um número baseado na data para ser o índice
-        // Isso garante que hoje o resultado seja 'X', e amanhã seja 'Y'
         let seed = 0;
         for (let i = 0; i < dataString.length; i++) {
             seed += dataString.charCodeAt(i);
@@ -898,12 +898,42 @@ async function carregarPalavraDoDia() {
 
         // 4. Preenche o HTML
         document.getElementById('word-day-title').innerText = palavraDoDia.palavra;
-        document.getElementById('word-day-meaning').innerText = palavraDoDia.significado;
+        document.getElementById('word-day-title').innerText = palavraDoDia.palavra;
+
+        // Lógica para formatar: transforma em minúsculo e garante as vírgulas
+        let significadoFormatado = palavraDoDia.significado
+            .toLowerCase()            // Tudo para minúsculo
+            .replace(/\//g, ', ')     // Se houver barras "/", vira vírgula
+            .split(',')               // Separa por vírgula
+            .map(s => s.trim())       // Remove espaços sobrando de cada palavra
+            .filter(s => s !== "")    // Remove itens vazios
+            .join(', ');              // Junta tudo com vírgula e espaço padrão
+
+        document.getElementById('word-day-meaning').innerText = `${significadoFormatado}`;
         
-        // Configura o som
-        document.getElementById('play-word-day').onclick = () => {
+        // Configura o som com troca de ícone
+        const btnSom = document.getElementById('play-word-day');
+        btnSom.onclick = () => {
+            // Se já estiver falando, para o áudio e reseta o ícone
+            if (window.speechSynthesis.speaking) {
+                window.speechSynthesis.cancel();
+                btnSom.src = "imagens/pronuncia.png";
+                return;
+            }
+
             const msg = new SpeechSynthesisUtterance(palavraDoDia.palavra);
             msg.lang = 'en-US';
+
+            // Quando o áudio começa
+            msg.onstart = () => {
+                btnSom.src = "imagens/parar.png";
+            };
+
+            // Quando o áudio termina (ou é cancelado)
+            msg.onend = () => {
+                btnSom.src = "imagens/pronuncia.png";
+            };
+
             window.speechSynthesis.speak(msg);
         };
 
@@ -912,5 +942,111 @@ async function carregarPalavraDoDia() {
     }
 }
 
-// Chame essa função quando o usuário fizer login ou abrir o hub
-// Exemplo: dentro da função mostrarMenuHub() que você já tem
+async function carregarEstatisticas() {
+    try {
+        const { data: { user } } = await _supabase.auth.getUser();
+        if (!user) return;
+
+        // 1. Contagem de Erros (Continua igual)
+        const { count: totalErros } = await _supabase
+            .from('erros_usuarios')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', user.id);
+        
+        document.getElementById('count-erros').innerText = totalErros || 0;
+
+        // 2. Contagem de Palavras Descobertas
+        // Como você só tem a tabela 'dicionarios', vamos contar o total dela
+        const { count: totalPalavras, error: errDics } = await _supabase
+            .from('dicionarios')
+            .select('*', { count: 'exact', head: true });
+
+        if (errDics) {
+            console.error("Erro ao ler tabela dicionarios:", errDics.message);
+            return;
+        }
+
+        // Aplicando a sua regra: Se você quer que conte apenas blocos de 100
+        // Exemplo: se tiver 250 palavras, ele mostra 200 (2 dicionários completos)
+        const apenasCompletos = Math.floor(totalPalavras / 100) * 100;
+
+        document.getElementById('count-descobertas').innerText = apenasCompletos;
+
+    } catch (err) {
+        console.error("Erro nas estatísticas:", err);
+    }
+}
+
+function abrirMeusErros() {
+    // Em vez de apenas mostrar o menu, chamamos a função que 
+    // carrega os dados e aplica o "modo-largo"
+    irParaMeusErros(); 
+}
+
+function abrirTodosDicionarios() {
+    esconderTodosMenus();
+    menuDicionariosRaiz.style.display = "flex";
+    listarDicionariosRaiz(); 
+}
+
+async function pesquisarNaOxford() {
+    const palavra = document.getElementById("input-busca-oxford").value.trim();
+    const painelResultado = document.getElementById("resultado-oxford");
+    const btn = document.getElementById("btn-search-oxford");
+
+    if (!palavra) return;
+
+    btn.innerHTML = `<span style="font-size:10px; color:white;">...</span>`;
+    painelResultado.style.display = "block";
+    painelResultado.innerHTML = "Buscando...";
+
+    try {
+        const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${palavra}`);
+        if (!response.ok) throw new Error("Não encontrada.");
+
+        const data = await response.json();
+        const info = data[0];
+
+        const definicao = info.meanings[0].definitions[0].definition;
+        const fonetica = info.phonetic || info.phonetics.find(p => p.text)?.text || "";
+        const audioUrl = info.phonetics.find(p => p.audio !== "")?.audio;
+
+painelResultado.innerHTML = `
+            <div style="display:flex; align-items:center; margin-bottom: 0px; flex-wrap: nowrap; overflow: hidden;">
+                <div style="display: flex; align-items: center; white-space: nowrap; flex-shrink: 0;">
+                    <strong style="color:white; margin-right: 8px;">${info.word.toUpperCase()}</strong>
+                    <span style="opacity:0.5; font-size: 12px;">${fonetica}</span>
+                    ${audioUrl ? `
+                        <button class="btn-audio-oxford" onclick="tocarAudioOxford(this, '${audioUrl}')">
+                            <img src="imagens/pronuncia.png" class="img-audio-status">
+                        </button>` : ''}
+                </div>
+            </div>
+        `;
+
+    } catch (err) {
+        painelResultado.innerHTML = `<span style="color:#ff4738">${err.message}</span>`;
+    } finally {
+        btn.innerHTML = `<img src="imagens/lupa.png">`;
+    }
+}
+
+function tocarAudioOxford(botao, url) {
+    const img = botao.querySelector('.img-audio-status');
+    const audio = new Audio(url);
+
+    // Muda para o ícone de parar
+    img.src = 'imagens/parar.png';
+
+    audio.play();
+
+    // Quando o áudio terminar, volta para o ícone de pronúncia
+    audio.onended = () => {
+        img.src = 'imagens/pronuncia.png';
+    };
+
+    // Caso ocorra erro ou o usuário pause, garante que o ícone volte
+    audio.onerror = () => {
+        img.src = 'imagens/pronuncia.png';
+    };
+}

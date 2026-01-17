@@ -7,54 +7,218 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
 
-.word-card {
-    background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
-    border: 1px solid #333;
-    border-radius: 15px;
+
+
+#painel-resultado-oxford {
+    padding: 15px;
+    height: 140px; /* Mesma altura aproximada do #palavra-box */
+    overflow-y: auto; /* Cria scroll se a tradução for longa */
+    box-sizing: border-box;
+    background: rgba(255, 0, 127, 0.03); /* Mantém o estilo visual */
+    border: 1px solid rgba(255, 0, 127, 0.4);
+    border-radius: 15px; /* Mesma curvatura do word-card */
+}
+
+.search-box-futuristic {
+    background: rgba(255, 0, 127, 0.03);
+    border: 1px solid rgba(255, 0, 127, 0.4);
     padding: 20px;
-    margin-bottom: 20px;
-    text-align: left;
-    width: 100%; /* Garante que ocupe a largura do container */
+    margin-top: 25px;
+    position: relative;
+    border-radius: 4px;
+}
+
+.search-input-wrapper {
+    display: flex;
+    align-items: stretch;
+    margin-top: 15px;
+    height: 45px; /* Reduzi um pouco a altura geral */
+}
+
+#input-busca-oxford {
+    flex: 1;
+    background: #1a1a1a;
+    border: 1px solid rgba(255, 0, 127, 0.5);
+    border-right: none;
+    color: white;
+    padding: 0 15px;
+    border-radius: 4px 0 0 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 15px;
+    outline: none;
     box-sizing: border-box;
 }
 
-.word-header {
+#btn-search-oxford {
+    background: var(--accent-color);
+    border: none;
+    width: 45px; /* Botão agora é um quadrado perfeito com a altura */
     display: flex;
-    justify-content: space-between;
-    align-items: center; /* Alinha o texto e o ícone no meio verticalmente */
-    font-size: 12px;
-    color: var(--accent-color);
-    font-weight: bold;
-    text-transform: uppercase;
-    margin-bottom: 5px;
-}
-
-/* AQUI ESTÁ A CORREÇÃO DO ÍCONE */
-#play-word-day {
-    width: 24px !important;  /* Define um tamanho fixo pequeno */
-    height: 24px !important;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    transition: transform 0.2s;
+    border-radius: 0 4px 4px 0;
+    transition: 0.3s;
+    box-sizing: border-box;
 }
 
-#play-word-day:hover {
-    transform: scale(1.2);
+#btn-search-oxford img {
+    width: 16px !important; /* Lupa menor e mais delicada */
+    height: 16px !important;
+    filter: brightness(0) invert(1);
 }
 
-/* AQUI ESTÁ O DESTAQUE DA PALAVRA */
-#word-day-title {
-    font-size: 32px !important; /* Aumenta o tamanho da palavra */
-    margin: 5px 0 !important;
-    color: #fff;
-    font-weight: bold;
+.resultado-container {
+    margin-top: 15px;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    color: #ccc;
+    display: none;
 }
 
-#word-day-meaning {
-    color: #bbb;
-    font-size: 16px;
-    font-style: italic;
-    margin: 0;
+.btn-audio-oxford {
+    background: transparent !important;
+    border: none !important;
+    padding: 0;
+    margin-left: 6px;
+    cursor: pointer;
+    outline: none;
+    display: inline-flex;
+    align-items: center;
+    -webkit-tap-highlight-color: transparent;
 }
+
+.btn-audio-oxford:hover, 
+.btn-audio-oxford:active, 
+.btn-audio-oxford:focus {
+    background: transparent !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.btn-audio-oxford img {
+    width: 16px; /* Tamanho do ícone */
+    height: 16px;
+    display: block;
+    transition: transform 0.1s;
+}
+
+.btn-audio-oxford:active img {
+    transform: scale(0.9);
+}
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-box {
+            background: rgba(255, 0, 127, 0.03);
+            border: 1px solid rgba(255, 0, 127, 0.4);
+            padding: 20px 15px;
+            position: relative;
+            border-radius: 4px; /* Retângulo inteiro, sem cortes */
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .stat-box:hover {
+            background: rgba(255, 0, 127, 0.08);
+            border-color: var(--accent-color);
+            box-shadow: 0 0 15px rgba(255, 0, 127, 0.2), inset 0 0 10px rgba(255, 0, 127, 0.1);
+            transform: translateY(-3px);
+        }
+
+.stat-glitch-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%; /* Alterado de 40% para 100% para fechar todo o topo */
+    height: 3px;
+    background: var(--accent-color);
+    box-shadow: 0 0 10px var(--accent-color);
+}
+
+        .stat-label {
+            display: block;
+            color: #999;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px; /* Espaçamento entre letras para estilo técnico */
+            margin-bottom: 8px;
+            font-weight: 800; /* Fonte bem forte */
+            font-family: 'Courier New', Courier, monospace; /* Mesma fonte anterior */
+        }
+
+        .stat-value {
+            color: var(--accent-color);
+            font-size: 32px;
+            font-weight: 900; /* Peso máximo para o número */
+            font-family: 'Courier New', Courier, monospace; /* Fonte estilo máquina de escrever/terminal */
+            display: block;
+            line-height: 1;
+        }
+
+        #play-word-day {
+            transition: content 0.2s ease-in-out, transform 0.1s;
+        }
+
+        #play-word-day:active {
+            transform: scale(0.9); /* Efeito de clique físico */
+        }
+
+        .word-card {
+            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+            border: 1px solid #333;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: left;
+            width: 100%; /* Garante que ocupe a largura do container */
+            box-sizing: border-box;
+        }
+
+        .word-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center; /* Alinha o texto e o ícone no meio verticalmente */
+            font-size: 16px;
+            color: var(--accent-color);
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            align-items: center;
+        }
+
+        /* AQUI ESTÁ A CORREÇÃO DO ÍCONE */
+        #play-word-day {
+            width: 24px !important;  /* Define um tamanho fixo pequeno */
+            height: 24px !important;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        #play-word-day:hover {
+            transform: scale(1.2);
+        }
+
+        /* AQUI ESTÁ O DESTAQUE DA PALAVRA */
+        #word-day-title {
+            font-size: 32px !important; /* Aumenta o tamanho da palavra */
+            margin: 5px 0 !important;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        #word-day-meaning {
+            color: #bbb;
+            font-size: 16px;
+            font-style: italic;
+            margin: 0;
+        }
 
         input[type="password"] {
             font-family: Arial, sans-serif !important; 
@@ -689,6 +853,32 @@
                         </div>
                         <h2 id="word-day-title">Loading...</h2>
                         <p id="word-day-meaning">...</p>
+                    </div>
+                    
+                    <div class="stats-container">
+                        <div class="stat-box" onclick="abrirMeusErros()">
+                            <div class="stat-glitch-line"></div>
+                            <span class="stat-label">Erros para revisar</span>
+                            <span id="count-erros" class="stat-value">0</span>
+                        </div>
+
+                        <div class="stat-box" onclick="abrirTodosDicionarios()">
+                            <div class="stat-glitch-line"></div>
+                            <span class="stat-label">Palavras descobertas</span>
+                            <span id="count-descobertas" class="stat-value">0</span>
+                        </div>
+                    </div>
+
+                    <div class="search-box-futuristic">
+                        <div class="stat-glitch-line"></div>
+                        <span class="stat-label">Consulta Global (Oxford)</span>
+                        <div class="search-input-wrapper">
+                            <input type="text" id="input-busca-oxford" placeholder="Digite em Inglês...">
+                            <button onclick="pesquisarNaOxford()" id="btn-search-oxford">
+                                <img src="imagens/lupa.png" style="width: 15px; filter: invert(1);">
+                            </button>
+                        </div>
+                        <div id="resultado-oxford" class="resultado-container"></div>
                     </div>
                 </div>
 
