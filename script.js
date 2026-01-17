@@ -347,7 +347,7 @@ function filtrarAlterarPalavras() {
         return;
     }
     const filtradas = dadosDicionarioAtual.filter(item => {
-        return item.palavra.toLowerCase().includes(termo) || item.significado.toLowerCase().includes(termo);
+        return item.palavra.toLowerCase().startsWith(termo) || item.significado.toLowerCase().startsWith(termo);
     });
     renderizarListaAlterar(filtradas);
 }
@@ -518,7 +518,7 @@ function filtrarPalavras() {
     const filtradas = dadosDicionarioAtual.filter(item => {
         const palavraIngles = item.palavra.toLowerCase();
         const significado = item.significado.toLowerCase();
-        return palavraIngles.startsWith(termo) || significado.includes(termo);
+        return palavraIngles.startsWith(termo) || significado.startsWith(termo);
     });
     renderizarListaPalavras(filtradas);
 }
