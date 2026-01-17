@@ -291,10 +291,15 @@ input[type="email"] {
                 position: fixed;
                 left: -262px;
                 top: 0; 
-                height: 100vh;          
+                /* AJUSTES AQUI: */
+                height: 100% !important; 
+                height: 100dvh !important; /* Altura dinâmica para mobile */
+                max-height: 100dvh;
                 overflow-y: auto;
                 display: flex;
                 flex-direction: column;
+                box-sizing: border-box; /* Fundamental para a borda não aumentar o tamanho */
+                border-right: 2px solid var(--accent-color);
             }
             .sidebar-bottom {
                     margin-top: auto;
