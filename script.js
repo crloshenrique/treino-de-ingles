@@ -710,9 +710,17 @@ function proximaRodada() {
     const box = document.getElementById("palavra-box");
     const containerOpcoes = document.getElementById("opcoes-container");
     
+    // Nova estrutura: A pronúncia ignora a largura do ícone para ficar centralizada
     box.innerHTML = `
-        <span style="display:block">${atual.palavra}</span>
-        <span style="font-size: 1.1rem; color: rgba(255,255,255,0.5); font-weight: normal; margin-top: 5px;">${atual.pronuncia}</span>
+        <div class="quiz-header-container">
+            <div class="word-row-wrapper">
+                <span class="word-main-text">${atual.palavra}</span>
+                <button class="btn-audio-quiz" onclick="falarPalavraQuiz('${atual.palavra}', this)">
+                    <img src="imagens/pronuncia.png" class="img-audio-quiz">
+                </button>
+            </div>
+            <span class="pronuncia-quiz-sub">${atual.pronuncia}</span>
+        </div>
     `;
 
     containerOpcoes.innerHTML = "";
@@ -764,6 +772,7 @@ function proximaRodada() {
         containerOpcoes.appendChild(btn);
     });
 }
+
 
 function finalizarTeste() {
     document.getElementById("palavra-box").innerHTML = "<span>Teste finalizado!</span>";
@@ -1049,4 +1058,22 @@ function tocarAudioOxford(botao, url) {
     audio.onerror = () => {
         img.src = 'imagens/pronuncia.png';
     };
+}
+
+function falarPalavraQuiz(texto, botao) {
+    const img = botao.querySelector('.img-audio-quiz');
+    
+    // Troca para o ícone de "parar" enquanto fala
+    img.src = 'imagens/parar.png';
+
+    const utterance = new SpeechSynthesisUtterance(texto);
+    utterance.lang = 'en-US';
+    utterance.rate = 0.8;
+
+    utterance.onend = () => {
+        img.src = 'imagens/pronuncia.png'; // Volta ao ícone original
+    };
+
+    window.speechSynthesis.cancel(); 
+    window.speechSynthesis.speak(utterance);
 }

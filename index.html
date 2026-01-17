@@ -7,104 +7,156 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
 
-#painel-resultado-oxford {
-    padding: 15px;
-    height: 140px; /* Mesma altura aproximada do #palavra-box */
-    overflow-y: auto; /* Cria scroll se a tradução for longa */
-    box-sizing: border-box;
-    background: rgba(255, 0, 127, 0.03); /* Mantém o estilo visual */
-    border: 1px solid rgba(255, 0, 127, 0.4);
-    border-radius: 15px; /* Mesma curvatura do word-card */
-}
-
-.search-box-futuristic {
-    background: rgba(255, 0, 127, 0.03);
-    border: 1px solid rgba(255, 0, 127, 0.4);
-    padding: 20px;
-    margin-top: 25px;
-    position: relative;
-    border-radius: 4px;
-}
-
-.search-input-wrapper {
+/* Container que centraliza tudo */
+.quiz-header-container {
     display: flex;
-    align-items: stretch;
-    margin-top: 15px;
-    height: 45px; /* Reduzi um pouco a altura geral */
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
 }
 
-#input-busca-oxford {
-    flex: 1;
-    background: #1a1a1a;
-    border: 1px solid rgba(255, 0, 127, 0.5);
-    border-right: none;
-    color: white;
-    padding: 0 15px;
-    border-radius: 4px 0 0 4px;
-    font-family: 'Courier New', monospace;
-    font-size: 15px;
-    outline: none;
-    box-sizing: border-box;
-}
-
-#btn-search-oxford {
-    background: var(--accent-color);
-    border: none;
-    width: 45px;
-    height: 35px;
+/* Linha da palavra: usamos padding à esquerda para compensar o ícone à direita */
+.word-row-wrapper {
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
-    border-radius: 0 4px 4px 0;
-    transition: 0.3s;
-    box-sizing: border-box;
+    gap: 20px; /* Distância entre a palavra e o ícone (colado) */
+    /* O segredo: adicionamos um espaço invisível na esquerda igual ao tamanho do ícone 
+       para que a PALAVRA fique no centro exato */
+    padding-left: 40px; 
 }
 
-#btn-search-oxford img {
-    width: 16px !important; /* Lupa menor e mais delicada */
-    height: 16px !important;
-    filter: brightness(0) invert(1);
+.word-main-text {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: white;
 }
 
-.resultado-container {
-    margin-top: 15px;
-    font-family: 'Courier New', monospace;
-    font-size: 14px;
-    color: #ccc;
-    display: none;
-}
-
-.btn-audio-oxford {
+.btn-audio-quiz {
     background: transparent !important;
     border: none !important;
-    padding: 0;
-    margin-left: 6px;
     cursor: pointer;
-    outline: none;
-    display: inline-flex;
+    padding: 0;
+    display: flex;
     align-items: center;
-    -webkit-tap-highlight-color: transparent;
+    width: 30px; /* Largura fixa para o botão */
 }
 
-.btn-audio-oxford:hover, 
-.btn-audio-oxford:active, 
-.btn-audio-oxford:focus {
-    background: transparent !important;
-    transform: none !important;
-    box-shadow: none !important;
+.img-audio-quiz {
+    width: 30px;
+    height: auto;
+    transition: transform 0.2s ease;
 }
 
-.btn-audio-oxford img {
-    width: 16px; /* Tamanho do ícone */
-    height: 16px;
-    display: block;
-    transition: transform 0.1s;
+/* Efeito de hover corrigido (sem descer) */
+.btn-audio-quiz:hover .img-audio-quiz {
+    transform: scale(1.1);
 }
 
-.btn-audio-oxford:active img {
-    transform: scale(0.9);
+.pronuncia-quiz-sub {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.5);
+    margin-top: 5px;
 }
+
+        #painel-resultado-oxford {
+            padding: 15px;
+            height: 140px; /* Mesma altura aproximada do #palavra-box */
+            overflow-y: auto; /* Cria scroll se a tradução for longa */
+            box-sizing: border-box;
+            background: rgba(255, 0, 127, 0.03); /* Mantém o estilo visual */
+            border: 1px solid rgba(255, 0, 127, 0.4);
+            border-radius: 15px; /* Mesma curvatura do word-card */
+        }
+
+        .search-box-futuristic {
+            background: rgba(255, 0, 127, 0.03);
+            border: 1px solid rgba(255, 0, 127, 0.4);
+            padding: 20px;
+            margin-top: 25px;
+            position: relative;
+            border-radius: 4px;
+        }
+
+        .search-input-wrapper {
+            display: flex;
+            align-items: stretch;
+            margin-top: 15px;
+            height: 45px; /* Reduzi um pouco a altura geral */
+        }
+
+        #input-busca-oxford {
+            flex: 1;
+            background: #1a1a1a;
+            border: 1px solid rgba(255, 0, 127, 0.5);
+            border-right: none;
+            color: white;
+            padding: 0 15px;
+            border-radius: 4px 0 0 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 15px;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        #btn-search-oxford {
+            background: var(--accent-color);
+            border: none;
+            width: 45px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 0 4px 4px 0;
+            transition: 0.3s;
+            box-sizing: border-box;
+        }
+
+        #btn-search-oxford img {
+            width: 16px !important; /* Lupa menor e mais delicada */
+            height: 16px !important;
+            filter: brightness(0) invert(1);
+        }
+
+        .resultado-container {
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: #ccc;
+            display: none;
+        }
+
+        .btn-audio-oxford {
+            background: transparent !important;
+            border: none !important;
+            padding: 0;
+            margin-left: 6px;
+            cursor: pointer;
+            outline: none;
+            display: inline-flex;
+            align-items: center;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn-audio-oxford:hover, 
+        .btn-audio-oxford:active, 
+        .btn-audio-oxford:focus {
+            background: transparent !important;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .btn-audio-oxford img {
+            width: 16px; /* Tamanho do ícone */
+            height: 16px;
+            display: block;
+            transition: transform 0.1s;
+        }
+
+        .btn-audio-oxford:active img {
+            transform: scale(0.9);
+        }
 
         .stats-container {
             display: grid;
@@ -131,15 +183,15 @@
             transform: translateY(-3px);
         }
 
-.stat-glitch-line {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%; /* Alterado de 40% para 100% para fechar todo o topo */
-    height: 3px;
-    background: var(--accent-color);
-    box-shadow: 0 0 10px var(--accent-color);
-}
+        .stat-glitch-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%; /* Alterado de 40% para 100% para fechar todo o topo */
+            height: 3px;
+            background: var(--accent-color);
+            box-shadow: 0 0 10px var(--accent-color);
+        }
 
         .stat-label {
             display: block;
