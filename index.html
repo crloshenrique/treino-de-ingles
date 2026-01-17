@@ -286,20 +286,24 @@ input[type="email"] {
             }
 
             #menu-toggle img { width: 35px; height: 35px; }
+            
             #sidebar {
                 width: 260px;
                 position: fixed;
                 left: -262px;
                 top: 0; 
                 height: 100vh;          
-                overflow-y: auto;
+                overflow-y: hidden;
                 display: flex;
                 flex-direction: column;
+                background: var(--bg-color);
             }
+
             .sidebar-bottom {
-                    margin-top: auto;
-                    padding-bottom: 80px !important; 
+                margin-top: auto;
+                padding-bottom: 20px !important;
             }
+
             body.menu-aberto {
                     overflow: hidden !important;
                     position: fixed;
