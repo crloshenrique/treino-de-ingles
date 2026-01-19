@@ -983,18 +983,28 @@ function aplicarEfeitoNegativo(elemento) {
 
 async function carregarPalavraDoDia() {
     try {
-        // 1. Pega todas as palavras do seu dicionário principal
+        // 1. Obtém o usuário logado para filtrar os dados
+        const { data: { user } } = await _supabase.auth.getUser();
+        if (!user) return;
+
+        // 2. Busca apenas as palavras pertencentes ao usuário logado
         const { data: palavras, error } = await _supabase
             .from('dicionarios')
-            .select('*');
+            .select('*')
+            .eq('user_id', user.id); // Garante que a palavra venha do dicionário do próprio usuário
 
-        if (error || !palavras.length) return;
+        // Se houver erro ou o usuário não tiver palavras cadastradas
+        if (error || !palavras || palavras.length === 0) {
+            document.getElementById('word-day-title').innerText = "---";
+            document.getElementById('word-day-meaning').innerText = "Adicione palavras ao seu dicionário.";
+            return;
+        }
 
-        // 2. Lógica da Data: Criamos uma string baseada no ano-mês-dia
+        // 3. Lógica da Data: Criamos uma string baseada no ano-mês-dia
         const hoje = new Date();
         const dataString = hoje.getFullYear() + "-" + hoje.getMonth() + "-" + hoje.getDate();
         
-        // 3. Geramos um número baseado na data para ser o índice
+        // 4. Geramos um índice determinístico baseado na data
         let seed = 0;
         for (let i = 0; i < dataString.length; i++) {
             seed += dataString.charCodeAt(i);
@@ -1003,25 +1013,22 @@ async function carregarPalavraDoDia() {
         const indice = seed % palavras.length;
         const palavraDoDia = palavras[indice];
 
-        // 4. Preenche o HTML
-        document.getElementById('word-day-title').innerText = palavraDoDia.palavra;
+        // 5. Preenche o HTML com os dados da palavra sorteada
         document.getElementById('word-day-title').innerText = palavraDoDia.palavra;
 
-        // Lógica para formatar: transforma em minúsculo e garante as vírgulas
         let significadoFormatado = palavraDoDia.significado
-            .toLowerCase()            // Tudo para minúsculo
-            .replace(/\//g, ', ')     // Se houver barras "/", vira vírgula
-            .split(',')               // Separa por vírgula
-            .map(s => s.trim())       // Remove espaços sobrando de cada palavra
-            .filter(s => s !== "")    // Remove itens vazios
-            .join(', ');              // Junta tudo com vírgula e espaço padrão
+            .toLowerCase()
+            .replace(/\//g, ', ')
+            .split(',')
+            .map(s => s.trim())
+            .filter(s => s !== "")
+            .join(', ');
 
         document.getElementById('word-day-meaning').innerText = `${significadoFormatado}`;
         
-        // Configura o som com troca de ícone
+        // 6. Configura a funcionalidade de áudio
         const btnSom = document.getElementById('play-word-day');
         btnSom.onclick = () => {
-            // Se já estiver falando, para o áudio e reseta o ícone
             if (window.speechSynthesis.speaking) {
                 window.speechSynthesis.cancel();
                 btnSom.src = "imagens/pronuncia.png";
@@ -1031,12 +1038,10 @@ async function carregarPalavraDoDia() {
             const msg = new SpeechSynthesisUtterance(palavraDoDia.palavra);
             msg.lang = 'en-US';
 
-            // Quando o áudio começa
             msg.onstart = () => {
                 btnSom.src = "imagens/parar.png";
             };
 
-            // Quando o áudio termina (ou é cancelado)
             msg.onend = () => {
                 btnSom.src = "imagens/pronuncia.png";
             };
