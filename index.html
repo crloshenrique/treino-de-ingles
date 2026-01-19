@@ -7,6 +7,78 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
 
+/* Container de cada linha de configuração */
+.config-row {
+    display: flex;
+    justify-content: space-between; /* Texto na esquerda, Botão na direita */
+    align-items: center;
+    width: 100%;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.05); /* Fundo levemente visível */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    margin-bottom: 12px;
+    box-sizing: border-box;
+}
+
+.config-texto {
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+/* O Switch (Botão liga/desliga) */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 26px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #333;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+/* Cor rosa quando o input estiver checado */
+input:checked + .slider {
+    background-color: #ff007f; /* Seu rosa padrão */
+    box-shadow: 0 0 10px rgba(255, 0, 127, 0.4);
+}
+
+input:checked + .slider:before {
+    transform: translateX(24px);
+}
+
+/* Para Firefox */
+#texto-massa {
+    resize: none;
+    scrollbar-color: var(--accent-color) rgba(255, 255, 255, 0.05);
+}
+
+
 /* Container que centraliza tudo */
 .quiz-header-container {
     display: flex;
@@ -20,16 +92,22 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 20px; /* Distância entre a palavra e o ícone (colado) */
-    /* O segredo: adicionamos um espaço invisível na esquerda igual ao tamanho do ícone 
-       para que a PALAVRA fique no centro exato */
-    padding-left: 40px; 
+    gap: 15px;
+    max-width: 100%; /* Garante que não ultrapasse a tela */
+    padding-left: 40px; /* Mantém a centralização compensando o ícone */
 }
 
 .word-main-text {
     font-size: 2.5rem;
     font-weight: bold;
     color: white;
+    
+    /* TRATAMENTO DE QUEBRA */
+    white-space: nowrap;      /* Força a palavra a ficar em uma linha só */
+    overflow: hidden;         /* Esconde o que sobrar */
+    text-overflow: ellipsis;  /* Se a palavra for gigante, coloca "..." */
+    
+    max-width: 70vw;          /* Limita a largura a 70% da largura da tela */
 }
 
 .btn-audio-quiz {
@@ -805,6 +883,7 @@
         #lista-revisao, #lista-meus-erros, #lista-alterar-palavras { 
             width: 100%; /* Garante que a lista interna também ocupe tudo */
             max-height: 350px; 
+            overflow-x: hidden;
             overflow-y: auto; 
             padding-right: 5px; 
             margin-bottom: 15px; 
@@ -884,6 +963,12 @@
                 <img src="imagens/menus/menu-erros.png" alt="Erros">
                 <span>Revisão</span>
             </div>
+
+            <div class="sidebar-item" onclick="irParaConfiguracoes(); handleMenuClick();">
+                <img src="imagens/menus/menu-configuracoes.png" alt="Configurações">
+                <span>Configurações</span>
+            </div>
+
             <div class="sidebar-bottom">
                 <div class="sidebar-item" onclick="irParaPerfil(); handleMenuClick();">
                     <img src="imagens/menus/menu-login.png" alt="Perfil">
@@ -1037,6 +1122,33 @@
                         </div>
                     </div>
                 </div>
+
+<div id="menu-configuracoes" class="menu" style="display: none; flex-direction: column; align-items: center;">
+    <h2>Configurações</h2>
+    
+    <div style="width: 100%; margin-top: 20px;">
+        <div class="config-row">
+            <span class="config-texto">Efeitos sonoros</span>
+            <label class="switch">
+                <input type="checkbox" id="check-som" onchange="salvarConfiguracoes()" checked>
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="config-row">
+            <span class="config-texto">Pronúncia automática</span>
+            <label class="switch">
+                <input type="checkbox" id="check-pronuncia" onchange="salvarConfiguracoes()">
+                <span class="slider"></span>
+            </label>
+        </div>
+    </div>
+
+    <div class="btn-voltar-icone" onclick="irParaHub()" style="margin-top: 20px;">
+        <img src="imagens/voltar.png" alt="Voltar">
+        <span>Voltar</span>
+    </div>
+</div>
 
                 <div id="menu-temas" class="menu" style="display:none">
                     <h2>Escolha o dicionário</h2>

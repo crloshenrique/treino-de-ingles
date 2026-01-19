@@ -3,6 +3,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // SELETORES DE MENUS
+const menuConfiguracoes = document.getElementById("menu-configuracoes");
 const menuBoasVindas = document.getElementById("menu-boas-vindas");
 const menuHub = document.getElementById("menu-hub");
 const menuDicionariosRaiz = document.getElementById("menu-dicionarios-raiz");
@@ -74,6 +75,13 @@ window.onload = async () => {
     });
 
     console.log("Sistema de treino carregado com Correção Visual");
+
+    const configSalva = localStorage.getItem('config_quiz');
+    if (configSalva) {
+        const config = JSON.parse(configSalva);
+        document.getElementById('check-som').checked = config.som;
+        document.getElementById('check-pronuncia').checked = config.pronuncia;
+    }
 };
 
 // --- BUSCA NOME COMPLETO DO BANCO ---
@@ -231,7 +239,7 @@ function handleMenuClick() {
 function esconderTodosMenus() {
     const menus = [menuBoasVindas, menuHub, menuDicionariosRaiz, menuGerenciarDicionarios, areaAdicionarDicionario, 
                    menuTemas, menuPrincipal, menuNiveis, menuIntervalos, visualizacaoPalavras, menuPerfil, menuMeusErros,
-                   menuAlterarPalavras, telaEdicaoCampos];
+                   menuAlterarPalavras, telaEdicaoCampos, menuConfiguracoes];
     menus.forEach(m => { if(m) m.style.display = "none"; });
     container.classList.remove("modo-largo");
     interromperJogo();
@@ -298,24 +306,31 @@ function abrirSubMenuDicionarios() {
 
 // --- LOGICA PARA ALTERAR PALAVRAS (CORRIGIDO) ---
 async function abrirMenuAlterarPalavras() {
-    esconderTodosMenus();
-    container.classList.add("modo-largo");
-    menuAlterarPalavras.style.display = "flex";
-    
-    // CORREÇÃO VISUAL: Garantir que o container não gere scroll horizontal
-    listaAlterarPalavras.style.overflowX = "hidden";
-    listaAlterarPalavras.style.width = "100%";
-    listaAlterarPalavras.innerHTML = "<div style='padding:20px; color: var(--accent-color); font-weight: bold;'>Carregando palavras...</div>";
-    
-    const { data, error } = await _supabase.from('dicionarios').select('*').order('palavra', { ascending: true });
-    
-    if (error) {
-        listaAlterarPalavras.innerHTML = "Erro ao carregar dados.";
-        return;
-    }
+    try {
+        const { data: { user } } = await _supabase.auth.getUser();
+        if (!user) return;
 
-    dadosDicionarioAtual = data || [];
-    renderizarListaAlterar(dadosDicionarioAtual);
+        esconderTodosMenus();
+        container.classList.add("modo-largo");
+        menuAlterarPalavras.style.display = "flex";
+        
+        listaAlterarPalavras.innerHTML = "<div style='padding:20px; color: var(--accent-color);'>Carregando suas palavras...</div>";
+        
+        // Filtra para garantir que ele só veja o que é DELE
+        const { data, error } = await _supabase
+            .from('dicionarios')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('palavra', { ascending: true });
+        
+        if (error) throw error;
+
+        dadosDicionarioAtual = data || [];
+        renderizarListaAlterar(dadosDicionarioAtual);
+    } catch (err) {
+        listaAlterarPalavras.innerHTML = "Erro ao carregar dados.";
+        console.error(err);
+    }
 }
 
 function renderizarListaAlterar(lista) {
@@ -437,13 +452,28 @@ function voltarParaDicionariosRaiz() {
 }
 
 async function carregarCategoriasDoBanco() {
-    const { data, error } = await _supabase.from('dicionarios').select('categoria, id').order('id', { ascending: true });
-    if (!error && data) { 
-        const unicas = [];
-        data.forEach(item => {
-            if (!unicas.includes(item.categoria)) unicas.push(item.categoria);
-        });
-        categoriasDisponiveis = unicas;
+    try {
+        const { data: { user } } = await _supabase.auth.getUser();
+        if (!user) return;
+
+        // Busca apenas as categorias onde o user_id é do utilizador logado
+        const { data, error } = await _supabase
+            .from('dicionarios')
+            .select('categoria')
+            .eq('user_id', user.id);
+
+        if (error) throw error;
+
+        if (data) {
+            const unicas = [];
+            data.forEach(item => {
+                if (!unicas.includes(item.categoria)) unicas.push(item.categoria);
+            });
+            categoriasDisponiveis = unicas;
+            renderizarCategoriasDicionario(unicas); // Chama a função que desenha os cards na tela
+        }
+    } catch (err) {
+        console.error("Erro ao carregar categorias:", err.message);
     }
 }
 
@@ -465,29 +495,41 @@ function gerarMenuDicionariosVisualizacao() {
 }
 
 async function carregarEExibirVarios(cat) {
-    if(document.getElementById('area-selecao-dicionario')) document.getElementById('area-selecao-dicionario').style.display = "none";
-    listaDicionariosVisualizar.style.display = "none";
-    if (tituloCategoriasDicionario) tituloCategoriasDicionario.style.display = "none";
-    if (btnVoltarRaizDicionario) btnVoltarRaizDicionario.style.display = "flex";
-    
-    visualizacaoPalavras.style.display = "flex";
-    areaListaPalavras.innerHTML = "Carregando...";
-    container.classList.add("modo-largo");
-    
-    let query = _supabase.from('dicionarios').select('*');
-    if (cat !== 'todos') {
-        query = query.eq('categoria', cat);
-    }
-    
-    const { data, error } = await query.order('palavra', { ascending: true });
-    
-    if (error) {
-        areaListaPalavras.innerHTML = "Erro ao carregar dados.";
-        return;
-    }
+    try {
+        const { data: { user } } = await _supabase.auth.getUser();
+        if (!user) return;
 
-    dadosDicionarioAtual = data || [];
-    renderizarListaPalavras(dadosDicionarioAtual);
+        // Ajustes de interface (esconder menus e mostrar lista)
+        if(document.getElementById('area-selecao-dicionario')) document.getElementById('area-selecao-dicionario').style.display = "none";
+        listaDicionariosVisualizar.style.display = "none";
+        if (tituloCategoriasDicionario) tituloCategoriasDicionario.style.display = "none";
+        if (btnVoltarRaizDicionario) btnVoltarRaizDicionario.style.display = "flex";
+        visualizacaoPalavras.style.display = "flex";
+        
+        areaListaPalavras.innerHTML = "<div class='loader'>Carregando palavras...</div>";
+        container.classList.add("modo-largo");
+
+        // Montagem da Query com filtro de Usuário
+        let query = _supabase
+            .from('dicionarios')
+            .select('*')
+            .eq('user_id', user.id); // SEGURANÇA: Apenas dados do utilizador
+
+        if (cat !== 'todos') {
+            query = query.eq('categoria', cat);
+        }
+
+        const { data, error } = await query.order('palavra', { ascending: true });
+
+        if (error) throw error;
+
+        dadosDicionarioAtual = data || [];
+        renderizarListaPalavras(dadosDicionarioAtual); // Desenha a tabela de palavras
+
+    } catch (err) {
+        areaListaPalavras.innerHTML = "<span style='color:red'>Erro ao carregar palavras.</span>";
+        console.error(err);
+    }
 }
 
 function renderizarListaPalavras(lista) {
@@ -529,72 +571,117 @@ async function salvarNoBancoLocal() {
     const palavra = document.getElementById("add-palavra").value.trim();
     const pronuncia = document.getElementById("add-pronuncia").value.trim();
     const significado = document.getElementById("add-significado").value.trim();
-    const categoria = document.getElementById("add-categoria").value.trim();
+    const categoria = document.getElementById("add-categoria").value.trim().toLowerCase();
     const btn = document.getElementById("btn-salvar-individual");
 
-    if (!palavra || !significado || !categoria) { 
-        exibirFeedback("feedback-adicao", "Preencha os campos obrigatórios!", "erro"); 
-        return; 
+    if (!palavra || !significado || !categoria) {
+        exibirFeedback("feedback-adicao", "Preencha os campos obrigatórios!", "erro");
+        return;
     }
 
     btn.disabled = true;
-    btn.textContent = "Salvando...";
 
-    const { error } = await _supabase.from('dicionarios').insert([{ palavra, pronuncia, significado, categoria }]);
-    
-    if (error) {
-        exibirFeedback("feedback-adicao", "Erro: " + error.message, "erro");
-        btn.disabled = false;
-        btn.textContent = "Salvar";
-    } else { 
-        exibirFeedback("feedback-adicao", "Palavra adicionada com sucesso!", "sucesso");
+    try {
+        const { data: { user } } = await _supabase.auth.getUser();
+
+        // 1. Verificar quantas palavras já existem nesta categoria para este usuário
+        const { count, error: countError } = await _supabase
+            .from('dicionarios')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', user.id)
+            .eq('categoria', categoria);
+
+        if (count >= 100) {
+            exibirFeedback("feedback-adicao", "Limite atingido! Este dicionário já tem 100 palavras.", "erro");
+            btn.disabled = false;
+            return;
+        }
+
+        // 2. Se for menos de 100, permite salvar
+        const { error } = await _supabase.from('dicionarios').insert([{ 
+            palavra, pronuncia, significado, categoria, user_id: user.id 
+        }]);
+
+        if (error) throw error;
+
+        exibirFeedback("feedback-adicao", "Palavra adicionada!", "sucesso");
         document.getElementById("add-palavra").value = "";
         document.getElementById("add-pronuncia").value = "";
         document.getElementById("add-significado").value = "";
         setTimeout(() => { location.reload(); }, 1500);
+
+    } catch (e) {
+        exibirFeedback("feedback-adicao", "Erro ao salvar.", "erro");
+        btn.disabled = false;
     }
 }
 
 async function salvarEmMassa() {
-    const categoria = document.getElementById("add-categoria-massa").value.trim();
+    const categoria = document.getElementById("add-categoria-massa").value.trim().toLowerCase();
     const text = document.getElementById("texto-massa").value.trim();
     const btn = document.getElementById("btn-salvar-massa");
 
-    if (!categoria || !text) { 
-        exibirFeedback("feedback-adicao", "Preencha categoria e texto!", "erro"); 
-        return; 
+    if (!categoria || !text) {
+        exibirFeedback("feedback-adicao", "Preencha categoria e texto!", "erro");
+        return;
     }
 
-    const lines = text.split('\n');
-    const objetosParaEnviar = [];
-    lines.forEach(linha => {
-        if (linha.includes('=') && linha.includes('(')) {
-            const partes = linha.split('=');
-            const significado = partes[1].trim();
-            const antesDoIgual = partes[0].trim();
-            const palavra = antesDoIgual.split('(')[0].trim();
-            const pronunciaRaw = antesDoIgual.split('(')[1].split(')')[0].trim();
-            objetosParaEnviar.push({ palavra, pronuncia: pronunciaRaw, significado, categoria });
+    const lines = text.split('\n').filter(l => l.trim() !== "");
+    const totalNovas = lines.length;
+
+    if (totalNovas > 100) {
+        exibirFeedback("feedback-adicao", "Você não pode enviar mais de 100 palavras de uma vez.", "erro");
+        return;
+    }
+
+    try {
+        const { data: { user } } = await _supabase.auth.getUser();
+
+        // 1. Verificar ocupação atual
+        const { count, error: countError } = await _supabase
+            .from('dicionarios')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', user.id)
+            .eq('categoria', categoria);
+
+        // 2. Verificar se a soma ultrapassa 100
+        if (count + totalNovas > 100) {
+            const sobra = 100 - count;
+            exibirFeedback("feedback-adicao", `Limite excedido! Este dicionário já tem ${count} palavras. Você só pode adicionar mais ${sobra}.`, "erro");
+            return;
         }
-    });
 
-    if (objetosParaEnviar.length === 0) { 
-        exibirFeedback("feedback-adicao", "Formato inválido! Use: Palavra (pronúncia) = significado", "erro"); 
-        return; 
-    }
+        // 3. Processar e Enviar
+        const objetosParaEnviar = [];
+        lines.forEach(linha => {
+            const match = linha.match(/^([^(]+)\(([^)]+)\)\s*=\s*(.*)$/);
+            if (match) {
+                objetosParaEnviar.push({ 
+                    palavra: match[1].trim(), 
+                    pronuncia: match[2].trim(), 
+                    significado: match[3].trim(), 
+                    categoria, 
+                    user_id: user.id 
+                });
+            }
+        });
 
-    btn.disabled = true;
-    btn.textContent = "Salvando...";
+        if (objetosParaEnviar.length === 0) {
+            exibirFeedback("feedback-adicao", "Formato inválido!", "erro");
+            return;
+        }
 
-    const { error } = await _supabase.from('dicionarios').insert(objetosParaEnviar);
-    
-    if (error) {
-        exibirFeedback("feedback-adicao", "Erro: " + error.message, "erro");
-        btn.disabled = false;
-        btn.textContent = "Salvar";
-    } else { 
-        exibirFeedback("feedback-adicao", "Palavras adicionadas com sucesso!", "sucesso");
+        btn.disabled = true;
+        const { error } = await _supabase.from('dicionarios').insert(objetosParaEnviar);
+        
+        if (error) throw error;
+
+        exibirFeedback("feedback-adicao", `${objetosParaEnviar.length} palavras adicionadas!`, "sucesso");
         setTimeout(() => { location.reload(); }, 1500);
+
+    } catch (e) {
+        exibirFeedback("feedback-adicao", "Erro no processamento.", "erro");
+        btn.disabled = false;
     }
 }
 
@@ -707,6 +794,17 @@ function iniciarJogo() {
 function proximaRodada() {
     if (palavrasParaOJogo.length === 0) { finalizarTeste(); return; }
     let atual = palavrasParaOJogo.shift();
+
+    const devePronunciar = document.getElementById('check-pronuncia').checked;
+        if (devePronunciar) {
+            // Chamamos a função de voz que você já tem, mas sem passar um botão
+            const utterance = new SpeechSynthesisUtterance(atual.palavra);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.8;
+            window.speechSynthesis.cancel(); 
+            window.speechSynthesis.speak(utterance);
+        }
+
     const box = document.getElementById("palavra-box");
     const containerOpcoes = document.getElementById("opcoes-container");
     
@@ -1061,6 +1159,7 @@ function tocarAudioOxford(botao, url) {
 }
 
 function falarPalavraQuiz(texto, botao) {
+    window.speechSynthesis.cancel();
     const img = botao.querySelector('.img-audio-quiz');
     
     // Troca para o ícone de "parar" enquanto fala
@@ -1076,4 +1175,17 @@ function falarPalavraQuiz(texto, botao) {
 
     window.speechSynthesis.cancel(); 
     window.speechSynthesis.speak(utterance);
+}
+
+function irParaConfiguracoes() {
+    esconderTodosMenus();
+    menuConfiguracoes.style.display = "flex";
+}
+
+function salvarConfiguracoes() {
+    const config = {
+        som: document.getElementById('check-som').checked,
+        pronuncia: document.getElementById('check-pronuncia').checked
+    };
+    localStorage.setItem('config_quiz', JSON.stringify(config));
 }
