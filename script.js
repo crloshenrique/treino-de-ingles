@@ -322,7 +322,7 @@ async function abrirMenuAlterarPalavras() {
         container.classList.add("modo-largo");
         menuAlterarPalavras.style.display = "flex";
         
-        listaAlterarPalavras.innerHTML = "<div style='padding:20px; color: #ffffff;'>Carregando suas palavras...</div>";
+        listaAlterarPalavras.innerHTML = "<div style='color: white;'>Carregando suas palavras...</div>";
         
         // Filtra para garantir que ele só veja o que é DELE
         const { data, error } = await _supabase
@@ -361,7 +361,7 @@ function renderizarListaAlterar(lista) {
             listaAlterarPalavras.appendChild(div);
         });
     } else {
-        listaAlterarPalavras.innerHTML = "<div style='padding:20px'>Nenhuma palavra encontrada.</div>";
+        listaAlterarPalavras.innerHTML = "<div style='color: white; opacity: 0.7;'>Nenhuma palavra encontrada.</div>";
     }
 }
 
@@ -478,7 +478,7 @@ async function carregarCategoriasDoBanco() {
                 if (!unicas.includes(item.categoria)) unicas.push(item.categoria);
             });
             categoriasDisponiveis = unicas;
-            renderizarCategoriasDicionario(unicas); // Chama a função que desenha os cards na tela
+            gerarMenuTemas(); // Chama a função que desenha os cards na tela
         }
     } catch (err) {
         console.error("Erro ao carregar categorias:", err.message);
@@ -514,7 +514,7 @@ async function carregarEExibirVarios(cat) {
         if (btnVoltarRaizDicionario) btnVoltarRaizDicionario.style.display = "flex";
         visualizacaoPalavras.style.display = "flex";
         
-        areaListaPalavras.innerHTML = "<div class='loader'>Carregando palavras...</div>";
+        areaListaPalavras.innerHTML = "<div class='loader' style='color: white; padding:20px'>Carregando palavras...</div>";
         container.classList.add("modo-largo");
 
         // Montagem da Query com filtro de Usuário
@@ -557,7 +557,7 @@ function renderizarListaPalavras(lista) {
             areaListaPalavras.appendChild(div);
         });
     } else {
-        areaListaPalavras.innerHTML = "<div style='padding:20px'>Nenhuma palavra encontrada.</div>";
+        areaListaPalavras.innerHTML = "<div style='color: white; opacity: 0.7; padding:20px'>Nenhuma palavra encontrada.</div>";
     }
 }
 
@@ -706,6 +706,17 @@ async function gerarMenuTemas() {
 
     listaTemasBotoes.innerHTML = "";
     
+    // VERIFICAÇÃO DE LISTA VAZIA:
+    // Se não houver categorias no banco para este usuário
+    if (!categoriasDisponiveis || categoriasDisponiveis.length === 0) {
+        listaTemasBotoes.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: white; opacity: 0.7;">
+                <p>Sua lista de dicionários está vazia.</p>
+            </div>
+        `;
+        return;
+    }
+
     // Mapeamos a contagem internamente (o usuário não verá isso)
     const contagemPorCategoria = {};
     data.forEach(item => {
@@ -716,14 +727,13 @@ async function gerarMenuTemas() {
         const div = document.createElement("div");
         div.className = "card-dicionario";
         
-        // Exibe APENAS o nome da categoria, como era antes
+        // Exibe APENAS o nome da categoria
         div.textContent = cat; 
 
         const total = contagemPorCategoria[cat] || 0;
 
         div.onclick = async () => {
             if (total < 100) {
-                // O efeito de tremer continua funcionando aqui
                 aplicarEfeitoNegativo(div);
             } else {
                 carregarVocabulario(cat);
@@ -926,7 +936,7 @@ function voltarDoTeste() {
 async function irParaMeusErros() {
     esconderTodosMenus();
     menuMeusErros.style.display = "flex";
-    listaMeusErros.innerHTML = "Carregando seus erros...";
+    listaMeusErros.innerHTML = "<div style='padding:20px; text-align: center; color: white;'>Carregando seus erros...</div>";
     container.classList.add("modo-largo");
 
     const { data: { user } } = await _supabase.auth.getUser();
@@ -968,7 +978,7 @@ async function irParaMeusErros() {
             listaMeusErros.appendChild(div);
         });
     } else {
-        listaMeusErros.innerHTML = "<div style='padding:20px'>Sua lista de erros está vazia.</div>";
+        listaMeusErros.innerHTML = "<div style='padding:15px; color: white; opacity: 0.7; text-align: center;'>Sua lista de erros está vazia.</div>";
     }
 }
 
@@ -979,7 +989,7 @@ async function limparErrosBanco() {
     if (error) {
         alert("Erro ao limpar: " + error.message);
     } else {
-        listaMeusErros.innerHTML = "<div style='padding:20px'>Sua lista de erros está vazia.</div>";
+        listaMeusErros.innerHTML = "<div style='padding:15px; color: white; opacity: 0.7; text-align: center;' >Sua lista de erros está vazia.</div>";
     }
 }
 
@@ -1261,7 +1271,7 @@ function renderizarListaApagar(lista) {
     corpoListaApagarPalavras.innerHTML = "";
     
     if (lista.length === 0) {
-        corpoListaApagarPalavras.innerHTML = "<p style='color:white; text-align:center;'>Nenhuma palavra encontrada.</p>";
+        corpoListaApagarPalavras.innerHTML = "<p style='color: white; opacity: 0.7; text-align:center;'>Nenhuma palavra encontrada.</p>";
         return;
     }
 
@@ -1271,31 +1281,37 @@ function renderizarListaApagar(lista) {
         item.className = "item-dicionario item-clicavel";
         item.style.position = "relative";
         
+        // Estrutura alinhada conforme solicitado anteriormente
         item.innerHTML = `
-            <div class="card-content-wrapper" style="width: 100%; display: flex; justify-content: space-between; align-items: center; transition: opacity 0.3s ease;">
-                <div class="col-palavra-info" style="pointer-events: none;">
-                    <span>${f.palavra}</span>
-                    <span class="pronuncia-pequena">${f.pronuncia}</span>
-                </div>
-                <span style="pointer-events: none;">${f.significados}</span>
+            <div class="col-palavra-info" style="pointer-events: none; transition: opacity 0.3s ease;">
+                <span>${f.palavra}</span>
+                <span class="pronuncia-pequena">${f.pronuncia}</span>
             </div>
+            <span style="pointer-events: none; transition: opacity 0.3s ease;">${f.significados}</span>
         `;
 
-        // Função interna para resetar ESTE item específico
+        // CORREÇÃO: Função para resetar o estado visual do item
         const resetarEsteItem = () => {
             item.classList.remove("card-confirmar-delete");
+            item.aguardando = false;
+            
+            // 1. Remove o ícone da lixeira
             const icone = item.querySelector(".icon-lixeira-temp");
-            const wrapper = item.querySelector(".card-content-wrapper");
             if (icone) {
                 icone.style.opacity = "0";
                 setTimeout(() => icone.remove(), 300);
             }
-            if (wrapper) wrapper.style.opacity = "1";
-            item.aguardando = false;
+            
+            // 2. Faz os textos (Palavra e Significado) voltarem a aparecer
+            const filhos = item.children;
+            for (let filho of filhos) {
+                if (!filho.classList.contains('icon-lixeira-temp')) {
+                    filho.style.opacity = "1";
+                }
+            }
         };
 
         item.onclick = async (e) => {
-            // Se clicar em um item diferente do que já está aberto
             if (itemEmConfirmacao && itemEmConfirmacao !== item) {
                 itemEmConfirmacao.resetar();
             }
@@ -1303,11 +1319,13 @@ function renderizarListaApagar(lista) {
             if (!item.aguardando) {
                 item.aguardando = true;
                 itemEmConfirmacao = item;
-                item.resetar = resetarEsteItem; // Atribui a função de reset ao objeto do item
+                item.resetar = resetarEsteItem;
 
                 item.classList.add("card-confirmar-delete");
-                const wrapper = item.querySelector(".card-content-wrapper");
-                wrapper.style.opacity = "0";
+                
+                // Esconde o conteúdo original
+                const filhos = item.children;
+                for (let filho of filhos) { filho.style.opacity = "0"; }
 
                 const iconeLixeira = document.createElement("img");
                 iconeLixeira.src = "imagens/limpar.png";
@@ -1322,7 +1340,7 @@ function renderizarListaApagar(lista) {
                     opacity: "0",
                     transition: "all 0.3s ease",
                     filter: "brightness(0) invert(1)",
-                    pointerEvents: "none" // Evita que o clique no ícone atrapalhe
+                    pointerEvents: "none"
                 });
 
                 item.appendChild(iconeLixeira);
@@ -1332,7 +1350,7 @@ function renderizarListaApagar(lista) {
                     iconeLixeira.style.transform = "translate(-50%, -50%) scale(1.1)";
                 }, 50);
 
-                // Timer para auto-reset
+                // Timer de 4 segundos para reset automático
                 setTimeout(() => {
                     if (item.aguardando && itemEmConfirmacao === item) {
                         resetarEsteItem();
@@ -1341,7 +1359,6 @@ function renderizarListaApagar(lista) {
                 }, 4000);
 
             } else {
-                // SEGUNDO CLIQUE: Excluir
                 itemEmConfirmacao = null;
                 await efetuarExclusaoPalavra(p.id, f.palavra, item);
             }
@@ -1349,44 +1366,6 @@ function renderizarListaApagar(lista) {
 
         corpoListaApagarPalavras.appendChild(item);
     });
-}
-
-async function efetuarExclusaoPalavra(id, texto, elementoItem) {
-    try {
-        // 1. Efeito visual imediato: A linha diminui e some
-        if (elementoItem) {
-            elementoItem.style.transform = "scale(0.8)";
-            elementoItem.style.opacity = "0";
-            setTimeout(() => elementoItem.remove(), 300);
-        }
-
-        // 2. Executa no Supabase
-        const { error } = await _supabase
-            .from('dicionarios')
-            .delete()
-            .eq('id', id);
-
-        if (error) throw error;
-
-        // 3. Atualiza a lista local (global)
-        dadosPalavrasParaApagar = dadosPalavrasParaApagar.filter(p => p.id !== id);
-
-        // 4. Feedback
-        exibirFeedback("feedback-apagar", `A palavra "${texto}" foi apagada!`, "sucesso");
-
-        setTimeout(() => {
-            const f = document.getElementById("feedback-apagar");
-            if (f) {
-                f.style.display = "none";
-                f.textContent = "";
-            }
-        }, 3000);
-
-    } catch (err) {
-        console.error("Erro ao deletar:", err);
-        exibirFeedback("feedback-apagar", "Erro ao apagar no banco.", "erro");
-        // Caso dê erro, opcionalmente você poderia recarregar a lista: abrirApagarPalavras();
-    }
 }
 
 function filtrarApagarPalavras() {
@@ -1418,29 +1397,45 @@ function mostrarAviso(mensagem) {
     }, 2500);
 }
 
-function abrirMenuApagarDicionarios() {
+async function abrirMenuApagarDicionarios() {
     esconderTodosMenus();
     
+    // Voltamos para 'flex' como estava no seu original
     const menuEscolha = document.getElementById("menu-escolha-dicionario-apagar");
     const listaCards = document.getElementById("lista-dicionarios-apagar");
 
-    if (menuEscolha) menuEscolha.style.display = "flex";
+    if (menuEscolha) menuEscolha.style.display = "flex"; 
     
     if (listaCards) {
         listaCards.style.display = "grid"; 
         listaCards.innerHTML = "";
 
-        // Card Todos
-        listaCards.appendChild(criarCardComConfirmacao("Todos", 'todos'));
+        // 1. Atualizamos a lista (importante para não vir vazia)
+        await carregarCategoriasDoBanco();
 
-        // Cards das Categorias
-        categoriasDisponiveis.forEach(cat => {
-            listaCards.appendChild(criarCardComConfirmacao(cat, cat));
+        // 2. Filtramos apenas as categorias válidas e que não sejam "todos"
+        const categoriasFiltradas = categoriasDisponiveis.filter(cat => 
+            cat && typeof cat === 'string' && cat.toLowerCase() !== 'todos'
+        );
+
+        // 3. Se não houver nada, mostra a mensagem, mas mantém a estrutura de grid
+        if (categoriasFiltradas.length === 0) {
+            listaCards.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: white; opacity: 0.7;">
+                    <p>Sua lista de dicionários está vazia.</p>
+                </div>
+            `;
+            return;
+        }
+
+        // 4. Adiciona os cards (Sem o card "Todos")
+        categoriasFiltradas.forEach(cat => {
+            const labelFormatado = cat.charAt(0).toUpperCase() + cat.slice(1);
+            listaCards.appendChild(criarCardComConfirmacao(labelFormatado, cat));
         });
     }
 }
 
-// Função para o botão voltar da lista de dicionários
 function voltarParaMenuApagarRaiz() {
     esconderTodosMenus(); // Isso limpa a grade de dicionários da tela
     if (menuApagarRaiz) {
@@ -1488,10 +1483,8 @@ function criarCardComConfirmacao(label, categoria) {
     div.className = "card-dicionario";
     div.innerHTML = `<div class="card-content-wrapper"><span>${label}</span></div>`;
     
-    // Propriedade interna para controlar o estado deste card específico
     div.aguardandoConfirmacao = false;
 
-    // Função para resetar ESTE card específico ao estado original
     div.resetar = function() {
         this.aguardandoConfirmacao = false;
         this.classList.remove("card-confirmar-delete");
@@ -1507,43 +1500,34 @@ function criarCardComConfirmacao(label, categoria) {
     };
 
     div.onclick = async () => {
-        // Se houver outro card aberto e não for este, reseta o outro
         if (cardDicionarioEmConfirmacao && cardDicionarioEmConfirmacao !== div) {
             cardDicionarioEmConfirmacao.resetar();
         }
 
         if (!div.aguardandoConfirmacao) {
-            // PRIMEIRO CLIQUE: Modo Confirmação
             div.aguardandoConfirmacao = true;
-            cardDicionarioEmConfirmacao = div; // Define este como o card ativo
-
+            cardDicionarioEmConfirmacao = div;
             div.classList.add("card-confirmar-delete");
             
             const wrapper = div.querySelector(".card-content-wrapper");
             wrapper.style.opacity = "0";
-            wrapper.style.transform = "scale(0.8)";
             
             setTimeout(() => {
-                wrapper.innerHTML = `<img src="imagens/limpar.png" class="icon-lixeira" alt="Confirmar">`;
+                wrapper.innerHTML = `<img src="imagens/limpar.png" class="icon-lixeira" alt="Confirmar" style="width:40px; height:40px; filter:brightness(0) invert(1);">`;
                 wrapper.style.opacity = "1";
-                wrapper.style.transform = "scale(1.1)";
             }, 300);
 
-            // Auto-reset após 3 segundos
             setTimeout(() => {
                 if (div.aguardandoConfirmacao && cardDicionarioEmConfirmacao === div) {
                     div.resetar();
                     cardDicionarioEmConfirmacao = null;
                 }
             }, 3000);
-
         } else {
-            // SEGUNDO CLIQUE: Apagar
             cardDicionarioEmConfirmacao = null;
             await executarExclusaoDicionario(categoria, div);
         }
     };
-
     return div;
 }
 
@@ -1552,32 +1536,88 @@ async function executarExclusaoDicionario(categoria, elementoCard) {
         const { data: { session } } = await _supabase.auth.getSession();
         if (!session) return;
 
-        // 1. Efeito visual imediato: Faz o card sumir da tela na hora
-        elementoCard.style.transform = "scale(0)";
+        // Efeito visual imediato
+        elementoCard.style.transform = "scale(0) ";
         elementoCard.style.opacity = "0";
         
-        // Remove do DOM após a animação de saída (300ms)
         setTimeout(() => {
             elementoCard.remove();
+            if (listaDicionariosApagar.children.length === 0) {
+                listaDicionariosApagar.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: white; opacity: 0.7;">
+                        <p>Sua lista de dicionários está vazia.</p>
+                    </div>
+                `;
+            }
         }, 300);
 
-        // 2. Executa a exclusão no banco (em segundo plano)
-        let query = _supabase.from('dicionarios').delete().eq('user_id', session.user.id);
-        if (categoria !== 'todos') {
-            query = query.eq('categoria', categoria);
-        }
+        // Executa a exclusão no banco
+        const { error } = await _supabase
+            .from('dicionarios')
+            .delete()
+            .eq('user_id', session.user.id)
+            .eq('categoria', categoria);
 
-        const { error } = await query;
         if (error) throw error;
 
-        // 3. Atualiza os dados internos (sem travar a tela)
-        await carregarCategoriasDoBanco();
-        
-        exibirMensagemFlutuante(categoria === 'todos' ? "Dicionário apagado!" : "Categoria removida!");
+        // --- AS LINHAS ABAIXO RESOLVEM O SEU PROBLEMA ---
+        await carregarCategoriasDoBanco(); // Atualiza a lista global
+        gerarMenuTemas();                  // Reconstrói o menu "Praticar"
+        gerarMenuDicionariosVisualizacao(); // Atualiza o menu "Visualizar"
+        // ----------------------------------------------
 
     } catch (err) {
         console.error("Erro ao apagar:", err);
-        // Se der erro, recarregamos tudo para o card voltar (já que não foi apagado)
         abrirMenuApagarDicionarios(); 
+    }
+}
+
+async function efetuarExclusaoPalavra(id, texto, elementoItem) {
+    try {
+        // 1. Efeito visual imediato na lista de palavras
+        if (elementoItem) {
+            elementoItem.style.transform = "scale(0.8)";
+            elementoItem.style.opacity = "0";
+            setTimeout(() => elementoItem.remove(), 300);
+        }
+
+        // 2. Executa a exclusão no Supabase
+        const { error } = await _supabase
+            .from('dicionarios')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
+
+        // 3. Atualiza a lista local (global) de palavras para o filtro de busca
+        dadosPalavrasParaApagar = dadosPalavrasParaApagar.filter(p => p.id !== id);
+
+        // 4. ATUALIZAÇÃO DOS MENUS (O que faltava)
+        // Recarregamos as categorias do banco para ver se o dicionário ainda existe
+        await carregarCategoriasDoBanco(); 
+        
+        // Atualizamos todos os menus que dependem das categorias
+        gerarMenuTemas();                   // Menu Praticar
+        gerarMenuDicionariosVisualizacao(); // Menu Visualizar
+        
+        // 5. Verifica se a lista na tela de apagar palavras ficou vazia após o filtro
+        if (dadosPalavrasParaApagar.length === 0) {
+            corpoListaApagarPalavras.innerHTML = "<p style='color:white; text-align:center; opacity: 0.7;'>Sua lista de palavras está vazia.</p>";
+        }
+
+        // 6. Feedback de sucesso
+        exibirFeedback("feedback-apagar", `A palavra "${texto}" foi apagada!`, "sucesso");
+
+        setTimeout(() => {
+            const f = document.getElementById("feedback-apagar");
+            if (f) {
+                f.style.display = "none";
+                f.textContent = "";
+            }
+        }, 3000);
+
+    } catch (err) {
+        console.error("Erro ao deletar:", err);
+        exibirFeedback("feedback-apagar", "Erro ao apagar no banco.", "erro");
     }
 }
