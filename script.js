@@ -694,7 +694,7 @@ async function salvarEmMassa() {
 }
 
 async function gerarMenuTemas() {
-    listaTemasBotoes.innerHTML = "Carregando temas...";
+    listaTemasBotoes.innerHTML = `<div class="loader" style="color:white;display:flex;align-items:center;justify-content:center;white-space:nowrap;height:100%;text-align:center;grid-column:1/-1;">Carregando seus dicionários...</div>`;
     
     // Buscamos apenas o necessário para contar
     const { data, error } = await _supabase.from('dicionarios').select('categoria');
@@ -1233,10 +1233,6 @@ function solicitarExclusaoPalavra(id, texto) {
     }
 }
 
-function abrirApagarDicionarios() {
-    console.log("Iniciando fluxo para apagar dicionários...");
-}
-
 async function abrirApagarPalavras() {
     esconderTodosMenus();
     container.classList.add("modo-largo");
@@ -1398,6 +1394,7 @@ function mostrarAviso(mensagem) {
 }
 
 async function abrirMenuApagarDicionarios() {
+    
     esconderTodosMenus();
     
     // Voltamos para 'flex' como estava no seu original
@@ -1408,10 +1405,11 @@ async function abrirMenuApagarDicionarios() {
     
     if (listaCards) {
         listaCards.style.display = "grid"; 
-        listaCards.innerHTML = "";
 
-        // 1. Atualizamos a lista (importante para não vir vazia)
+        listaCards.innerHTML = `<div class="loader" style="color:white;display:flex;align-items:center;justify-content:center;white-space:nowrap;height:100%;text-align:center;grid-column:1/-1;">Carregando seus dicionários...</div>`;
+
         await carregarCategoriasDoBanco();
+        listaCards.innerHTML = "";
 
         // 2. Filtramos apenas as categorias válidas e que não sejam "todos"
         const categoriasFiltradas = categoriasDisponiveis.filter(cat => 
@@ -1604,9 +1602,6 @@ async function efetuarExclusaoPalavra(id, texto, elementoItem) {
         if (dadosPalavrasParaApagar.length === 0) {
             corpoListaApagarPalavras.innerHTML = "<p style='color:white; text-align:center; opacity: 0.7;'>Sua lista de palavras está vazia.</p>";
         }
-
-        // 6. Feedback de sucesso
-        exibirFeedback("feedback-apagar", `A palavra "${texto}" foi apagada!`, "sucesso");
 
         setTimeout(() => {
             const f = document.getElementById("feedback-apagar");
