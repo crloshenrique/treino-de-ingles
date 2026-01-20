@@ -7,135 +7,258 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
 
-/* Container de cada linha de configuração */
-.config-row {
-    display: flex;
-    justify-content: space-between; /* Texto na esquerda, Botão na direita */
-    align-items: center;
-    width: 100%;
-    padding: 15px;
-    background: rgba(255, 255, 255, 0.05); /* Fundo levemente visível */
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    margin-bottom: 12px;
-    box-sizing: border-box;
-}
-
-.config-texto {
-    color: white;
-    font-size: 1.1rem;
-    font-weight: 500;
-}
-
-/* O Switch (Botão liga/desliga) */
-.switch {
+/* Estilo para a transição do conteúdo do card */
+.card-dicionario {
+    transition: all 0.3s ease;
     position: relative;
-    display: inline-block;
-    width: 50px;
-    height: 26px;
+    overflow: hidden;
 }
 
-.switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-.slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background-color: #333;
-    transition: .4s;
-    border-radius: 34px;
-}
-
-.slider:before {
-    position: absolute;
-    content: "";
-    height: 18px;
-    width: 18px;
-    left: 4px;
-    bottom: 4px;
-    background-color: white;
-    transition: .4s;
-    border-radius: 50%;
-}
-
-/* Cor rosa quando o input estiver checado */
-input:checked + .slider {
-    background-color: #ff007f; /* Seu rosa padrão */
-    box-shadow: 0 0 10px rgba(255, 0, 127, 0.4);
-}
-
-input:checked + .slider:before {
-    transform: translateX(24px);
-}
-
-/* Para Firefox */
-#texto-massa {
-    resize: none;
-    scrollbar-color: var(--accent-color) rgba(255, 255, 255, 0.05);
-}
-
-
-/* Container que centraliza tudo */
-.quiz-header-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-}
-
-/* Linha da palavra: usamos padding à esquerda para compensar o ícone à direita */
-.word-row-wrapper {
+.card-content-wrapper {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 15px;
-    max-width: 100%; /* Garante que não ultrapasse a tela */
-    padding-left: 40px; /* Mantém a centralização compensando o ícone */
+    width: 100%;
+    height: 100%;
+    transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-.word-main-text {
-    font-size: 2.5rem;
-    font-weight: bold;
-    color: white;
-    
-    /* TRATAMENTO DE QUEBRA */
-    white-space: nowrap;      /* Força a palavra a ficar em uma linha só */
-    overflow: hidden;         /* Esconde o que sobrar */
-    text-overflow: ellipsis;  /* Se a palavra for gigante, coloca "..." */
-    
-    max-width: 70vw;          /* Limita a largura a 70% da largura da tela */
+/* Quando o card está em modo de confirmação */
+.card-confirmar-delete {
+    border-color: #f14738 !important;
+    background: rgba(241, 71, 56, 0.1) !important;
 }
 
-.btn-audio-quiz {
-    background: transparent !important;
-    border: none !important;
-    cursor: pointer;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    width: 30px; /* Largura fixa para o botão */
+.icon-lixeira {
+    width: 40px;
+    height: 40px;
+    filter: brightness(0) invert(1); /* Deixa o ícone branco */
 }
 
-.img-audio-quiz {
-    width: 30px;
-    height: auto;
-    transition: transform 0.2s ease;
-}
+        /* Garante que o container de apagar tenha a mesma estrutura do de praticar */
+        #lista-dicionarios-apagar.grid-dicionarios {
+            display: grid;
+            /* No celular, força 2 colunas lado a lado sempre */
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 12px;
+            width: 100%;
+            margin-top: 15px;
+            box-sizing: border-box;
+        }
 
-/* Efeito de hover corrigido (sem descer) */
-.btn-audio-quiz:hover .img-audio-quiz {
-    transform: scale(1.1);
-}
+        /* Garante que os cards tenham altura e não fiquem apenas uma linha fina */
+        #lista-dicionarios-apagar .card-dicionario {
+            min-height: 100px;
+            background: transparent;
+            border: 2px solid var(--accent-color);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            padding: 15px;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            text-transform: uppercase;
+            word-break: break-word;
+            transition: background 0.2s, transform 0.2s;
+            text-align: center;
+        }
 
-.pronuncia-quiz-sub {
-    font-size: 1.1rem;
-    color: rgba(255, 255, 255, 0.5);
-    margin-top: 5px;
-}
+        .toast-sucesso {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #4CAF50; /* Verde */
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 10000;
+            animation: subir-e-sumir 2.5s forwards;
+        }
+
+        @keyframes subir-e-sumir {
+            0% { opacity: 0; transform: translate(-50%, 20px); }
+            20% { opacity: 1; transform: translate(-50%, 0); }
+            80% { opacity: 1; }
+            100% { opacity: 0; transform: translate(-50%, -20px); }
+        }
+
+        .lista-palavras-container {
+            width: 100%;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+
+        /* Garante que os containers fiquem lado a lado */
+        .grid-opcoes-central {
+            display: flex;
+            flex-direction: row; /* Força ficar lado a lado */
+            justify-content: center;
+            gap: 15px; /* Espaço entre os botões */
+            width: 100%;
+            max-width: 400px; /* Ajuste conforme seu layout */
+            margin: 20px auto;
+        }
+
+        /* Nova classe Rosa que você pediu */
+        .btn-apagar-rosa {
+            background-color: #ff007f !important; /* Rosa Padrão */
+            color: white !important;
+            border: none;
+            padding: 20px;
+            border-radius: 12px;
+            width: 100%;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.1s;
+            display: block;
+        }
+
+        .btn-apagar-rosa:active {
+            transform: scale(0.95);
+        }
+
+        /* Ajuste no card para não quebrar a linha */
+        .card-opcao-gerenciar {
+            flex: 1; /* Faz os dois botões terem o mesmo tamanho */
+        }
+
+        /* Container de cada linha de configuração */
+        .config-row {
+            display: flex;
+            justify-content: space-between; /* Texto na esquerda, Botão na direita */
+            align-items: center;
+            width: 100%;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05); /* Fundo levemente visível */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+        }
+
+        .config-texto {
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        /* O Switch (Botão liga/desliga) */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #333;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        /* Cor rosa quando o input estiver checado */
+        input:checked + .slider {
+            background-color: #ff007f; /* Seu rosa padrão */
+            box-shadow: 0 0 10px rgba(255, 0, 127, 0.4);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+
+        /* Para Firefox */
+        #texto-massa {
+            resize: none;
+            scrollbar-color: var(--accent-color) rgba(255, 255, 255, 0.05);
+        }
+
+
+        /* Container que centraliza tudo */
+        .quiz-header-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        /* Linha da palavra: usamos padding à esquerda para compensar o ícone à direita */
+        .word-row-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            max-width: 100%; /* Garante que não ultrapasse a tela */
+            padding-left: 40px; /* Mantém a centralização compensando o ícone */
+        }
+
+        .word-main-text {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: white;
+            
+            /* TRATAMENTO DE QUEBRA */
+            white-space: nowrap;      /* Força a palavra a ficar em uma linha só */
+            overflow: hidden;         /* Esconde o que sobrar */
+            text-overflow: ellipsis;  /* Se a palavra for gigante, coloca "..." */
+            
+            max-width: 70vw;          /* Limita a largura a 70% da largura da tela */
+        }
+
+        .btn-audio-quiz {
+            background: transparent !important;
+            border: none !important;
+            cursor: pointer;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            width: 30px; /* Largura fixa para o botão */
+        }
+
+        .img-audio-quiz {
+            width: 30px;
+            height: auto;
+            transition: transform 0.2s ease;
+        }
+
+        /* Efeito de hover corrigido (sem descer) */
+        .btn-audio-quiz:hover .img-audio-quiz {
+            transform: scale(1.1);
+        }
+
+        .pronuncia-quiz-sub {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 5px;
+        }
 
         #painel-resultado-oxford {
             padding: 15px;
@@ -687,15 +810,15 @@ input:checked + .slider:before {
         .menu { display: flex; flex-direction: column; gap: 15px; width: 100%; align-items: center; }
         .menu button { width: 100%; }
 
-.grid-temas {
-    display: grid;
-    /* No celular, força 2 colunas lado a lado sempre */
-    grid-template-columns: repeat(2, 1fr); 
-    gap: 12px;
-    width: 100%;
-    margin-top: 20px;
-    box-sizing: border-box;
-}
+        .grid-temas {
+            display: grid;
+            /* No celular, força 2 colunas lado a lado sempre */
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 12px;
+            width: 100%;
+            margin-top: 15px;
+            box-sizing: border-box;
+        }
 
         .card-dicionario {
             min-height: 100px;
@@ -880,7 +1003,7 @@ input:checked + .slider:before {
             text-align: left; 
             box-sizing: border-box; /* Garante que o padding não "estoure" a largura */
         }
-        #lista-revisao, #lista-meus-erros, #lista-alterar-palavras { 
+        #lista-revisao, #lista-meus-erros, #lista-alterar-palavras, #corpo-lista-apagar-palavras { 
             width: 100%; /* Garante que a lista interna também ocupe tudo */
             max-height: 350px; 
             overflow-x: hidden;
@@ -893,10 +1016,45 @@ input:checked + .slider:before {
         .revisao-correto { border-left: 5px solid var(--success-color) !important; }
         .revisao-errado { border-left: 5px solid var(--error-color) !important; }
 
-        #area-lista-palavras::-webkit-scrollbar, #lista-revisao::-webkit-scrollbar, #lista-meus-erros::-webkit-scrollbar, #lista-alterar-palavras::-webkit-scrollbar { width: 8px; }
-        #area-lista-palavras::-webkit-scrollbar-track, #lista-revisao::-webkit-scrollbar-track, #lista-meus-erros::-webkit-scrollbar-track, #lista-alterar-palavras::-webkit-scrollbar-track { background: #2a2a2a; border-radius: 10px; }
-        #area-lista-palavras::-webkit-scrollbar-thumb, #lista-revisao::-webkit-scrollbar-thumb, #lista-meus-erros::-webkit-scrollbar-thumb, #lista-alterar-palavras::-webkit-scrollbar-thumb { background: var(--accent-color); border-radius: 10px; }
+/* Altura e Comportamento da Lista */
+#lista-revisao, 
+#lista-meus-erros, 
+#lista-alterar-palavras, 
+#corpo-lista-apagar-palavras { 
+    width: 100%; 
+    max-height: 350px; 
+    overflow-x: hidden;
+    overflow-y: auto; 
+    padding-right: 5px; 
+    margin-bottom: 15px; 
+}
 
+/* Customização da Barra de Rolagem (Scrollbar) */
+#area-lista-palavras::-webkit-scrollbar, 
+#lista-revisao::-webkit-scrollbar, 
+#lista-meus-erros::-webkit-scrollbar, 
+#lista-alterar-palavras::-webkit-scrollbar, 
+#corpo-lista-apagar-palavras::-webkit-scrollbar { 
+    width: 8px; 
+}
+
+#area-lista-palavras::-webkit-scrollbar-track, 
+#lista-revisao::-webkit-scrollbar-track, 
+#lista-meus-erros::-webkit-scrollbar-track, 
+#lista-alterar-palavras::-webkit-scrollbar-track, 
+#corpo-lista-apagar-palavras::-webkit-scrollbar-track { 
+    background: #2a2a2a; 
+    border-radius: 10px; 
+}
+
+#area-lista-palavras::-webkit-scrollbar-thumb, 
+#lista-revisao::-webkit-scrollbar-thumb, 
+#lista-meus-erros::-webkit-scrollbar-thumb, 
+#lista-alterar-palavras::-webkit-scrollbar-thumb, 
+#corpo-lista-apagar-palavras::-webkit-scrollbar-thumb { 
+    background: var(--accent-color); 
+    border-radius: 10px; 
+}
         #area-lista-palavras {
             width: 100%;
             max-height: 450px;
@@ -1014,7 +1172,7 @@ input:checked + .slider:before {
                         <div class="stat-glitch-line"></div>
                         <span class="stat-label">Consulta Global (Oxford)</span>
                         <div class="search-input-wrapper">
-                            <input type="text" id="input-busca-oxford" placeholder="Digite em Inglês...">
+                            <input type="text" id="input-busca-oxford" placeholder="Procurar pronúncia">
                             <button onclick="pesquisarNaOxford()" id="btn-search-oxford">
                                 <img src="imagens/lupa.png" style="width: 15px; filter: invert(1);">
                             </button>
@@ -1031,6 +1189,7 @@ input:checked + .slider:before {
                     <button class="btn-custom-lateral" onclick="abrirSubMenuDicionarios()">Visualizar</button>
                     <button class="btn-custom-lateral" onclick="abrirEscolhaTipoAdicao()">Adicionar</button>
                     <button class="btn-custom-lateral" onclick="abrirMenuAlterarPalavras()">Editar</button>
+                    <button class="btn-custom-lateral" onclick="irParaMenuApagar()">Apagar</button>
                     <div class="btn-voltar-icone" onclick="irParaHub()">
                         <img src="imagens/voltar.png" alt="Voltar">
                         <span>Voltar</span>
@@ -1079,7 +1238,7 @@ input:checked + .slider:before {
                         <textarea id="texto-massa" rows="8" placeholder="Palavra (pronúncia) = significado"></textarea>
                         <button id="btn-salvar-massa" class="btn-custom-lateral" style="width:100%" onclick="salvarEmMassa()">Salvar</button>
                     </div>
-                    <div class="btn-voltar-icone" onclick="voltarBotaoAdicao()">
+                    <div class="btn-voltar-icone" onclick="voltarBotaoAdicao()" style="margin-top: 0px;">
                         <img src="imagens/voltar.png" alt="Voltar">
                         <span>Voltar</span>
                     </div>
@@ -1087,9 +1246,9 @@ input:checked + .slider:before {
 
                 <div id="menu-gerenciar-dicionarios" class="menu" style="display:none">
                     <div id="area-selecao-dicionario" style="width: 100%;">
-                        <h2 id="titulo-categorias-dicionario">Qual dicionário você deseja visualizar?</h2>
+                        <h2 id="titulo-categorias-dicionario" style="margin-bottom: 52px;">Qual dicionário você deseja visualizar?</h2>
                         <div id="lista-dicionarios-visualizar" class="grid-temas"></div>
-                        <div class="btn-voltar-icone" onclick="irParaDicionariosRaiz()" style="margin-top: 20px;">
+                        <div class="btn-voltar-icone" onclick="irParaDicionariosRaiz()" style="margin-top: 40px;">
                             <img src="imagens/voltar.png" alt="Voltar">
                             <span>Voltar</span>
                         </div>
@@ -1104,6 +1263,57 @@ input:checked + .slider:before {
                         </div>
                     </div>
                 </div>
+
+<div id="menu-apagar-raiz" class="menu" style="display: none;">
+    <h2>O que você deseja apagar?</h2>
+    
+    <div class="grid-opcoes-central">
+        <div class="card-opcao-gerenciar" onclick="abrirApagarPalavras()">
+            <button class="btn-apagar-rosa">Palavra</button>
+        </div>
+
+        <div class="card-opcao-gerenciar">
+            <button class="btn-apagar-rosa" onclick="abrirMenuApagarDicionarios()">Dicionário</button>
+        </div>
+    </div>
+
+    <div class="btn-voltar-icone" onclick="irParaDicionariosRaiz()">
+        <img src="imagens/voltar.png" alt="Voltar">
+        <span>Voltar</span>
+    </div>
+</div>
+
+
+            <div id="menu-lista-apagar-palavras" class="menu" style="display: none;">
+                <h2>Qual palavra você deseja apagar?</h2>
+
+                <div id="feedback-apagar" style="display: none;"></div>
+                
+                <input type="text" id="busca-apagar" placeholder="Pesquisar..." oninput="filtrarApagarPalavras()">
+
+                <div class="header-dicionario">
+                    <span>Palavra</span>
+                    <span>Significado</span>
+                </div>
+
+                <div id="corpo-lista-apagar-palavras"></div>
+
+                <div class="btn-voltar-icone" onclick="irParaMenuApagar()">
+                    <img src="imagens/voltar.png" alt="Voltar">
+                    <span>Voltar</span>
+                </div>
+            </div>
+
+<div id="menu-escolha-dicionario-apagar" class="menu" style="display: none;">
+    <h2>Escolha o dicionário para apagar</h2>
+    
+    <div id="lista-dicionarios-apagar" class="grid-dicionarios"></div>
+
+    <div class="btn-voltar-icone" onclick="voltarParaMenuApagarRaiz()">
+        <img src="imagens/voltar.png" alt="Voltar">
+        <span>Voltar</span>
+    </div>
+</div>
 
                 <div id="menu-meus-erros" class="menu" style="display:none">
                     <h2>Lista de erros</h2>
@@ -1123,32 +1333,32 @@ input:checked + .slider:before {
                     </div>
                 </div>
 
-<div id="menu-configuracoes" class="menu" style="display: none; flex-direction: column; align-items: center;">
-    <h2>Configurações</h2>
-    
-    <div style="width: 100%; margin-top: 20px;">
-        <div class="config-row">
-            <span class="config-texto">Efeitos sonoros</span>
-            <label class="switch">
-                <input type="checkbox" id="check-som" onchange="salvarConfiguracoes()" checked>
-                <span class="slider"></span>
-            </label>
-        </div>
+                <div id="menu-configuracoes" class="menu" style="display: none; flex-direction: column; align-items: center;">
+                    <h2>Configurações</h2>
+                    
+                    <div style="width: 100%; margin-top: 20px;">
+                        <div class="config-row">
+                            <span class="config-texto">Efeitos sonoros</span>
+                            <label class="switch">
+                                <input type="checkbox" id="check-som" onchange="salvarConfiguracoes()" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
 
-        <div class="config-row">
-            <span class="config-texto">Pronúncia automática</span>
-            <label class="switch">
-                <input type="checkbox" id="check-pronuncia" onchange="salvarConfiguracoes()">
-                <span class="slider"></span>
-            </label>
-        </div>
-    </div>
+                        <div class="config-row">
+                            <span class="config-texto">Pronúncia automática</span>
+                            <label class="switch">
+                                <input type="checkbox" id="check-pronuncia" onchange="salvarConfiguracoes()">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
 
-    <div class="btn-voltar-icone" onclick="irParaHub()" style="margin-top: 20px;">
-        <img src="imagens/voltar.png" alt="Voltar">
-        <span>Voltar</span>
-    </div>
-</div>
+                    <div class="btn-voltar-icone" onclick="irParaHub()" style="margin-top: 20px;">
+                        <img src="imagens/voltar.png" alt="Voltar">
+                        <span>Voltar</span>
+                    </div>
+                </div>
 
                 <div id="menu-temas" class="menu" style="display:none">
                     <h2>Escolha o dicionário</h2>

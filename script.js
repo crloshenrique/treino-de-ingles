@@ -3,6 +3,11 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // SELETORES DE MENUS
+const menuEscolhaDicionarioApagar = document.getElementById("menu-escolha-dicionario-apagar");
+const listaDicionariosApagar = document.getElementById("lista-dicionarios-apagar");
+const menuListaApagarPalavras = document.getElementById("menu-lista-apagar-palavras");
+const corpoListaApagarPalavras = document.getElementById("corpo-lista-apagar-palavras");
+const menuApagarRaiz = document.getElementById("menu-apagar-raiz");
 const menuConfiguracoes = document.getElementById("menu-configuracoes");
 const menuBoasVindas = document.getElementById("menu-boas-vindas");
 const menuHub = document.getElementById("menu-hub");
@@ -29,6 +34,9 @@ const menuAlterarPalavras = document.getElementById("menu-alterar-palavras");
 const listaAlterarPalavras = document.getElementById("lista-alterar-palavras");
 const telaEdicaoCampos = document.getElementById("tela-edicao-campos");
 
+let cardDicionarioEmConfirmacao = null;
+let itemEmConfirmacao = null;
+let dadosPalavrasParaApagar = []; // Global para armazenar o que veio do banco
 let categoriasDisponiveis = [];
 let vocabulario = [];
 let palavrasParaOJogo = [];
@@ -239,7 +247,7 @@ function handleMenuClick() {
 function esconderTodosMenus() {
     const menus = [menuBoasVindas, menuHub, menuDicionariosRaiz, menuGerenciarDicionarios, areaAdicionarDicionario, 
                    menuTemas, menuPrincipal, menuNiveis, menuIntervalos, visualizacaoPalavras, menuPerfil, menuMeusErros,
-                   menuAlterarPalavras, telaEdicaoCampos, menuConfiguracoes];
+                   menuAlterarPalavras, telaEdicaoCampos, menuConfiguracoes, menuApagarRaiz, menuListaApagarPalavras, menuEscolhaDicionarioApagar];
     menus.forEach(m => { if(m) m.style.display = "none"; });
     container.classList.remove("modo-largo");
     interromperJogo();
@@ -314,7 +322,7 @@ async function abrirMenuAlterarPalavras() {
         container.classList.add("modo-largo");
         menuAlterarPalavras.style.display = "flex";
         
-        listaAlterarPalavras.innerHTML = "<div style='padding:20px; color: var(--accent-color);'>Carregando suas palavras...</div>";
+        listaAlterarPalavras.innerHTML = "<div style='padding:20px; color: #ffffff;'>Carregando suas palavras...</div>";
         
         // Filtra para garantir que ele só veja o que é DELE
         const { data, error } = await _supabase
@@ -772,6 +780,7 @@ function abrirMenuIntervalos() {
 function voltarAoMenuPraticar() { menuNiveis.style.display = "none"; menuIntervalos.style.display = "none"; menuPrincipal.style.display = "flex"; }
 
 function iniciarNivel(q) { palavrasParaOJogo = vocabulario.slice(0, q); iniciarJogo(); } //OK
+
 function iniciarIntervalo(i, f) { palavrasParaOJogo = vocabulario.slice(i, f); iniciarJogo(); } //OK
 
 function iniciarJogo() {
@@ -983,28 +992,23 @@ function aplicarEfeitoNegativo(elemento) {
 
 async function carregarPalavraDoDia() {
     try {
-        // 1. Obtém o usuário logado para filtrar os dados
         const { data: { user } } = await _supabase.auth.getUser();
         if (!user) return;
 
-        // 2. Busca apenas as palavras pertencentes ao usuário logado
         const { data: palavras, error } = await _supabase
             .from('dicionarios')
             .select('*')
             .eq('user_id', user.id); // Garante que a palavra venha do dicionário do próprio usuário
 
-        // Se houver erro ou o usuário não tiver palavras cadastradas
         if (error || !palavras || palavras.length === 0) {
-            document.getElementById('word-day-title').innerText = "---";
-            document.getElementById('word-day-meaning').innerText = "Adicione palavras ao seu dicionário.";
+            document.getElementById('word-day-title').innerText = "Lista vazia";
+            document.getElementById('word-day-meaning').innerText = "Adicione algum dicionário.";
             return;
         }
 
-        // 3. Lógica da Data: Criamos uma string baseada no ano-mês-dia
         const hoje = new Date();
         const dataString = hoje.getFullYear() + "-" + hoje.getMonth() + "-" + hoje.getDate();
         
-        // 4. Geramos um índice determinístico baseado na data
         let seed = 0;
         for (let i = 0; i < dataString.length; i++) {
             seed += dataString.charCodeAt(i);
@@ -1013,7 +1017,6 @@ async function carregarPalavraDoDia() {
         const indice = seed % palavras.length;
         const palavraDoDia = palavras[indice];
 
-        // 5. Preenche o HTML com os dados da palavra sorteada
         document.getElementById('word-day-title').innerText = palavraDoDia.palavra;
 
         let significadoFormatado = palavraDoDia.significado
@@ -1056,10 +1059,11 @@ async function carregarPalavraDoDia() {
 
 async function carregarEstatisticas() {
     try {
+        // Obtém o usuário atual para filtrar os dados do banco
         const { data: { user } } = await _supabase.auth.getUser();
         if (!user) return;
 
-        // 1. Contagem de Erros (Continua igual)
+        // 1. Contagem de Erros: Filtra apenas os erros vinculados ao ID do usuário logado
         const { count: totalErros } = await _supabase
             .from('erros_usuarios')
             .select('*', { count: 'exact', head: true })
@@ -1067,20 +1071,22 @@ async function carregarEstatisticas() {
         
         document.getElementById('count-erros').innerText = totalErros || 0;
 
-        // 2. Contagem de Palavras Descobertas
-        // Como você só tem a tabela 'dicionarios', vamos contar o total dela
+        // 2. Contagem de Palavras Descobertas: Agora filtrada por user_id
         const { count: totalPalavras, error: errDics } = await _supabase
             .from('dicionarios')
-            .select('*', { count: 'exact', head: true });
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', user.id); // Integração do novo sistema de user-id aqui
 
         if (errDics) {
             console.error("Erro ao ler tabela dicionarios:", errDics.message);
             return;
         }
 
-        // Aplicando a sua regra: Se você quer que conte apenas blocos de 100
-        // Exemplo: se tiver 250 palavras, ele mostra 200 (2 dicionários completos)
-        const apenasCompletos = Math.floor(totalPalavras / 100) * 100;
+        // Lógica de blocos de 100:
+        // Se o total for < 100, Math.floor resultará em 0.
+        // Se o total for 250, exibirá 200.
+        const contagemSegura = totalPalavras || 0;
+        const apenasCompletos = Math.floor(contagemSegura / 100) * 100;
 
         document.getElementById('count-descobertas').innerText = apenasCompletos;
 
@@ -1193,4 +1199,385 @@ function salvarConfiguracoes() {
         pronuncia: document.getElementById('check-pronuncia').checked
     };
     localStorage.setItem('config_quiz', JSON.stringify(config));
+}
+
+
+
+
+
+
+
+
+
+
+function irParaMenuApagar() {
+    esconderTodosMenus();
+    menuApagarRaiz.style.display = "flex";
+}
+
+
+function solicitarExclusaoPalavra(id, texto) {
+    if (confirm(`Deseja realmente apagar a palavra "${texto}"?`)) {
+        console.log("ID para deletar:", id);
+        // Aqui faremos o DELETE no próximo passo
+    }
+}
+
+function abrirApagarDicionarios() {
+    console.log("Iniciando fluxo para apagar dicionários...");
+}
+
+async function abrirApagarPalavras() {
+    esconderTodosMenus();
+    container.classList.add("modo-largo");
+    menuListaApagarPalavras.style.display = "flex";
+    
+    // Limpa o campo de busca ao abrir o menu
+    document.getElementById("busca-apagar").value = "";
+    corpoListaApagarPalavras.innerHTML = "<p style='color:white; text-align:center;'>Carregando palavras...</p>";
+
+    try {
+        const { data: { user } } = await _supabase.auth.getUser();
+        if (!user) return;
+
+        const { data, error } = await _supabase
+            .from('dicionarios')
+            .select('id, palavra, significado, pronuncia')
+            .eq('user_id', user.id)
+            .order('palavra', { ascending: true });
+
+        if (error) throw error;
+
+        dadosPalavrasParaApagar = data || []; // Salva na global para o filtro funcionar
+        renderizarListaApagar(dadosPalavrasParaApagar);
+
+    } catch (err) {
+        console.error("Erro:", err);
+        corpoListaApagarPalavras.innerHTML = "<p style='color:#ff4d6d; text-align:center;'>Erro ao carregar.</p>";
+    }
+}
+
+function renderizarListaApagar(lista) {
+    corpoListaApagarPalavras.innerHTML = "";
+    
+    if (lista.length === 0) {
+        corpoListaApagarPalavras.innerHTML = "<p style='color:white; text-align:center;'>Nenhuma palavra encontrada.</p>";
+        return;
+    }
+
+    lista.forEach(p => {
+        const f = formatarItem(p.palavra, p.pronuncia, p.significado);
+        const item = document.createElement("div");
+        item.className = "item-dicionario item-clicavel";
+        item.style.position = "relative";
+        
+        item.innerHTML = `
+            <div class="card-content-wrapper" style="width: 100%; display: flex; justify-content: space-between; align-items: center; transition: opacity 0.3s ease;">
+                <div class="col-palavra-info" style="pointer-events: none;">
+                    <span>${f.palavra}</span>
+                    <span class="pronuncia-pequena">${f.pronuncia}</span>
+                </div>
+                <span style="pointer-events: none;">${f.significados}</span>
+            </div>
+        `;
+
+        // Função interna para resetar ESTE item específico
+        const resetarEsteItem = () => {
+            item.classList.remove("card-confirmar-delete");
+            const icone = item.querySelector(".icon-lixeira-temp");
+            const wrapper = item.querySelector(".card-content-wrapper");
+            if (icone) {
+                icone.style.opacity = "0";
+                setTimeout(() => icone.remove(), 300);
+            }
+            if (wrapper) wrapper.style.opacity = "1";
+            item.aguardando = false;
+        };
+
+        item.onclick = async (e) => {
+            // Se clicar em um item diferente do que já está aberto
+            if (itemEmConfirmacao && itemEmConfirmacao !== item) {
+                itemEmConfirmacao.resetar();
+            }
+
+            if (!item.aguardando) {
+                item.aguardando = true;
+                itemEmConfirmacao = item;
+                item.resetar = resetarEsteItem; // Atribui a função de reset ao objeto do item
+
+                item.classList.add("card-confirmar-delete");
+                const wrapper = item.querySelector(".card-content-wrapper");
+                wrapper.style.opacity = "0";
+
+                const iconeLixeira = document.createElement("img");
+                iconeLixeira.src = "imagens/limpar.png";
+                iconeLixeira.className = "icon-lixeira-temp";
+                Object.assign(iconeLixeira.style, {
+                    position: "absolute",
+                    left: "50%",
+                    top: "50%",
+                    transform: "translate(-50%, -50%) scale(0.5)",
+                    width: "35px",
+                    height: "35px",
+                    opacity: "0",
+                    transition: "all 0.3s ease",
+                    filter: "brightness(0) invert(1)",
+                    pointerEvents: "none" // Evita que o clique no ícone atrapalhe
+                });
+
+                item.appendChild(iconeLixeira);
+
+                setTimeout(() => {
+                    iconeLixeira.style.opacity = "1";
+                    iconeLixeira.style.transform = "translate(-50%, -50%) scale(1.1)";
+                }, 50);
+
+                // Timer para auto-reset
+                setTimeout(() => {
+                    if (item.aguardando && itemEmConfirmacao === item) {
+                        resetarEsteItem();
+                        itemEmConfirmacao = null;
+                    }
+                }, 4000);
+
+            } else {
+                // SEGUNDO CLIQUE: Excluir
+                itemEmConfirmacao = null;
+                await efetuarExclusaoPalavra(p.id, f.palavra, item);
+            }
+        };
+
+        corpoListaApagarPalavras.appendChild(item);
+    });
+}
+
+async function efetuarExclusaoPalavra(id, texto, elementoItem) {
+    try {
+        // 1. Efeito visual imediato: A linha diminui e some
+        if (elementoItem) {
+            elementoItem.style.transform = "scale(0.8)";
+            elementoItem.style.opacity = "0";
+            setTimeout(() => elementoItem.remove(), 300);
+        }
+
+        // 2. Executa no Supabase
+        const { error } = await _supabase
+            .from('dicionarios')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
+
+        // 3. Atualiza a lista local (global)
+        dadosPalavrasParaApagar = dadosPalavrasParaApagar.filter(p => p.id !== id);
+
+        // 4. Feedback
+        exibirFeedback("feedback-apagar", `A palavra "${texto}" foi apagada!`, "sucesso");
+
+        setTimeout(() => {
+            const f = document.getElementById("feedback-apagar");
+            if (f) {
+                f.style.display = "none";
+                f.textContent = "";
+            }
+        }, 3000);
+
+    } catch (err) {
+        console.error("Erro ao deletar:", err);
+        exibirFeedback("feedback-apagar", "Erro ao apagar no banco.", "erro");
+        // Caso dê erro, opcionalmente você poderia recarregar a lista: abrirApagarPalavras();
+    }
+}
+
+function filtrarApagarPalavras() {
+    const termo = document.getElementById("busca-apagar").value.toLowerCase().trim();
+    
+    if (termo === "") {
+        renderizarListaApagar(dadosPalavrasParaApagar);
+        return;
+    }
+
+    const filtradas = dadosPalavrasParaApagar.filter(item => {
+        // Verifica se a palavra ou o significado começam com o termo pesquisado
+        return (item.palavra && item.palavra.toLowerCase().includes(termo)) || 
+               (item.significado && item.significado.toLowerCase().includes(termo));
+    });
+
+    renderizarListaApagar(filtradas);
+}
+
+function mostrarAviso(mensagem) {
+    const toast = document.createElement("div");
+    toast.className = "toast-sucesso";
+    toast.innerText = mensagem;
+    document.body.appendChild(toast);
+
+    // Remove o elemento do HTML depois que a animação acaba
+    setTimeout(() => {
+        toast.remove();
+    }, 2500);
+}
+
+function abrirMenuApagarDicionarios() {
+    esconderTodosMenus();
+    
+    const menuEscolha = document.getElementById("menu-escolha-dicionario-apagar");
+    const listaCards = document.getElementById("lista-dicionarios-apagar");
+
+    if (menuEscolha) menuEscolha.style.display = "flex";
+    
+    if (listaCards) {
+        listaCards.style.display = "grid"; 
+        listaCards.innerHTML = "";
+
+        // Card Todos
+        listaCards.appendChild(criarCardComConfirmacao("Todos", 'todos'));
+
+        // Cards das Categorias
+        categoriasDisponiveis.forEach(cat => {
+            listaCards.appendChild(criarCardComConfirmacao(cat, cat));
+        });
+    }
+}
+
+// Função para o botão voltar da lista de dicionários
+function voltarParaMenuApagarRaiz() {
+    esconderTodosMenus(); // Isso limpa a grade de dicionários da tela
+    if (menuApagarRaiz) {
+        menuApagarRaiz.style.display = "flex";
+    }
+}
+
+async function confirmarApagarDicionario(categoria) {
+    const mensagem = categoria === 'todos' 
+        ? "⚠️ VOCÊ TEM CERTEZA?\nIsso apagará TODAS as palavras do seu dicionário permanentemente." 
+        : `Deseja apagar permanentemente todas as palavras da categoria "${categoria}"?`;
+
+    if (!confirm(mensagem)) return;
+
+    try {
+        const { data: { user } } = await _supabase.auth.getUser();
+        if (!user) return;
+
+        // Inicia a query de delete
+        let query = _supabase.from('dicionarios').delete().eq('user_id', user.id);
+
+        // Se não for 'todos', filtra pela categoria específica
+        if (categoria !== 'todos') {
+            query = query.eq('categoria', categoria);
+        }
+
+        const { error } = await query;
+        if (error) throw error;
+
+        // Feedback visual de sucesso
+        alert(categoria === 'todos' ? "Dicionário totalmente apagado!" : `Categoria "${categoria}" removida!`);
+
+        // Recarrega os dados e atualiza a tela
+        await carregarCategoriasDoBanco(); 
+        abrirMenuApagarDicionarios(); 
+
+    } catch (err) {
+        console.error("Erro ao apagar:", err);
+        alert("Ocorreu um erro ao tentar apagar os dados.");
+    }
+}
+
+function criarCardComConfirmacao(label, categoria) {
+    const div = document.createElement("div");
+    div.className = "card-dicionario";
+    div.innerHTML = `<div class="card-content-wrapper"><span>${label}</span></div>`;
+    
+    // Propriedade interna para controlar o estado deste card específico
+    div.aguardandoConfirmacao = false;
+
+    // Função para resetar ESTE card específico ao estado original
+    div.resetar = function() {
+        this.aguardandoConfirmacao = false;
+        this.classList.remove("card-confirmar-delete");
+        const wrapper = this.querySelector(".card-content-wrapper");
+        if (wrapper) {
+            wrapper.style.opacity = "0";
+            setTimeout(() => {
+                wrapper.innerHTML = `<span>${label}</span>`;
+                wrapper.style.opacity = "1";
+                wrapper.style.transform = "scale(1)";
+            }, 300);
+        }
+    };
+
+    div.onclick = async () => {
+        // Se houver outro card aberto e não for este, reseta o outro
+        if (cardDicionarioEmConfirmacao && cardDicionarioEmConfirmacao !== div) {
+            cardDicionarioEmConfirmacao.resetar();
+        }
+
+        if (!div.aguardandoConfirmacao) {
+            // PRIMEIRO CLIQUE: Modo Confirmação
+            div.aguardandoConfirmacao = true;
+            cardDicionarioEmConfirmacao = div; // Define este como o card ativo
+
+            div.classList.add("card-confirmar-delete");
+            
+            const wrapper = div.querySelector(".card-content-wrapper");
+            wrapper.style.opacity = "0";
+            wrapper.style.transform = "scale(0.8)";
+            
+            setTimeout(() => {
+                wrapper.innerHTML = `<img src="imagens/limpar.png" class="icon-lixeira" alt="Confirmar">`;
+                wrapper.style.opacity = "1";
+                wrapper.style.transform = "scale(1.1)";
+            }, 300);
+
+            // Auto-reset após 3 segundos
+            setTimeout(() => {
+                if (div.aguardandoConfirmacao && cardDicionarioEmConfirmacao === div) {
+                    div.resetar();
+                    cardDicionarioEmConfirmacao = null;
+                }
+            }, 3000);
+
+        } else {
+            // SEGUNDO CLIQUE: Apagar
+            cardDicionarioEmConfirmacao = null;
+            await executarExclusaoDicionario(categoria, div);
+        }
+    };
+
+    return div;
+}
+
+async function executarExclusaoDicionario(categoria, elementoCard) {
+    try {
+        const { data: { session } } = await _supabase.auth.getSession();
+        if (!session) return;
+
+        // 1. Efeito visual imediato: Faz o card sumir da tela na hora
+        elementoCard.style.transform = "scale(0)";
+        elementoCard.style.opacity = "0";
+        
+        // Remove do DOM após a animação de saída (300ms)
+        setTimeout(() => {
+            elementoCard.remove();
+        }, 300);
+
+        // 2. Executa a exclusão no banco (em segundo plano)
+        let query = _supabase.from('dicionarios').delete().eq('user_id', session.user.id);
+        if (categoria !== 'todos') {
+            query = query.eq('categoria', categoria);
+        }
+
+        const { error } = await query;
+        if (error) throw error;
+
+        // 3. Atualiza os dados internos (sem travar a tela)
+        await carregarCategoriasDoBanco();
+        
+        exibirMensagemFlutuante(categoria === 'todos' ? "Dicionário apagado!" : "Categoria removida!");
+
+    } catch (err) {
+        console.error("Erro ao apagar:", err);
+        // Se der erro, recarregamos tudo para o card voltar (já que não foi apagado)
+        abrirMenuApagarDicionarios(); 
+    }
 }
