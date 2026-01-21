@@ -46,6 +46,9 @@ let ultimoMenuAberto = "";
 let dadosDicionarioAtual = []; 
 let palavraSendoEditada = null; 
 
+window.speechSynthesis.getVoices();
+window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+
 // Força o navegador a preparar as vozes IMEDIATAMENTE ao abrir
 if ('speechSynthesis' in window) {
     window.speechSynthesis.getVoices();
@@ -64,6 +67,7 @@ function formatarItem(palavraRaw, pronunciaRaw, significadoRaw) {
 }
 
 window.onload = async () => {
+    aquecerVoz();
     const { data: { session } } = await _supabase.auth.getSession();
     
     if (session) {
