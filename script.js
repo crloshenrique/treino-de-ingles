@@ -1062,15 +1062,28 @@ async function carregarPalavraDoDia() {
         
         const btnSom = document.getElementById('play-word-day');
         btnSom.onclick = () => {
-            if (window.speechSynthesis.speaking) {
-                window.speechSynthesis.cancel();
+            // 1. Limpa a fila do sistema imediatamente (resolve o delay de cliques anteriores)
+            window.speechSynthesis.cancel();
+
+            // 2. Se o ícone já for o de "parar", apenas interrompemos a fala (o cancel já fez isso)
+            if (btnSom.src.includes("parar.png")) {
                 btnSom.src = "imagens/pronuncia.png";
                 return;
             }
+
             const msg = new SpeechSynthesisUtterance(palavraDoDia.palavra);
             msg.lang = 'en-US';
-            msg.onstart = () => { btnSom.src = "imagens/parar.png"; };
-            msg.onend = () => { btnSom.src = "imagens/pronuncia.png"; };
+            msg.rate = 0.9; // Velocidade levemente maior para parecer mais responsivo
+
+            msg.onstart = () => { 
+                btnSom.src = "imagens/parar.png"; 
+            };
+            
+            msg.onend = () => { 
+                btnSom.src = "imagens/pronuncia.png"; 
+            };
+
+            // 3. Dispara a fala nova sem esperar verificações de estado do sistema
             window.speechSynthesis.speak(msg);
         };
 
