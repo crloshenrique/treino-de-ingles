@@ -1008,7 +1008,7 @@ async function carregarPalavraDoDia() {
         const { data: palavras, error } = await _supabase
             .from('dicionarios')
             .select('*')
-            .eq('user_id', user.id); // Garante que a palavra venha do dicionário do próprio usuário
+            .eq('user_id', user.id);
 
         if (error || !palavras || palavras.length === 0) {
             document.getElementById('word-day-title').innerText = "Lista vazia";
@@ -1016,17 +1016,38 @@ async function carregarPalavraDoDia() {
             return;
         }
 
-        const hoje = new Date();
-        const dataString = hoje.getFullYear() + "-" + hoje.getMonth() + "-" + hoje.getDate();
-        
-        let seed = 0;
-        for (let i = 0; i < dataString.length; i++) {
-            seed += dataString.charCodeAt(i);
-        }
-        
-        const indice = seed % palavras.length;
-        const palavraDoDia = palavras[indice];
+        const hoje = new Date().toDateString(); // Ex: "Mon Jan 20 2026"
+        const salvaNoCache = localStorage.getItem('palavraDoDia_Cache');
+        let palavraDoDia;
 
+        // Tenta recuperar do cache se for o mesmo dia
+        if (salvaNoCache) {
+            const cache = JSON.parse(salvaNoCache);
+            if (cache.data === hoje) {
+                // Verifica se a palavra salva ainda existe no banco (caso você a tenha deletado)
+                palavraDoDia = palavras.find(p => p.id === cache.id);
+            }
+        }
+
+        // Se não tem cache, ou mudou o dia, ou a palavra do cache foi deletada do banco
+        if (!palavraDoDia) {
+            const dataString = new Date().getFullYear() + "-" + new Date().getMonth() + "-" + new Date().getDate();
+            let seed = 0;
+            for (let i = 0; i < dataString.length; i++) {
+                seed += dataString.charCodeAt(i);
+            }
+            
+            const indice = seed % palavras.length;
+            palavraDoDia = palavras[indice];
+
+            // Salva a escolha do dia para não mudar se deletar outras palavras
+            localStorage.setItem('palavraDoDia_Cache', JSON.stringify({
+                id: palavraDoDia.id,
+                data: hoje
+            }));
+        }
+
+        // --- ABAIXO SEGUE O RESTANTE DO SEU CÓDIGO DE EXIBIÇÃO (IGUAL) ---
         document.getElementById('word-day-title').innerText = palavraDoDia.palavra;
 
         let significadoFormatado = palavraDoDia.significado
@@ -1039,7 +1060,6 @@ async function carregarPalavraDoDia() {
 
         document.getElementById('word-day-meaning').innerText = `${significadoFormatado}`;
         
-        // 6. Configura a funcionalidade de áudio
         const btnSom = document.getElementById('play-word-day');
         btnSom.onclick = () => {
             if (window.speechSynthesis.speaking) {
@@ -1047,18 +1067,10 @@ async function carregarPalavraDoDia() {
                 btnSom.src = "imagens/pronuncia.png";
                 return;
             }
-
             const msg = new SpeechSynthesisUtterance(palavraDoDia.palavra);
             msg.lang = 'en-US';
-
-            msg.onstart = () => {
-                btnSom.src = "imagens/parar.png";
-            };
-
-            msg.onend = () => {
-                btnSom.src = "imagens/pronuncia.png";
-            };
-
+            msg.onstart = () => { btnSom.src = "imagens/parar.png"; };
+            msg.onend = () => { btnSom.src = "imagens/pronuncia.png"; };
             window.speechSynthesis.speak(msg);
         };
 
