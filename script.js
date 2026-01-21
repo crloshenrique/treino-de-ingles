@@ -46,6 +46,15 @@ let ultimoMenuAberto = "";
 let dadosDicionarioAtual = []; 
 let palavraSendoEditada = null; 
 
+// Força o navegador a preparar as vozes IMEDIATAMENTE ao abrir
+if ('speechSynthesis' in window) {
+    window.speechSynthesis.getVoices();
+    window.speechSynthesis.onvoiceschanged = () => {
+        window.speechSynthesis.getVoices();
+        console.log("Vozes carregadas e prontas.");
+    };
+}
+
 // --- FUNÇÃO DE FORMATAÇÃO CENTRALIZADA ---
 function formatarItem(palavraRaw, pronunciaRaw, significadoRaw) {
     const palavra = palavraRaw.charAt(0).toUpperCase() + palavraRaw.slice(1).toLowerCase();
@@ -1000,6 +1009,93 @@ function aplicarEfeitoNegativo(elemento) {
     }, 400); // 400ms coincide com a animação CSS
 }
 
+async function carregarPalavraDoDia() {
+    try {
+        const { data: { user } } = await _supabase.auth.getUser();
+        if (!user) return;
+
+        const { data: palavras, error } = await _supabase
+            .from('dicionarios')
+            .select('*')
+            .eq('user_id', user.id);
+
+        if (error || !palavras || palavras.length === 0) {
+            document.getElementById('word-day-title').innerText = "Lista vazia";
+            document.getElementById('word-day-meaning').innerText = "Adicione algum dicionário.";
+            return;
+        }
+
+        const hoje = new Date().toDateString();
+        const salvaNoCache = localStorage.getItem('palavraDoDia_Cache');
+        let palavraDoDia;
+
+        if (salvaNoCache) {
+            const cache = JSON.parse(salvaNoCache);
+            if (cache.data === hoje) {
+                palavraDoDia = palavras.find(p => p.id === cache.id);
+            }
+        }
+
+        if (!palavraDoDia) {
+            const dataString = new Date().getFullYear() + "-" + new Date().getMonth() + "-" + new Date().getDate();
+            let seed = 0;
+            for (let i = 0; i < dataString.length; i++) {
+                seed += dataString.charCodeAt(i);
+            }
+            const indice = seed % palavras.length;
+            palavraDoDia = palavras[indice];
+
+            localStorage.setItem('palavraDoDia_Cache', JSON.stringify({
+                id: palavraDoDia.id,
+                data: hoje
+            }));
+        }
+
+        document.getElementById('word-day-title').innerText = palavraDoDia.palavra;
+
+        let significadoFormatado = palavraDoDia.significado
+            .toLowerCase()
+            .replace(/\//g, ', ')
+            .split(',')
+            .map(s => s.trim())
+            .filter(s => s !== "")
+            .join(', ');
+
+        document.getElementById('word-day-meaning').innerText = `${significadoFormatado}`;
+        
+        const btnSom = document.getElementById('play-word-day');
+        
+        btnSom.onclick = () => {
+            // Cancela qualquer áudio anterior para não criar fila
+            window.speechSynthesis.cancel();
+
+            if (btnSom.src.includes("parar.png")) {
+                btnSom.src = "imagens/pronuncia.png";
+                return;
+            }
+
+            const msg = new SpeechSynthesisUtterance(palavraDoDia.palavra);
+            msg.lang = 'en-US';
+            
+            // ESTRATÉGIA DE VELOCIDADE: Seleciona vozes que já estão no seu Windows/Celular (offline)
+            const voices = window.speechSynthesis.getVoices();
+            const vozRapida = voices.find(v => v.lang.includes("en") && v.localService === true) 
+                            || voices.find(v => v.lang.includes("en")); 
+
+            if (vozRapida) msg.voice = vozRapida;
+
+            msg.rate = 1.0; // 1.0 é processado mais rápido que 0.9 em muitos sistemas
+            msg.onstart = () => { btnSom.src = "imagens/parar.png"; };
+            msg.onend = () => { btnSom.src = "imagens/pronuncia.png"; };
+
+            window.speechSynthesis.speak(msg);
+        };
+
+    } catch (err) {
+        console.error("Erro ao carregar palavra do dia:", err);
+    }
+}
+
 async function carregarEstatisticas() {
     try {
         // Obtém o usuário atual para filtrar os dados do banco
@@ -1550,109 +1646,17 @@ async function efetuarExclusaoPalavra(id, texto, elementoItem) {
     }
 }
 
-// 1. Instância única na memória para resposta imediata
-const ssuPalavraDia = new SpeechSynthesisUtterance();
-
-
-
-
-
-async function carregarPalavraDoDia() {
-    try {
-        const { data: { user } } = await _supabase.auth.getUser();
-        if (!user) return;
-
-        const { data: palavras, error } = await _supabase
-            .from('dicionarios')
-            .select('*')
-            .eq('user_id', user.id);
-
-        if (error || !palavras || palavras.length === 0) {
-            document.getElementById('word-day-title').innerText = "Lista vazia";
-            document.getElementById('word-day-meaning').innerText = "Adicione algum dicionário.";
-            return;
-        }
-
-        const hoje = new Date().toDateString();
-        const salvaNoCache = localStorage.getItem('palavraDoDia_Cache');
-        let palavraDoDia;
-
-        if (salvaNoCache) {
-            const cache = JSON.parse(salvaNoCache);
-            if (cache.data === hoje) {
-                palavraDoDia = palavras.find(p => p.id === cache.id);
-            }
-        }
-
-        if (!palavraDoDia) {
-            const dataString = new Date().getFullYear() + "-" + new Date().getMonth() + "-" + new Date().getDate();
-            let seed = 0;
-            for (let i = 0; i < dataString.length; i++) seed += dataString.charCodeAt(i);
-            palavraDoDia = palavras[seed % palavras.length];
-            localStorage.setItem('palavraDoDia_Cache', JSON.stringify({ id: palavraDoDia.id, data: hoje }));
-        }
-
-        document.getElementById('word-day-title').innerText = palavraDoDia.palavra;
-        document.getElementById('word-day-meaning').innerText = palavraDoDia.significado.toLowerCase().replace(/\//g, ', ');
-
-        const btnSom = document.getElementById('play-word-day');
-        
-        btnSom.onclick = () => {
-            window.speechSynthesis.cancel(); // Para qualquer travamento anterior
-
-            if (btnSom.src.includes("parar.png")) {
-                btnSom.src = "imagens/pronuncia.png";
-                return;
-            }
-
-            // Configuração da fala
-            ssuPalavraDia.text = palavraDoDia.palavra;
-            ssuPalavraDia.lang = 'en-US';
-            ssuPalavraDia.rate = 1.0; 
-
-            // Prioriza vozes locais (processadas no aparelho, sem delay de rede)
-            const voices = window.speechSynthesis.getVoices();
-            const localVoice = voices.find(v => v.lang.includes("en") && v.localService === true) || 
-                               voices.find(v => v.lang.includes("en"));
-            
-            if (localVoice) ssuPalavraDia.voice = localVoice;
-
-            ssuPalavraDia.onstart = () => { btnSom.src = "imagens/parar.png"; };
-            ssuPalavraDia.onend = () => { btnSom.src = "imagens/pronuncia.png"; };
-            ssuPalavraDia.onerror = () => { btnSom.src = "imagens/pronuncia.png"; };
-
-            window.speechSynthesis.speak(ssuPalavraDia);
-        };
-
-    } catch (err) {
-        console.error("Erro ao carregar palavra do dia:", err);
+function aquecerVoz() {
+    if ('speechSynthesis' in window) {
+        // Envia um comando de fala real, mas inaudível, para "acordar" o hardware
+        window.speechSynthesis.cancel();
+        const warmup = new SpeechSynthesisUtterance("a"); 
+        warmup.volume = 0; 
+        warmup.rate = 10; // Velocidade máxima para terminar em milissegundos
+        window.speechSynthesis.speak(warmup);
     }
 }
 
-// 2. Sistema de aquecimento agressivo (colocar no final do script.js)
-let motorPronto = false;
-function aquecerMotorVoz() {
-    if (motorPronto) return;
-    
-    // Força o carregamento da lista de vozes
-    window.speechSynthesis.getVoices();
-    
-    // Dispara um áudio vazio para tirar o canal de som do modo de espera/sleep do navegador
-    const warmup = new SpeechSynthesisUtterance("");
-    warmup.volume = 0;
-    window.speechSynthesis.speak(warmup);
-    
-    motorPronto = true;
-}
-
-// Eventos para acordar o áudio na primeira interação
-window.addEventListener('DOMContentLoaded', () => {
-    window.speechSynthesis.getVoices();
-    ['touchstart', 'click', 'keydown'].forEach(event => {
-        document.body.addEventListener(event, aquecerMotorVoz, { once: true });
-    });
-});
-
-window.speechSynthesis.onvoiceschanged = () => {
-    window.speechSynthesis.getVoices();
-};
+// Garante o aquecimento em eventos de interação (requisito de navegadores modernos)
+window.addEventListener('DOMContentLoaded', aquecerVoz);
+document.body.addEventListener('click', aquecerVoz, { once: true });
