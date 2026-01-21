@@ -1030,35 +1030,18 @@ async function carregarPalavraDoDia() {
         if (!palavraDoDia) {
             const dataString = new Date().getFullYear() + "-" + new Date().getMonth() + "-" + new Date().getDate();
             let seed = 0;
-            for (let i = 0; i < dataString.length; i++) {
-                seed += dataString.charCodeAt(i);
-            }
-            const indice = seed % palavras.length;
-            palavraDoDia = palavras[indice];
-
-            localStorage.setItem('palavraDoDia_Cache', JSON.stringify({
-                id: palavraDoDia.id,
-                data: hoje
-            }));
+            for (let i = 0; i < dataString.length; i++) seed += dataString.charCodeAt(i);
+            palavraDoDia = palavras[seed % palavras.length];
+            localStorage.setItem('palavraDoDia_Cache', JSON.stringify({ id: palavraDoDia.id, data: hoje }));
         }
 
         document.getElementById('word-day-title').innerText = palavraDoDia.palavra;
+        document.getElementById('word-day-meaning').innerText = palavraDoDia.significado.toLowerCase().replace(/\//g, ', ');
 
-        let significadoFormatado = palavraDoDia.significado
-            .toLowerCase()
-            .replace(/\//g, ', ')
-            .split(',')
-            .map(s => s.trim())
-            .filter(s => s !== "")
-            .join(', ');
-
-        document.getElementById('word-day-meaning').innerText = `${significadoFormatado}`;
-        
         const btnSom = document.getElementById('play-word-day');
         
         btnSom.onclick = () => {
-            // 1. Cancela qualquer fala anterior
-            window.speechSynthesis.cancel();
+            window.speechSynthesis.cancel(); // Para qualquer fala travada
 
             if (btnSom.src.includes("parar.png")) {
                 btnSom.src = "imagens/pronuncia.png";
@@ -1066,17 +1049,19 @@ async function carregarPalavraDoDia() {
             }
 
             const msg = new SpeechSynthesisUtterance(palavraDoDia.palavra);
-            
-            // --- NOVIDADE AQUI: Garante que use a voz que já está no aparelho (mais rápida) ---
-            const voices = window.speechSynthesis.getVoices();
             msg.lang = 'en-US';
-            // Tenta encontrar uma voz local que já foi "aquecida"
-            const vozLocal = voices.find(v => v.localService && v.lang.includes("en"));
-            if (vozLocal) msg.voice = vozLocal;
+            msg.rate = 0.9;
 
-            msg.rate = 0.9; 
+            // --- MELHORIA: Seleção de Voz Instantânea ---
+            const voices = window.speechSynthesis.getVoices();
+            // Prioriza vozes locais (Microsoft, Google Local ou Apple) para evitar delay de download
+            const localVoice = voices.find(v => v.lang.includes("en") && v.localService === true) || voices.find(v => v.lang.includes("en"));
+            
+            if (localVoice) msg.voice = localVoice;
+
             msg.onstart = () => { btnSom.src = "imagens/parar.png"; };
             msg.onend = () => { btnSom.src = "imagens/pronuncia.png"; };
+            msg.onerror = () => { btnSom.src = "imagens/pronuncia.png"; };
 
             window.speechSynthesis.speak(msg);
         };
@@ -1637,10 +1622,13 @@ async function efetuarExclusaoPalavra(id, texto, elementoItem) {
 }
 
 function aquecerVoz() {
-    const warmup = new SpeechSynthesisUtterance(""); // Mensagem vazia
-    warmup.volume = 0; // Volume zero
+    window.speechSynthesis.getVoices();
+    const warmup = new SpeechSynthesisUtterance("");
+    warmup.volume = 0;
     window.speechSynthesis.speak(warmup);
 }
 
 window.addEventListener('DOMContentLoaded', aquecerVoz);
+window.speechSynthesis.onvoiceschanged = aquecerVoz;
+document.body.addEventListener('touchstart', aquecerVoz, { once: true });
 document.body.addEventListener('click', aquecerVoz, { once: true });
