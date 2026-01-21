@@ -46,18 +46,6 @@ let ultimoMenuAberto = "";
 let dadosDicionarioAtual = []; 
 let palavraSendoEditada = null; 
 
-window.speechSynthesis.getVoices();
-window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
-
-// Força o navegador a preparar as vozes IMEDIATAMENTE ao abrir
-if ('speechSynthesis' in window) {
-    window.speechSynthesis.getVoices();
-    window.speechSynthesis.onvoiceschanged = () => {
-        window.speechSynthesis.getVoices();
-        console.log("Vozes carregadas e prontas.");
-    };
-}
-
 // --- FUNÇÃO DE FORMATAÇÃO CENTRALIZADA ---
 function formatarItem(palavraRaw, pronunciaRaw, significadoRaw) {
     const palavra = palavraRaw.charAt(0).toUpperCase() + palavraRaw.slice(1).toLowerCase();
@@ -67,7 +55,6 @@ function formatarItem(palavraRaw, pronunciaRaw, significadoRaw) {
 }
 
 window.onload = async () => {
-    aquecerVoz();
     const { data: { session } } = await _supabase.auth.getSession();
     
     if (session) {
@@ -1029,32 +1016,38 @@ async function carregarPalavraDoDia() {
             return;
         }
 
-        const hoje = new Date().toDateString();
+        const hoje = new Date().toDateString(); // Ex: "Mon Jan 20 2026"
         const salvaNoCache = localStorage.getItem('palavraDoDia_Cache');
         let palavraDoDia;
 
+        // Tenta recuperar do cache se for o mesmo dia
         if (salvaNoCache) {
             const cache = JSON.parse(salvaNoCache);
             if (cache.data === hoje) {
+                // Verifica se a palavra salva ainda existe no banco (caso você a tenha deletado)
                 palavraDoDia = palavras.find(p => p.id === cache.id);
             }
         }
 
+        // Se não tem cache, ou mudou o dia, ou a palavra do cache foi deletada do banco
         if (!palavraDoDia) {
             const dataString = new Date().getFullYear() + "-" + new Date().getMonth() + "-" + new Date().getDate();
             let seed = 0;
             for (let i = 0; i < dataString.length; i++) {
                 seed += dataString.charCodeAt(i);
             }
+            
             const indice = seed % palavras.length;
             palavraDoDia = palavras[indice];
 
+            // Salva a escolha do dia para não mudar se deletar outras palavras
             localStorage.setItem('palavraDoDia_Cache', JSON.stringify({
                 id: palavraDoDia.id,
                 data: hoje
             }));
         }
 
+        // --- ABAIXO SEGUE O RESTANTE DO SEU CÓDIGO DE EXIBIÇÃO (IGUAL) ---
         document.getElementById('word-day-title').innerText = palavraDoDia.palavra;
 
         let significadoFormatado = palavraDoDia.significado
@@ -1068,30 +1061,16 @@ async function carregarPalavraDoDia() {
         document.getElementById('word-day-meaning').innerText = `${significadoFormatado}`;
         
         const btnSom = document.getElementById('play-word-day');
-        
         btnSom.onclick = () => {
-            // Cancela qualquer áudio anterior para não criar fila
-            window.speechSynthesis.cancel();
-
-            if (btnSom.src.includes("parar.png")) {
+            if (window.speechSynthesis.speaking) {
+                window.speechSynthesis.cancel();
                 btnSom.src = "imagens/pronuncia.png";
                 return;
             }
-
             const msg = new SpeechSynthesisUtterance(palavraDoDia.palavra);
             msg.lang = 'en-US';
-            
-            // ESTRATÉGIA DE VELOCIDADE: Seleciona vozes que já estão no seu Windows/Celular (offline)
-            const voices = window.speechSynthesis.getVoices();
-            const vozRapida = voices.find(v => v.lang.includes("en") && v.localService === true) 
-                            || voices.find(v => v.lang.includes("en")); 
-
-            if (vozRapida) msg.voice = vozRapida;
-
-            msg.rate = 1.0; // 1.0 é processado mais rápido que 0.9 em muitos sistemas
             msg.onstart = () => { btnSom.src = "imagens/parar.png"; };
             msg.onend = () => { btnSom.src = "imagens/pronuncia.png"; };
-
             window.speechSynthesis.speak(msg);
         };
 
@@ -1649,18 +1628,3 @@ async function efetuarExclusaoPalavra(id, texto, elementoItem) {
         exibirFeedback("feedback-apagar", "Erro ao apagar no banco.", "erro");
     }
 }
-
-function aquecerVoz() {
-    if ('speechSynthesis' in window) {
-        // Envia um comando de fala real, mas inaudível, para "acordar" o hardware
-        window.speechSynthesis.cancel();
-        const warmup = new SpeechSynthesisUtterance("a"); 
-        warmup.volume = 0; 
-        warmup.rate = 10; // Velocidade máxima para terminar em milissegundos
-        window.speechSynthesis.speak(warmup);
-    }
-}
-
-// Garante o aquecimento em eventos de interação (requisito de navegadores modernos)
-window.addEventListener('DOMContentLoaded', aquecerVoz);
-document.body.addEventListener('click', aquecerVoz, { once: true });
