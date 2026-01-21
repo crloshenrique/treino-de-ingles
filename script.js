@@ -1016,38 +1016,32 @@ async function carregarPalavraDoDia() {
             return;
         }
 
-        const hoje = new Date().toDateString(); // Ex: "Mon Jan 20 2026"
+        const hoje = new Date().toDateString();
         const salvaNoCache = localStorage.getItem('palavraDoDia_Cache');
         let palavraDoDia;
 
-        // Tenta recuperar do cache se for o mesmo dia
         if (salvaNoCache) {
             const cache = JSON.parse(salvaNoCache);
             if (cache.data === hoje) {
-                // Verifica se a palavra salva ainda existe no banco (caso você a tenha deletado)
                 palavraDoDia = palavras.find(p => p.id === cache.id);
             }
         }
 
-        // Se não tem cache, ou mudou o dia, ou a palavra do cache foi deletada do banco
         if (!palavraDoDia) {
             const dataString = new Date().getFullYear() + "-" + new Date().getMonth() + "-" + new Date().getDate();
             let seed = 0;
             for (let i = 0; i < dataString.length; i++) {
                 seed += dataString.charCodeAt(i);
             }
-            
             const indice = seed % palavras.length;
             palavraDoDia = palavras[indice];
 
-            // Salva a escolha do dia para não mudar se deletar outras palavras
             localStorage.setItem('palavraDoDia_Cache', JSON.stringify({
                 id: palavraDoDia.id,
                 data: hoje
             }));
         }
 
-        // --- ABAIXO SEGUE O RESTANTE DO SEU CÓDIGO DE EXIBIÇÃO (IGUAL) ---
         document.getElementById('word-day-title').innerText = palavraDoDia.palavra;
 
         let significadoFormatado = palavraDoDia.significado
@@ -1061,29 +1055,29 @@ async function carregarPalavraDoDia() {
         document.getElementById('word-day-meaning').innerText = `${significadoFormatado}`;
         
         const btnSom = document.getElementById('play-word-day');
+        
         btnSom.onclick = () => {
-            // 1. Limpa a fila do sistema imediatamente (resolve o delay de cliques anteriores)
+            // 1. Cancela qualquer fala anterior
             window.speechSynthesis.cancel();
 
-            // 2. Se o ícone já for o de "parar", apenas interrompemos a fala (o cancel já fez isso)
             if (btnSom.src.includes("parar.png")) {
                 btnSom.src = "imagens/pronuncia.png";
                 return;
             }
 
             const msg = new SpeechSynthesisUtterance(palavraDoDia.palavra);
-            msg.lang = 'en-US';
-            msg.rate = 0.9; // Velocidade levemente maior para parecer mais responsivo
-
-            msg.onstart = () => { 
-                btnSom.src = "imagens/parar.png"; 
-            };
             
-            msg.onend = () => { 
-                btnSom.src = "imagens/pronuncia.png"; 
-            };
+            // --- NOVIDADE AQUI: Garante que use a voz que já está no aparelho (mais rápida) ---
+            const voices = window.speechSynthesis.getVoices();
+            msg.lang = 'en-US';
+            // Tenta encontrar uma voz local que já foi "aquecida"
+            const vozLocal = voices.find(v => v.localService && v.lang.includes("en"));
+            if (vozLocal) msg.voice = vozLocal;
 
-            // 3. Dispara a fala nova sem esperar verificações de estado do sistema
+            msg.rate = 0.9; 
+            msg.onstart = () => { btnSom.src = "imagens/parar.png"; };
+            msg.onend = () => { btnSom.src = "imagens/pronuncia.png"; };
+
             window.speechSynthesis.speak(msg);
         };
 
@@ -1641,3 +1635,12 @@ async function efetuarExclusaoPalavra(id, texto, elementoItem) {
         exibirFeedback("feedback-apagar", "Erro ao apagar no banco.", "erro");
     }
 }
+
+function aquecerVoz() {
+    const warmup = new SpeechSynthesisUtterance(""); // Mensagem vazia
+    warmup.volume = 0; // Volume zero
+    window.speechSynthesis.speak(warmup);
+}
+
+window.addEventListener('DOMContentLoaded', aquecerVoz);
+document.body.addEventListener('click', aquecerVoz, { once: true });
