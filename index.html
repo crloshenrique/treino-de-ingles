@@ -2,38 +2,65 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Treino de Inglês - Dashboard (Git 25)</title>
+    <title>Treino de Inglês</title>
     <link rel="icon" type="image/png" href="imagens/icone.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
 
-/* Estilo para a transição do conteúdo do card */
-.card-dicionario {
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
+.sidebar-item,
+.stat-box,
+.word-card,
+.search-box-futuristic,
+.btn-audio-oxford,
+.item-dicionario,
+.card-dicionario,
+.card-todos,
+.btn-voltar-icone,
+button,
+.card-dicionario, 
+.btn-apagar-rosa {
+    -webkit-user-select: none;  /* Safari/Chrome Mobile */
+    -moz-user-select: none;     /* Firefox */
+    -ms-user-select: none;      /* Edge/IE */
+    user-select: none;          /* Padrão */
+    
+    /* Remove o menu de "Copiar/Abrir em nova aba" no toque longo (iOS) */
+    -webkit-touch-callout: none;
+    
+    /* Remove aquele destaque azul/cinza chato ao tocar no celular */
+    -webkit-tap-highlight-color: transparent;
+
+    /* Garante que o cursor continue sendo a mãozinha no PC */
+    cursor: pointer;
 }
 
-.card-content-wrapper {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-    transition: opacity 0.3s ease, transform 0.3s ease;
-}
+        /* Estilo para a transição do conteúdo do card */
+        .card-dicionario {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
 
-/* Quando o card está em modo de confirmação */
-.card-confirmar-delete {
-    border-color: #f14738 !important;
-    background: rgba(241, 71, 56, 0.1) !important;
-}
+        .card-content-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
 
-.icon-lixeira {
-    width: 40px;
-    height: 40px;
-    filter: brightness(0) invert(1); /* Deixa o ícone branco */
-}
+        /* Quando o card está em modo de confirmação */
+        .card-confirmar-delete {
+            border-color: #f14738 !important;
+            background: rgba(241, 71, 56, 0.1) !important;
+        }
+
+        .icon-lixeira {
+            width: 40px;
+            height: 40px;
+            filter: brightness(0) invert(1); /* Deixa o ícone branco */
+        }
 
         /* Garante que o container de apagar tenha a mesma estrutura do de praticar */
         #lista-dicionarios-apagar.grid-dicionarios {

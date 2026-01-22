@@ -82,8 +82,6 @@ window.onload = async () => {
         }
     });
 
-    console.log("Sistema de treino carregado com Correção Visual");
-
     const configSalva = localStorage.getItem('config_quiz');
     if (configSalva) {
         const config = JSON.parse(configSalva);
@@ -1081,39 +1079,35 @@ async function carregarPalavraDoDia() {
 
 async function carregarEstatisticas() {
     try {
-        // Obtém o usuário atual para filtrar os dados do banco
         const { data: { user } } = await _supabase.auth.getUser();
         if (!user) return;
 
-        // 1. Contagem de Erros: Filtra apenas os erros vinculados ao ID do usuário logado
-        const { count: totalErros } = await _supabase
+        // 1. Contagem de Erros Únicos (Lógica de Set para ignorar repetições)
+        const { data: errosData } = await _supabase
             .from('erros_usuarios')
-            .select('*', { count: 'exact', head: true })
+            .select('dicionario_id')
             .eq('user_id', user.id);
-        
-        document.getElementById('count-erros').innerText = totalErros || 0;
 
-        // 2. Contagem de Palavras Descobertas: Agora filtrada por user_id
-        const { count: totalPalavras, error: errDics } = await _supabase
-            .from('dicionarios')
-            .select('*', { count: 'exact', head: true })
-            .eq('user_id', user.id); // Integração do novo sistema de user-id aqui
-
-        if (errDics) {
-            console.error("Erro ao ler tabela dicionarios:", errDics.message);
-            return;
+        if (errosData) {
+            const palavrasUnicasComErro = new Set(errosData.map(item => item.dicionario_id));
+            document.getElementById('count-erros').innerText = palavrasUnicasComErro.size;
+        } else {
+            document.getElementById('count-erros').innerText = 0;
         }
 
-        // Lógica de blocos de 100:
-        // Se o total for < 100, Math.floor resultará em 0.
-        // Se o total for 250, exibirá 200.
+        // 2. Contagem de Palavras Descobertas
+        const { count: totalPalavras } = await _supabase
+            .from('dicionarios')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', user.id);
+
         const contagemSegura = totalPalavras || 0;
         const apenasCompletos = Math.floor(contagemSegura / 100) * 100;
 
         document.getElementById('count-descobertas').innerText = apenasCompletos;
 
     } catch (err) {
-        console.error("Erro nas estatísticas:", err);
+        // Silencioso: Sem mensagens de console conforme solicitado
     }
 }
 
