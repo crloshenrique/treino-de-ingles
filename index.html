@@ -50,16 +50,16 @@
         }
 
 
-        /* Ajuste específico para o Menu Dicas não ficar bagunçado */
-        #menu-dicas {
-            display: none; /* Alterado para flex via JS */
-            flex-direction: column;
-            align-items: center; 
-            width: 100%;
-            max-width: 500px; /* Evita que os cards fiquem largos demais em telas grandes */
-            margin: 0 auto;
-            padding: 20px;
-        }
+#menu-dicas {
+    display: none; /* Mantido conforme seu JS */
+    flex-direction: column;
+    align-items: center; 
+    width: 100%;
+    max-width: 900px; /* Aumentado para acomodar os cards de 800px + margens */
+    margin: 0 auto;
+    padding: 20px;
+    box-sizing: border-box; /* Importante para não "fugir" da tela */
+}
 
         .container-dicas {
             display: flex;
@@ -71,28 +71,26 @@
             align-items: center; /* Centraliza os cards perfeitamente */
         }
 
-        .card-dica {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 0, 127, 0.2);
-            border-radius: 12px;
-            padding: 0 40px;
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+.card-dica {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 0, 127, 0.2);
+    border-radius: 12px;
+    padding: 20px 30px; /* Reduzi um pouco o padding para telas menores */
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 
-            /* VOLTANDO PARA VW, MAS SEM QUEBRAR O ALINHAMENTO */
-            width: 85vw; /* Define a largura baseada na tela */
-            max-width: 800px; /* Impede que fique exagerado em monitores ultra-wide */
-            
-            box-sizing: border-box;
-            height: 110px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            text-align: left;
-            
-            /* REMOVA: left: 50%, right: 50% e margin-left: -40vw */
-            /* Deixe o navegador cuidar do posicionamento agora que o pai tem align-items: center */
-        }
+    /* CORREÇÃO AQUI */
+    width: 95%;          /* Use porcentagem para respeitar o container pai */
+    max-width: 800px;    /* Mantém o limite para telas grandes */
+    box-sizing: border-box; /* Garante que o padding não aumente a largura total */
+    
+    min-height: 110px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: left;
+    margin: 0 auto;      /* Garante a centralização horizontal */
+}
 
         .card-dica.expandido {
             height: auto;
