@@ -3,6 +3,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // SELETORES DE MENUS
+const menuDicas = document.getElementById("menu-dicas");
 const menuEscolhaDicionarioApagar = document.getElementById("menu-escolha-dicionario-apagar");
 const listaDicionariosApagar = document.getElementById("lista-dicionarios-apagar");
 const menuListaApagarPalavras = document.getElementById("menu-lista-apagar-palavras");
@@ -245,7 +246,7 @@ function handleMenuClick() {
 function esconderTodosMenus() {
     const menus = [menuBoasVindas, menuHub, menuDicionariosRaiz, menuGerenciarDicionarios, areaAdicionarDicionario, 
                    menuTemas, menuPrincipal, menuNiveis, menuIntervalos, visualizacaoPalavras, menuPerfil, menuMeusErros,
-                   menuAlterarPalavras, telaEdicaoCampos, menuConfiguracoes, menuApagarRaiz, menuListaApagarPalavras, menuEscolhaDicionarioApagar];
+                   menuAlterarPalavras, telaEdicaoCampos, menuConfiguracoes, menuApagarRaiz, menuListaApagarPalavras, menuEscolhaDicionarioApagar, menuDicas];
     menus.forEach(m => { if(m) m.style.display = "none"; });
     container.classList.remove("modo-largo");
     interromperJogo();
@@ -275,6 +276,7 @@ function irParaTemas() { esconderTodosMenus(); menuTemas.style.display = "flex";
 function irParaDicionariosRaiz() { 
     esconderTodosMenus(); 
     menuDicionariosRaiz.style.display = "flex"; 
+    menuDicionariosRaiz.style.flexDirection = "column"; // Adicione esta linha
 }
 
 function irParaPerfil() {
@@ -1621,4 +1623,107 @@ async function efetuarExclusaoPalavra(id, texto, elementoItem) {
         console.error("Erro ao deletar:", err);
         exibirFeedback("feedback-apagar", "Erro ao apagar no banco.", "erro");
     }
+}
+
+// Abre e fecha o formulário de criação dentro da área de dicas
+function toggleFormDica() {
+    const form = document.getElementById("form-dica");
+    form.style.display = form.style.display === "none" ? "block" : "none";
+}
+
+async function salvarDicaNoBanco() {
+    const assunto = document.getElementById("add-dica-assunto").value;
+    const explicacao = document.getElementById("add-dica-explicacao").value;
+    const texto = document.getElementById("add-dica-texto").value;
+
+    if (!assunto || !explicacao || !texto) return alert("Preencha todos os campos!");
+
+    // Salva incluindo a nova coluna explicacao
+    const { error } = await _supabase.from('dicas').insert([{ assunto, explicacao, texto }]);
+
+    if (!error) {
+        document.getElementById("add-dica-assunto").value = "";
+        document.getElementById("add-dica-explicacao").value = "";
+        document.getElementById("add-dica-texto").value = "";
+        toggleFormDica();
+        carregarDicas();
+    }
+}
+
+async function carregarDicas() {
+    const container = document.getElementById("lista-dicas-container");
+    const { data, error } = await _supabase
+        .from('dicas')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+    if (error) return;
+
+    container.innerHTML = "";
+    data.forEach(dica => {
+        const card = document.createElement("div");
+        card.className = "card-dica";
+        
+        // Criamos uma div interna apenas para o cabeçalho para facilitar o alinhamento
+        card.innerHTML = `
+            <div class="dica-header">
+                <span class="dica-assunto">${dica.assunto}</span>
+                <p class="dica-explicacao">${dica.explicacao}</p>
+            </div>
+            <div class="dica-texto-completo">${dica.texto}</div>
+        `;
+        
+        card.onclick = (e) => {
+            e.stopPropagation();
+            const jaExpandido = card.classList.contains("expandido");
+            document.querySelectorAll('.card-dica').forEach(c => c.classList.remove('expandido'));
+            if (!jaExpandido) card.classList.add("expandido");
+        };
+        
+        container.appendChild(card);
+    });
+}
+
+// Lógica para fechar quando clicar fora de qualquer card
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.card-dica')) {
+        document.querySelectorAll('.card-dica.expandido').forEach(card => {
+            card.classList.remove('expandido');
+        });
+    }
+});
+
+function navegarDicas(destino) {
+    const hub = document.getElementById("hub-dicas-inicial");
+    const areaAdd = document.getElementById("area-adicionar-dica");
+    const areaVer = document.getElementById("area-visualizar-dicas");
+    const titulo = document.getElementById("titulo-menu-dicas");
+    const btnInicioGeral = document.getElementById("btn-inicio-dicas");
+
+    // Esconde tudo
+    hub.style.display = "none";
+    areaAdd.style.display = "none";
+    areaVer.style.display = "none";
+    btnInicioGeral.style.display = "none"; 
+
+    if (destino === 'visualizar') {
+        titulo.textContent = "Dicas";
+        areaVer.style.display = "block";
+        carregarDicas();
+    } 
+    else if (destino === 'adicionar') {
+        titulo.textContent = "Nova dica";
+        areaAdd.style.display = "block";
+    } 
+    else if (destino === 'voltar-hub') {
+        titulo.textContent = "O que você deseja fazer?";
+        hub.style.display = "flex";
+        btnInicioGeral.style.display = "flex"; // Mostra o "Início" apenas aqui
+    }
+}
+
+function irParaDicas() {
+    esconderTodosMenus();
+    document.getElementById("menu-dicas").style.display = "flex";
+    navegarDicas('voltar-hub');
 }

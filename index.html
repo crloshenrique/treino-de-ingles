@@ -7,32 +7,165 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
 
-.sidebar-item,
-.stat-box,
-.word-card,
-.search-box-futuristic,
-.btn-audio-oxford,
-.item-dicionario,
-.card-dicionario,
-.card-todos,
-.btn-voltar-icone,
-button,
-.card-dicionario, 
-.btn-apagar-rosa {
-    -webkit-user-select: none;  /* Safari/Chrome Mobile */
-    -moz-user-select: none;     /* Firefox */
-    -ms-user-select: none;      /* Edge/IE */
-    user-select: none;          /* Padrão */
-    
-    /* Remove o menu de "Copiar/Abrir em nova aba" no toque longo (iOS) */
-    -webkit-touch-callout: none;
-    
-    /* Remove aquele destaque azul/cinza chato ao tocar no celular */
-    -webkit-tap-highlight-color: transparent;
-
-    /* Garante que o cursor continue sendo a mãozinha no PC */
-    cursor: pointer;
+/* Adicione isso ao seu <style> */
+#menu-dicionarios-raiz {
+    flex-direction: column;
+    align-items: center;
 }
+
+        /* Container para alinhar os botões de Dicas lado a lado */
+        .hub-dicas-grid {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            width: 100%;
+            margin-top: 20px;
+            flex-wrap: wrap; /* Para não quebrar em telas muito pequenas */
+        }
+
+        /* Botão Quadrado Rosa para Dicas */
+        .btn-dica-quadrado {
+            width: 70px;
+            height: 70px;
+            background: rgba(255, 0, 127, 0.1); /* Rosa sutil no fundo */
+            border: 2px solid #ff007f; /* Borda rosa viva */
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-dica-quadrado:hover {
+            background: rgba(255, 0, 127, 0.3);
+            transform: scale(1.05);
+        }
+
+        .btn-dica-quadrado img {
+            width: 35px;
+            height: 35px;
+            object-fit: contain;
+        }
+
+
+        /* Ajuste específico para o Menu Dicas não ficar bagunçado */
+        #menu-dicas {
+            display: none; /* Alterado para flex via JS */
+            flex-direction: column;
+            align-items: center; 
+            width: 100%;
+            max-width: 500px; /* Evita que os cards fiquem largos demais em telas grandes */
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .container-dicas {
+            display: flex;
+            flex-direction: column;
+            gap: 8px; /* Mantém os cards próximos */
+            width: 100%;
+            margin-top: 20px;
+            margin-bottom: 30px;
+            align-items: center; /* Centraliza os cards perfeitamente */
+        }
+
+        .card-dica {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 0, 127, 0.2);
+            border-radius: 12px;
+            padding: 0 40px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+            /* VOLTANDO PARA VW, MAS SEM QUEBRAR O ALINHAMENTO */
+            width: 85vw; /* Define a largura baseada na tela */
+            max-width: 800px; /* Impede que fique exagerado em monitores ultra-wide */
+            
+            box-sizing: border-box;
+            height: 110px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: left;
+            
+            /* REMOVA: left: 50%, right: 50% e margin-left: -40vw */
+            /* Deixe o navegador cuidar do posicionamento agora que o pai tem align-items: center */
+        }
+
+        .card-dica.expandido {
+            height: auto;
+            min-height: 110px;
+            max-height: 3000px;
+            padding: 30px 40px;
+            justify-content: flex-start;
+        }
+
+
+        /* Assunto: Exatamente como o usuário escreveu */
+        .dica-assunto {
+            color: #ff007f;
+            font-weight: bold;
+            font-size: 1.1rem;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .dica-explicacao {
+            color: #ffffff;
+            opacity: 0.6;
+            font-size: 0.95rem;
+            margin: 0;
+            /* Garante que a explicação não quebre o layout na prévia */
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .dica-texto-completo {
+            color: #ffffff;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: none;
+        }
+
+        .card-dica.expandido .dica-texto-completo {
+            display: block;
+        }
+
+
+        .sidebar-item,
+        .stat-box,
+        .word-card,
+        .search-box-futuristic,
+        .btn-audio-oxford,
+        .item-dicionario,
+        .card-dicionario,
+        .card-todos,
+        .btn-voltar-icone,
+        button,
+        .card-dicionario, 
+        .btn-apagar-rosa {
+            -webkit-user-select: none;  /* Safari/Chrome Mobile */
+            -moz-user-select: none;     /* Firefox */
+            -ms-user-select: none;      /* Edge/IE */
+            user-select: none;          /* Padrão */
+            
+            /* Remove o menu de "Copiar/Abrir em nova aba" no toque longo (iOS) */
+            -webkit-touch-callout: none;
+            
+            /* Remove aquele destaque azul/cinza chato ao tocar no celular */
+            -webkit-tap-highlight-color: transparent;
+
+            /* Garante que o cursor continue sendo a mãozinha no PC */
+            cursor: pointer;
+        }
 
         /* Estilo para a transição do conteúdo do card */
         .card-dicionario {
@@ -1144,6 +1277,10 @@ button,
                 <img src="imagens/menus/menu-dicionarios.png" alt="Dicionários">
                 <span>Dicionários</span>
             </div>
+            <div class="sidebar-item" onclick="irParaDicas(); handleMenuClick();">
+                <img src="imagens/menus/lampada.png" alt="Dicas">
+                <span>Dicas</span>
+            </div>
             <div class="sidebar-item" onclick="irParaMeusErros(); handleMenuClick();">
                 <img src="imagens/menus/menu-erros.png" alt="Erros">
                 <span>Revisão</span>
@@ -1211,15 +1348,30 @@ button,
                 <div id="menu-perfil" class="menu" style="display:none">
                 </div>
 
-                <div id="menu-dicionarios-raiz" class="menu" style="display:none">
-                    <h2>Dicionários</h2>
-                    <button class="btn-custom-lateral" onclick="abrirSubMenuDicionarios()">Visualizar</button>
-                    <button class="btn-custom-lateral" onclick="abrirEscolhaTipoAdicao()">Adicionar</button>
-                    <button class="btn-custom-lateral" onclick="abrirMenuAlterarPalavras()">Editar</button>
-                    <button class="btn-custom-lateral" onclick="irParaMenuApagar()">Apagar</button>
-                    <div class="btn-voltar-icone" onclick="irParaHub()">
+                <div id="menu-dicionarios-raiz" class="menu-container" style="display: none; flex-direction: column; align-items: center;">
+                    
+                    <h2 id="titulo-menu-dicas" style="width: 100%; text-align: center; margin-bottom: 20px;">
+                        O que você deseja fazer?
+                    </h2>
+
+                    <div class="hub-dicas-grid">
+                        <div class="btn-dica-quadrado" onclick="abrirSubMenuDicionarios()" title="Visualizar">
+                            <img src="imagens/visualizar.png" alt="Visualizar">
+                        </div>
+                        <div class="btn-dica-quadrado" onclick="abrirEscolhaTipoAdicao()" title="Adicionar">
+                            <img src="imagens/adicionar.png" alt="Adicionar">
+                        </div>
+                        <div class="btn-dica-quadrado" onclick="abrirMenuAlterarPalavras()" title="Alterar">
+                            <img src="imagens/editar.png" alt="Alterar">
+                        </div>
+                        <div class="btn-dica-quadrado" onclick="irParaMenuApagar()" title="Apagar">
+                            <img src="imagens/apagar.png" alt="Apagar">
+                        </div>
+                    </div>
+
+                    <div class="btn-voltar-icone" onclick="irParaHub()" style="margin-top: 30px;">
                         <img src="imagens/voltar.png" alt="Voltar">
-                        <span>Voltar</span>
+                        <span>Início</span>
                     </div>
                 </div>
 
@@ -1291,24 +1443,24 @@ button,
                     </div>
                 </div>
 
-<div id="menu-apagar-raiz" class="menu" style="display: none;">
-    <h2>O que você deseja apagar?</h2>
-    
-    <div class="grid-opcoes-central">
-        <div class="card-opcao-gerenciar" onclick="abrirApagarPalavras()">
-            <button class="btn-apagar-rosa">Palavra</button>
-        </div>
+            <div id="menu-apagar-raiz" class="menu" style="display: none;">
+                <h2>O que você deseja apagar?</h2>
+                
+                <div class="grid-opcoes-central">
+                    <div class="card-opcao-gerenciar" onclick="abrirApagarPalavras()">
+                        <button class="btn-apagar-rosa">Palavra</button>
+                    </div>
 
-        <div class="card-opcao-gerenciar">
-            <button class="btn-apagar-rosa" onclick="abrirMenuApagarDicionarios()">Dicionário</button>
-        </div>
-    </div>
+                    <div class="card-opcao-gerenciar">
+                        <button class="btn-apagar-rosa" onclick="abrirMenuApagarDicionarios()">Dicionário</button>
+                    </div>
+                </div>
 
-    <div class="btn-voltar-icone" onclick="irParaDicionariosRaiz()">
-        <img src="imagens/voltar.png" alt="Voltar">
-        <span>Voltar</span>
-    </div>
-</div>
+                <div class="btn-voltar-icone" onclick="irParaDicionariosRaiz()">
+                    <img src="imagens/voltar.png" alt="Voltar">
+                    <span>Voltar</span>
+                </div>
+            </div>
 
 
             <div id="menu-lista-apagar-palavras" class="menu" style="display: none;">
@@ -1331,16 +1483,16 @@ button,
                 </div>
             </div>
 
-<div id="menu-escolha-dicionario-apagar" class="menu" style="display: none;">
-    <h2>Escolha o dicionário para apagar</h2>
-    
-    <div id="lista-dicionarios-apagar" class="grid-dicionarios"></div>
+            <div id="menu-escolha-dicionario-apagar" class="menu" style="display: none;">
+                <h2>Escolha o dicionário para apagar</h2>
+                
+                <div id="lista-dicionarios-apagar" class="grid-dicionarios"></div>
 
-    <div class="btn-voltar-icone" onclick="voltarParaMenuApagarRaiz()">
-        <img src="imagens/voltar.png" alt="Voltar">
-        <span>Voltar</span>
-    </div>
-</div>
+                <div class="btn-voltar-icone" onclick="voltarParaMenuApagarRaiz()">
+                    <img src="imagens/voltar.png" alt="Voltar">
+                    <span>Voltar</span>
+                </div>
+            </div>
 
                 <div id="menu-meus-erros" class="menu" style="display:none">
                     <div id="area-meus-erros" style="display: block;">
@@ -1350,7 +1502,7 @@ button,
                     <div style="display: flex; gap: 40px; justify-content: center; width: 100%;">
                         <div class="btn-voltar-icone" onclick="irParaHub()">
                             <img src="imagens/voltar.png" alt="Voltar">
-                            <span>Voltar</span>
+                            <span>Início</span>
                         </div>
                         <div class="btn-voltar-icone" onclick="limparErrosBanco()">
                             <img src="imagens/limpar.png" alt="Limpar">
@@ -1382,16 +1534,68 @@ button,
 
                     <div class="btn-voltar-icone" onclick="irParaHub()" style="margin-top: 20px;">
                         <img src="imagens/voltar.png" alt="Voltar">
-                        <span>Voltar</span>
+                        <span>Início</span>
                     </div>
                 </div>
+
+<div id="menu-dicas" class="menu-secao" style="display: none;">
+    <h2 id="titulo-menu-dicas">O que você deseja fazer?</h2>
+
+    <div id="hub-dicas-inicial" class="hub-dicas-grid">
+        <div class="btn-dica-quadrado" onclick="navegarDicas('visualizar')">
+            <img src="imagens/visualizar.png" alt="Visualizar">
+        </div>
+        <div class="btn-dica-quadrado" onclick="navegarDicas('adicionar')">
+            <img src="imagens/adicionar.png" alt="Adicionar">
+        </div>
+        <div class="btn-dica-quadrado" onclick="navegarDicas('editar')">
+            <img src="imagens/editar.png" alt="Editar">
+        </div>
+        <div class="btn-dica-quadrado" onclick="navegarDicas('apagar')">
+            <img src="imagens/apagar.png" alt="Apagar">
+        </div>
+    </div>
+
+    <div id="area-adicionar-dica" style="display:none; width: 100%; margin-top: 20px;">
+        <input type="text" id="add-dica-assunto" placeholder="Assunto (Título)">
+        <input type="text" id="add-dica-explicacao" placeholder="Breve explicação (prévia)">
+        <textarea id="add-dica-texto" rows="5" placeholder="Texto completo da dica..."></textarea>
+        
+        <div style="display: flex; justify-content: center; gap: 40px; margin-top: 5px;">
+            <div class="btn-voltar-icone" onclick="navegarDicas('voltar-hub')">
+                <img src="imagens/voltar.png" alt="Voltar">
+                <span>Voltar</span>
+            </div>
+            <div class="btn-voltar-icone" onclick="salvarDicaNoBanco()">
+                <img src="imagens/salvar.png" alt="Salvar">
+                <span>Salvar</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="area-visualizar-dicas" style="display:none; width: 100%;">
+        <div id="lista-dicas-container" class="container-dicas"></div>
+        
+        <div style="display: flex; justify-content: center; margin-top: 30px;">
+            <div class="btn-voltar-icone" onclick="navegarDicas('voltar-hub')">
+                <img src="imagens/voltar.png" alt="Voltar">
+                <span>Voltar</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="btn-inicio-dicas" class="btn-voltar-icone" onclick="irParaHub()" style="margin-top: 30px;">
+        <img src="imagens/voltar.png" alt="Início">
+        <span>Início</span>
+    </div>
+</div>
 
                 <div id="menu-temas" class="menu" style="display:none">
                     <h2>Escolha o dicionário</h2>
                     <div id="lista-temas-botoes" class="grid-temas"></div>
                     <div class="btn-voltar-icone" onclick="irParaHub()">
                         <img src="imagens/voltar.png" alt="Voltar">
-                        <span>Voltar</span>
+                        <span>Início</span>
                     </div>
                 </div>
 
