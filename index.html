@@ -7,21 +7,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
 
-/* Regra específica para Mobile (telas menores que 480px) */
 @media screen and (max-width: 480px) {
-    .btn-dica-quadrado {
-        width: 62px;  /* Redução leve para garantir o encaixe */
+    /* Ajusta os botões de ambos os menus no mobile */
+    #menu-dicionarios-raiz .btn-dica-quadrado,
+    #menu-dicas .btn-dica-quadrado {
+        width: 62px;    /* Tamanho reduzido para caber lado a lado */
         height: 62px;
-        flex-shrink: 0; /* Impede que o botão seja "esmagado" pelo navegador */
+        flex-shrink: 0; /* Impede que o botão seja esmagado */
     }
 
-    .btn-dica-quadrado img {
-        width: 30px;
-        height: 30px;
+    #menu-dicionarios-raiz .btn-dica-quadrado img,
+    #menu-dicas .btn-dica-quadrado img {
+        width: 28px;
+        height: 28px;
     }
 
     .hub-dicas-grid {
-        gap: 8px; /* Espaçamento mais apertado entre os ícones */
+        gap: 8px; /* Diminui o espaço entre botões no mobile */
+        padding: 0 5px;
     }
 }
 
@@ -35,10 +38,10 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 10px;        /* Espaçamento reduzido para caber melhor */
+    gap: 10px;         /* Espaço reduzido */
     width: 100%;
     margin-top: 20px;
-    flex-wrap: nowrap; /* FORÇA a ficarem lado a lado */
+    flex-wrap: nowrap; /* Garante que os 4 fiquem na mesma linha */
 }
 
         /* Botão Quadrado Rosa para Dicas */
