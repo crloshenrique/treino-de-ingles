@@ -44,6 +44,128 @@
     }
 }
 
+/* Força a lista de apagar a seguir o padrão exato da lista de editar */
+#lista-dicas-apagar {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 6px; /* Gap padrão que você usa no editar */
+    padding: 10px 0; /* Espaçamento interno da lista */
+}
+
+/* Card de Apagar: Linha fina rosa padrão */
+#lista-dicas-apagar .item-dicionario {
+    width: 100%;
+    min-height: 85px; 
+    padding: 15px 20px;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.03); /* Fundo fixo sutil */
+    border-radius: 12px;
+    
+    /* A linha rosa fina que você aprovou */
+    border: 1px solid rgba(255, 0, 127, 0.3);  
+    
+    transition: all 0.3s ease-in-out;
+}
+
+/* Efeito de Hover: APENAS a borda engrossa/brilha e o card sobe */
+#lista-dicas-apagar .item-dicionario:hover {
+    border-color: #ff007f; /* Rosa brilhante ao passar o mouse */
+    transform: translateY(-2px); /* Efeito de subida */
+    box-shadow: 0 4px 15px rgba(255, 0, 127, 0.2); /* Brilho da borda */
+    
+    /* background-color REMOVIDO para não mudar a cor do fundo */
+}
+
+/* Layout do menu para empurrar o botão para baixo */
+#menu-apagar-dicas-lista {
+    display: none;
+    flex-direction: column !important;
+    align-items: center;
+    width: 100%;
+}
+
+#menu-apagar-dicas-lista .btn-voltar-icone {
+    margin: 30px 0; /* Espaço maior para o botão não colar na lista */
+    display: flex;
+    justify-content: center;
+}
+
+.btn-apagar-direto {
+    background: rgba(241, 71, 56, 0.1);
+    border: 1px solid rgba(241, 71, 56, 0.4);
+    border-radius: 8px;
+    padding: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-apagar-direto:hover {
+    background: #f14738;
+    transform: scale(1.1);
+}
+
+/* Efeito de borda forte em todo o card no Visualizar */
+.card-dica {
+    border: 2px solid #333; /* Borda padrão escura para não dar salto */
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.card-dica:hover {
+    /* A borda assume a cor rosa forte */
+    border-color: #ff007f !important;
+    
+    /* Adiciona um brilho externo para deixar o efeito mais "neon/forte" */
+    box-shadow: 0 0 15px rgba(255, 0, 127, 0.4);
+    
+    /* Leve destaque no tamanho se quiser, ou mantenha 1.0 para fixo */
+    transform: scale(1.01); 
+}
+
+/* Estilo idêntico ao menu Revisão para os dois campos */
+#edit-dica-explicacao::-webkit-scrollbar,
+#add-dica-texto::-webkit-scrollbar {
+    width: 8px;
+}
+
+#edit-dica-explicacao::-webkit-scrollbar-track,
+#add-dica-texto::-webkit-scrollbar-track {
+    background: transparent; 
+}
+
+#edit-dica-explicacao::-webkit-scrollbar-thumb,
+#add-dica-texto::-webkit-scrollbar-thumb {
+    background: #ff007f;
+    border-radius: 10px;
+    /* Removida a borda que criava o efeito preto */
+}
+
+#edit-dica-explicacao::-webkit-scrollbar-thumb:hover,
+#add-dica-texto::-webkit-scrollbar-thumb:hover {
+    background: #ff007f;
+}
+
+/* Remove botões e o redimensionador de ambos para evitar furos na borda do campo */
+#edit-dica-explicacao::-webkit-scrollbar-button,
+#add-dica-texto::-webkit-scrollbar-button {
+    display: none;
+}
+
+#edit-dica-explicacao,
+#add-dica-texto {
+    resize: none !important;
+    padding-right: 8px; /* Espaço para o texto não encostar na barra rosa */
+    overflow-y: auto;
+}
+
 /* Adicione isso ao seu <style> */
 #menu-dicionarios-raiz {
     flex-direction: column;
@@ -1584,57 +1706,104 @@
                     </div>
                 </div>
 
-<div id="menu-dicas" class="menu-secao" style="display: none;">
-    <h2 id="titulo-menu-dicas" style="width: 100%; text-align: center; margin-bottom: 20px;">O que você deseja fazer?</h2>
+                <div id="menu-dicas" class="menu-secao" style="display: none;">
+                    <h2 id="titulo-menu-dicas" style="width: 100%; text-align: center; margin-bottom: 20px;">O que você deseja fazer?</h2>
 
-    <div id="hub-dicas-inicial" class="hub-dicas-grid">
-        <div class="btn-dica-quadrado" onclick="navegarDicas('visualizar')">
-            <img src="imagens/visualizar.png" alt="Visualizar">
-        </div>
-        <div class="btn-dica-quadrado" onclick="navegarDicas('adicionar')">
-            <img src="imagens/adicionar.png" alt="Adicionar">
-        </div>
-        <div class="btn-dica-quadrado" onclick="navegarDicas('editar')">
-            <img src="imagens/editar.png" alt="Editar">
-        </div>
-        <div class="btn-dica-quadrado" onclick="navegarDicas('apagar')">
-            <img src="imagens/apagar.png" alt="Apagar">
-        </div>
-    </div>
+                    <div id="hub-dicas-inicial" class="hub-dicas-grid">
+                        <div class="btn-dica-quadrado" onclick="navegarDicas('visualizar')">
+                            <img src="imagens/visualizar.png" alt="Visualizar">
+                        </div>
+                        <div class="btn-dica-quadrado" onclick="navegarDicas('adicionar')">
+                            <img src="imagens/adicionar.png" alt="Adicionar">
+                        </div>
+                        <div class="btn-dica-quadrado" onclick="navegarDicas('editar')">
+                            <img src="imagens/editar.png" alt="Editar">
+                        </div>
+                        <div class="btn-dica-quadrado" onclick="navegarDicas('apagar')">
+                            <img src="imagens/apagar.png" alt="Apagar">
+                        </div>
+                    </div>
 
-    <div id="area-adicionar-dica" style="display:none; width: 100%; margin-top: 20px;">
-        <input type="text" id="add-dica-assunto" placeholder="Assunto">
-        <input type="text" id="add-dica-explicacao" placeholder="Descrição">
-        <textarea id="add-dica-texto" rows="5" placeholder="Explicação"></textarea>
-        
-        <div style="display: flex; justify-content: center; gap: 40px; margin-top: 5px;">
-            <div class="btn-voltar-icone" onclick="navegarDicas('voltar-hub')">
-                <img src="imagens/voltar.png" alt="Voltar">
-                <span>Voltar</span>
-            </div>
-            <div class="btn-voltar-icone" onclick="salvarDicaNoBanco()">
-                <img src="imagens/salvar.png" alt="Salvar">
-                <span>Salvar</span>
-            </div>
-        </div>
-    </div>
+                    <div id="area-adicionar-dica" style="display:none; width: 100%; margin-top: 20px;">
+                        <div id="feedback-adicionar-dica" style="display: none; width: 95%; max-width: 800px; margin: 0 auto 10px auto;"></div>
 
-    <div id="area-visualizar-dicas" style="display:none; width: 100%;">
-        <div id="lista-dicas-container" class="container-dicas"></div>
-        
-        <div style="display: flex; justify-content: center; margin-top: 30px;">
-            <div class="btn-voltar-icone" onclick="navegarDicas('voltar-hub')">
-                <img src="imagens/voltar.png" alt="Voltar">
-                <span>Voltar</span>
-            </div>
-        </div>
-    </div>
+                        <input type="text" id="add-dica-assunto" placeholder="Assunto">
+                        <input type="text" id="add-dica-explicacao" placeholder="Descrição">
+                        <textarea id="add-dica-texto" rows="5" placeholder="Explicação"></textarea>
+                        
+                        <div style="display: flex; justify-content: center; gap: 40px; margin-top: 5px;">
+                            <div class="btn-voltar-icone" onclick="navegarDicas('voltar-hub')">
+                                <img src="imagens/voltar.png" alt="Voltar">
+                                <span>Voltar</span>
+                            </div>
+                            <div class="btn-voltar-icone" onclick="salvarDicaNoBanco()">
+                                <img src="imagens/salvar.png" alt="Salvar">
+                                <span>Salvar</span>
+                            </div>
+                        </div>
+                    </div>
 
-    <div id="btn-inicio-dicas" class="btn-voltar-icone" onclick="irParaHub()" style="margin-top: 35px;">
-        <img src="imagens/voltar.png" alt="Início">
-        <span>Início</span>
-    </div>
-</div>
+                    <div id="menu-editar-dicas-lista" style="display: none; flex-direction: column; align-items: center; width: 100%; margin-top: 20px;">
+                        <div id="lista-dicas-editar" style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                            </div>
+                        
+                        <div class="btn-voltar-icone" onclick="navegarDicas('voltar-hub')" style="margin-top: 30px;">
+                            <img src="imagens/voltar.png" alt="Voltar">
+                            <span>Voltar</span>
+                        </div>
+                    </div>
+
+                    <div id="menu-editar-dica-campos" style="display: none; margin-top: 20px; flex-direction: column; align-items: center; width: 100%;">
+                        
+                        <div id="feedback-editar-dica" style="display: none; width: 95%; max-width: 800px; margin-bottom: 10px;"></div>
+
+                        <input type="text" id="edit-dica-titulo" placeholder="Título do Assunto" class="input-estilizado" style="width: 95%; max-width: 800px;">
+                        <input type="text" id="edit-dica-descricao" placeholder="Breve descrição" class="input-estilizado" style="width: 95%; max-width: 800px;">
+                        
+                        <textarea id="edit-dica-explicacao" placeholder="Explicação completa" class="input-estilizado" 
+                                style="height: 150px; width: 95%; max-width: 800px; resize: none;"></textarea>
+
+                        <div style="display: flex; gap: 20px; justify-content: center; margin-top: 10px; width: 100%;">
+                            
+                            <div class="btn-voltar-icone" onclick="processarEdicaoDica()">
+                                <img src="imagens/salvar.png" alt="Salvar">
+                                <span>Salvar</span>
+                            </div>
+
+                            <div class="btn-voltar-icone" onclick="navegarDicas('editar')">
+                                <img src="imagens/voltar.png" alt="Voltar">
+                                <span>Voltar</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="area-visualizar-dicas" style="display:none; width: 100%;">
+                        <div id="lista-dicas-container" class="container-dicas"></div>
+                        
+                        <div style="justify-content: center; margin-top: 10px;">
+                            <div class="btn-voltar-icone" onclick="navegarDicas('voltar-hub')">
+                                <img src="imagens/voltar.png" alt="Voltar">
+                                <span>Voltar</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="btn-inicio-dicas" class="btn-voltar-icone" onclick="irParaHub()" style="margin-top: 35px;">
+                        <img src="imagens/voltar.png" alt="Início">
+                        <span>Início</span>
+                    </div>
+                </div>
+
+                <div id="menu-apagar-dicas-lista" class="menu-container" style="display: none;">
+                    <div id="lista-dicas-apagar" class="lista-itens-gerenciar">
+                        </div>
+
+                    <div class="btn-voltar-icone" onclick="navegarDicas('voltar-hub')" style="margin-top: 20px;">
+                        <img src="imagens/voltar.png" alt="Voltar">
+                        <span>Voltar</span>
+                    </div>
+                </div>
+
 
                 <div id="menu-temas" class="menu" style="display:none">
                     <h2>Escolha o dicionário</h2>

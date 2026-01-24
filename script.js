@@ -3,6 +3,11 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // SELETORES DE MENUS
+const menuApagarDicasLista = document.getElementById("menu-apagar-dicas-lista");
+const listaDicasApagar = document.getElementById("lista-dicas-apagar");
+const menuEditarDicasLista = document.getElementById("menu-editar-dicas-lista");
+const listaDicasEditar = document.getElementById("lista-dicas-editar");
+const menuEditarDicaCampos = document.getElementById("menu-editar-dica-campos");
 const menuDicas = document.getElementById("menu-dicas");
 const menuEscolhaDicionarioApagar = document.getElementById("menu-escolha-dicionario-apagar");
 const listaDicionariosApagar = document.getElementById("lista-dicionarios-apagar");
@@ -35,7 +40,9 @@ const menuAlterarPalavras = document.getElementById("menu-alterar-palavras");
 const listaAlterarPalavras = document.getElementById("lista-alterar-palavras");
 const telaEdicaoCampos = document.getElementById("tela-edicao-campos");
 
+let dadosDicasParaApagar = []; // Global para o filtro
 let cardDicionarioEmConfirmacao = null;
+let dicaSendoEditada = null; // Armazena o objeto da dica selecionada
 let itemEmConfirmacao = null;
 let dadosPalavrasParaApagar = []; // Global para armazenar o que veio do banco
 let categoriasDisponiveis = [];
@@ -246,7 +253,8 @@ function handleMenuClick() {
 function esconderTodosMenus() {
     const menus = [menuBoasVindas, menuHub, menuDicionariosRaiz, menuGerenciarDicionarios, areaAdicionarDicionario, 
                    menuTemas, menuPrincipal, menuNiveis, menuIntervalos, visualizacaoPalavras, menuPerfil, menuMeusErros,
-                   menuAlterarPalavras, telaEdicaoCampos, menuConfiguracoes, menuApagarRaiz, menuListaApagarPalavras, menuEscolhaDicionarioApagar, menuDicas];
+                   menuAlterarPalavras, telaEdicaoCampos, menuConfiguracoes, menuApagarRaiz, menuListaApagarPalavras, menuEscolhaDicionarioApagar, menuDicas,
+                   menuEditarDicasLista, menuEditarDicaCampos, menuApagarDicasLista];
     menus.forEach(m => { if(m) m.style.display = "none"; });
     container.classList.remove("modo-largo");
     interromperJogo();
@@ -1632,21 +1640,47 @@ function toggleFormDica() {
 }
 
 async function salvarDicaNoBanco() {
-    const assunto = document.getElementById("add-dica-assunto").value;
-    const explicacao = document.getElementById("add-dica-explicacao").value;
-    const texto = document.getElementById("add-dica-texto").value;
+    const assunto = document.getElementById("add-dica-assunto").value.trim();
+    const explicacao = document.getElementById("add-dica-explicacao").value.trim();
+    const texto = document.getElementById("add-dica-texto").value.trim();
+    const feedbackAdd = document.getElementById("feedback-adicionar-dica");
+    
+    const btnContainer = document.querySelector("#area-adicionar-dica .btn-voltar-icone[onclick*='salvarDicaNoBanco']");
 
-    if (!assunto || !explicacao || !texto) return alert("Preencha todos os campos!");
+    if (!assunto || !explicacao || !texto) {
+        exibirFeedback("feedback-adicionar-dica", "Por favor, preencha todos os campos.", "erro");
+        return;
+    }
 
-    // Salva incluindo a nova coluna explicacao
-    const { error } = await _supabase.from('dicas').insert([{ assunto, explicacao, texto }]);
+    if (btnContainer) btnContainer.style.pointerEvents = "none";
 
-    if (!error) {
+    const { error } = await _supabase
+        .from('dicas')
+        .insert([{ 
+            assunto: assunto, 
+            explicacao: explicacao, 
+            texto: texto 
+        }]);
+
+    if (error) {
+        exibirFeedback("feedback-adicionar-dica", "Erro ao salvar: " + error.message, "erro");
+        if (btnContainer) btnContainer.style.pointerEvents = "auto";
+    } else {
+        exibirFeedback("feedback-adicionar-dica", "Dica adicionada com sucesso!", "sucesso");
+        
+        // Limpa os campos
         document.getElementById("add-dica-assunto").value = "";
         document.getElementById("add-dica-explicacao").value = "";
         document.getElementById("add-dica-texto").value = "";
-        toggleFormDica();
-        carregarDicas();
+
+        setTimeout(() => {
+            if (btnContainer) btnContainer.style.pointerEvents = "auto";
+            
+            // FAZ A MENSAGEM SUMIR antes de navegar ou ao navegar
+            if (feedbackAdd) feedbackAdd.style.display = "none";
+            
+            navegarDicas('voltar-hub');
+        }, 1500); // Tempo que a mensagem fica visível
     }
 }
 
@@ -1658,6 +1692,12 @@ async function carregarDicas() {
         .order('created_at', { ascending: false });
 
     if (error) return;
+
+    // Mensagem caso não existam dicas
+    if (!data || data.length === 0) {
+        container.innerHTML = "<div style='color: white; opacity: 0.7; text-align: center; padding: 20px; width: 100%;'>Nenhuma dica encontrada.</div>";
+        return;
+    }
 
     container.innerHTML = "";
     data.forEach(dica => {
@@ -1702,28 +1742,50 @@ function navegarDicas(destino) {
     const hub = document.getElementById("hub-dicas-inicial");
     const areaAdd = document.getElementById("area-adicionar-dica");
     const areaVer = document.getElementById("area-visualizar-dicas");
+    const areaEditarLista = document.getElementById("menu-editar-dicas-lista");
+    const areaEditarCampos = document.getElementById("menu-editar-dica-campos");
+    const areaApagarLista = document.getElementById("menu-apagar-dicas-lista"); 
     const titulo = document.getElementById("titulo-menu-dicas");
     const btnInicioGeral = document.getElementById("btn-inicio-dicas");
 
-    // Esconde tudo
-    hub.style.display = "none";
-    areaAdd.style.display = "none";
-    areaVer.style.display = "none";
-    btnInicioGeral.style.display = "none"; 
+    // Esconde absolutamente tudo primeiro (usando verificação de existência para evitar erros)
+    if (hub) hub.style.display = "none";
+    if (areaAdd) areaAdd.style.display = "none";
+    if (areaVer) areaVer.style.display = "none";
+    if (areaEditarLista) areaEditarLista.style.display = "none";
+    if (areaEditarCampos) areaEditarCampos.style.display = "none";
+    if (areaApagarLista) areaApagarLista.style.display = "none";
+    if (btnInicioGeral) btnInicioGeral.style.display = "none"; 
 
     if (destino === 'visualizar') {
-        titulo.textContent = "Dicas";
-        areaVer.style.display = "block";
+        if (titulo) titulo.textContent = "Dicas";
+        if (areaVer) areaVer.style.display = "block";
         carregarDicas();
     } 
     else if (destino === 'adicionar') {
-        titulo.textContent = "Adicionar nova dica";
-        areaAdd.style.display = "block";
+        if (titulo) titulo.textContent = "Adicionar nova dica";
+        if (areaAdd) areaAdd.style.display = "block";
     } 
+    else if (destino === 'editar') {
+        if (titulo) titulo.textContent = "Escolha para editar";
+        if (areaEditarLista) areaEditarLista.style.display = "flex";
+        abrirListagemEditarDicas();
+    }
+    else if (destino === 'apagar') {
+        if (titulo) titulo.textContent = "Toque para apagar";
+        if (areaApagarLista) {
+            areaApagarLista.style.display = "flex";
+            abrirListagemApagarDicas(); 
+        }
+    }
+    else if (destino === 'campos-edicao') {
+        if (titulo) titulo.textContent = "Edite a dica";
+        if (areaEditarCampos) areaEditarCampos.style.display = "flex";
+    }
     else if (destino === 'voltar-hub') {
-        titulo.textContent = "O que você deseja fazer?";
-        hub.style.display = "flex";
-        btnInicioGeral.style.display = "flex"; // Mostra o "Início" apenas aqui
+        if (titulo) titulo.textContent = "O que você deseja fazer?";
+        if (hub) hub.style.display = "flex";
+        if (btnInicioGeral) btnInicioGeral.style.display = "flex"; 
     }
 }
 
@@ -1731,4 +1793,178 @@ function irParaDicas() {
     esconderTodosMenus();
     document.getElementById("menu-dicas").style.display = "flex";
     navegarDicas('voltar-hub');
+}
+
+async function abrirListagemEditarDicas() {
+    const listaDicasEditar = document.getElementById("lista-dicas-editar");
+    
+    // 1. Limpa e mostra carregando
+    listaDicasEditar.innerHTML = "<div style='color: white; padding: 20px;'>Carregando dicas...</div>";
+    listaDicasEditar.style.width = "100%";
+
+    try {
+        // 2. Busca os dados
+        const { data, error } = await _supabase
+            .from('dicas')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        // 3. Verifica se está vazio
+        if (!data || data.length === 0) {
+            listaDicasEditar.innerHTML = "<div style='color: white; opacity: 0.7; text-align: center; padding: 20px; width: 100%;'>Nenhuma dica encontrada.</div>";
+            return;
+        }
+
+        // 4. Renderiza os cards
+        listaDicasEditar.innerHTML = "";
+        data.forEach(dica => {
+            const card = document.createElement("div");
+            card.className = "card-dica";
+            card.style.cursor = "pointer";
+            card.style.width = "90%";
+            card.style.margin = "0 auto"; 
+            
+            // Ajuste de aproximação: margin-bottom no span e margin-top 0 no p
+            card.innerHTML = `
+                <span class="dica-assunto" style="display: block; margin-bottom: 2px;">${dica.assunto}</span>
+                <p class="dica-explicacao" style="display: block !important; margin-top: 0px !important;">${dica.explicacao}</p>
+            `;
+            
+            card.onclick = () => preencherFormularioEdicao(dica);
+            listaDicasEditar.appendChild(card);
+        });
+    } catch (err) {
+        console.error(err);
+        listaDicasEditar.innerHTML = "<div style='color: white;'>Erro ao carregar dicas.</div>";
+    }
+}
+
+function preencherFormularioEdicao(dica) {
+    dicaSendoEditada = dica;
+    
+    // IDs do teu HTML (index.html) sendo preenchidos com as colunas corretas do Banco
+    document.getElementById("edit-dica-titulo").value = dica.assunto || "";    // Coluna: assunto
+    document.getElementById("edit-dica-descricao").value = dica.explicacao || ""; // Coluna: explicacao
+    document.getElementById("edit-dica-explicacao").value = dica.texto || "";     // Coluna: texto (ajuste se necessário)
+    
+    document.getElementById("feedback-editar-dica").style.display = "none";
+    
+    navegarDicas('campos-edicao');
+}
+
+async function processarEdicaoDica() {
+    const tituloVal = document.getElementById("edit-dica-titulo").value.trim();
+    const descricaoVal = document.getElementById("edit-dica-descricao").value.trim();
+    const textoVal = document.getElementById("edit-dica-explicacao").value.trim();
+    
+    // O botão agora não muda mais o texto, apenas processa
+    const btnContainer = document.querySelector("#menu-editar-dica-campos .btn-voltar-icone[onclick*='processarEdicaoDica']");
+
+    if (!tituloVal || !descricaoVal || !textoVal) {
+        exibirFeedback("feedback-editar-dica", "Por favor, preencha todos os campos.", "erro");
+        return;
+    }
+
+    if (btnContainer) btnContainer.style.pointerEvents = "none";
+
+    const { error } = await _supabase
+        .from('dicas')
+        .update({ 
+            assunto: tituloVal,      
+            explicacao: descricaoVal, 
+            texto: textoVal          
+        })
+        .eq('id', dicaSendoEditada.id);
+
+    if (error) {
+        exibirFeedback("feedback-editar-dica", "Erro ao atualizar: " + error.message, "erro");
+        if (btnContainer) btnContainer.style.pointerEvents = "auto";
+    } else {
+        exibirFeedback("feedback-editar-dica", "Dica atualizada com sucesso!", "sucesso");
+        setTimeout(() => {
+            if (btnContainer) btnContainer.style.pointerEvents = "auto";
+            navegarDicas('editar'); 
+        }, 1500);
+    }
+}
+
+
+async function abrirListagemApagarDicas() {
+    const listaContainer = document.getElementById("lista-dicas-apagar");
+    listaContainer.innerHTML = "<div style='color: white; padding: 20px;'>Carregando dicas...</div>";
+    
+    const { data, error } = await _supabase
+        .from('dicas')
+        .select('*')
+        .order('assunto', { ascending: true });
+    
+    if (error) {
+        listaContainer.innerHTML = "<div style='color: white;'>Erro ao carregar.</div>";
+        return;
+    }
+
+    dadosDicasParaApagar = data || [];
+    renderizarListaApagarDicas(dadosDicasParaApagar);
+}
+
+function renderizarListaApagarDicas(lista) {
+    const listaContainer = document.getElementById("lista-dicas-apagar");
+    listaContainer.innerHTML = "";
+    
+    if (lista.length === 0) {
+        listaContainer.innerHTML = "<div style='color: white; opacity: 0.7;'>Nenhuma dica encontrada.</div>";
+        return;
+    }
+
+    lista.forEach(dica => {
+        const div = document.createElement("div");
+        div.className = "item-dicionario"; // Mesma classe usada no Editar para ficar um abaixo do outro
+        div.style.cursor = "pointer";
+        div.style.marginBottom = "10px"; // Garante o espaçamento entre os cards
+
+        // Conteúdo inicial (Assunto e Explicação)
+        div.innerHTML = `
+            <div class="col-palavra-info">
+                <span style="color: #ff007f; font-weight: bold; display: block;">${dica.assunto}</span>
+                <span class="pronuncia-pequena" style="display: block; margin-top: 5px;">${dica.explicacao}</span>
+            </div>
+        `;
+
+        div.onclick = async () => {
+            if (!div.classList.contains("confirmar-exclusao")) {
+                // Primeiro clique: Transforma o card no botão de apagar
+                div.classList.add("confirmar-exclusao");
+                div.style.backgroundColor = "#352322";
+                div.style.border = "1px solid #f14738";
+                // Localize onde você define o innerHTML quando clica para apagar
+                div.innerHTML = `
+                    <div style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; min-height: 50px;">
+                        <img src="imagens/limpar.png" style="width: 45px; height: auto; filter: brightness(0) invert(1);">
+                    </div>
+                `;
+                
+                // Reset após 3 segundos se não clicar novamente
+                setTimeout(() => {
+                    if (div.parentNode && div.classList.contains("confirmar-exclusao")) {
+                        renderizarListaApagarDicas(dadosDicasParaApagar);
+                    }
+                }, 3000);
+            } else {
+                // Segundo clique: Deleta
+                const { error } = await _supabase.from('dicas').delete().eq('id', dica.id);
+                if (!error) {
+                    div.style.opacity = "0";
+                    div.style.transform = "translateX(50px)"; // Efeito de deslizar ao sair
+                    div.style.transition = "0.3s";
+                    setTimeout(() => abrirListagemApagarDicas(), 300);
+                } else {
+                    alert("Erro ao apagar dica.");
+                }
+            }
+        };
+
+        listaContainer.appendChild(div);
+    });
 }
