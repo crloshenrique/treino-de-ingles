@@ -1649,6 +1649,14 @@ async function salvarDicaNoBanco() {
 
     if (!assunto || !explicacao || !texto) {
         exibirFeedback("feedback-adicionar-dica", "Por favor, preencha todos os campos.", "erro");
+        
+        // Garante alinhamento também na mensagem de erro
+        if (feedbackAdd) {
+            feedbackAdd.style.width = "100%";
+            feedbackAdd.style.boxSizing = "border-box";
+            feedbackAdd.style.textAlign = "center";
+            feedbackAdd.style.margin = "10px 0";
+        }
         return;
     }
 
@@ -1664,10 +1672,24 @@ async function salvarDicaNoBanco() {
 
     if (error) {
         exibirFeedback("feedback-adicionar-dica", "Erro ao salvar: " + error.message, "erro");
+        if (feedbackAdd) {
+            feedbackAdd.style.width = "100%";
+            feedbackAdd.style.boxSizing = "border-box";
+            feedbackAdd.style.textAlign = "center";
+        }
         if (btnContainer) btnContainer.style.pointerEvents = "auto";
     } else {
         exibirFeedback("feedback-adicionar-dica", "Dica adicionada com sucesso!", "sucesso");
         
+        // CORREÇÃO DE ALINHAMENTO:
+        if (feedbackAdd) {
+            feedbackAdd.style.width = "100%";
+            feedbackAdd.style.boxSizing = "border-box";
+            feedbackAdd.style.textAlign = "center";
+            feedbackAdd.style.margin = "10px 0";
+            feedbackAdd.style.display = "block"; // Garante que aparece como bloco
+        }
+
         // Limpa os campos
         document.getElementById("add-dica-assunto").value = "";
         document.getElementById("add-dica-explicacao").value = "";
@@ -1695,31 +1717,34 @@ async function carregarDicas() {
 
     // Mensagem caso não existam dicas
     if (!data || data.length === 0) {
-        container.innerHTML = "<div style='color: white; opacity: 0.7; text-align: center; padding: 20px; width: 100%;'>Nenhuma dica encontrada.</div>";
-        return;
+        container.innerHTML = "<div style='color: white; opacity: 0.7; text-align: center; padding: 20px; width: 100%; box-sizing: border-box;'>Nenhuma dica encontrada.</div>";        return;
     }
 
     container.innerHTML = "";
-    data.forEach(dica => {
+        data.forEach(dica => {
         const card = document.createElement("div");
         card.className = "card-dica";
         
+        // Criamos o HTML do topo normalmente
         card.innerHTML = `
             <div class="dica-header">
                 <span class="dica-assunto">${dica.assunto}</span>
                 <p class="dica-explicacao">${dica.explicacao}</p>
             </div>
-            <div class="dica-texto-completo">${dica.texto}</div>
         `;
+        
+        // AQUI ESTÁ O SEGREDO: Criamos o elemento do texto separado
+        const textoDiv = document.createElement("div");
+        textoDiv.className = "dica-texto-completo";
+        textoDiv.textContent = dica.texto; // textContent preserva os "enters" do banco
+        
+        // Adicionamos o texto dentro do card
+        card.appendChild(textoDiv);
         
         card.onclick = (e) => {
             e.stopPropagation();
             const jaExpandido = card.classList.contains("expandido");
-            
-            // Fecha todos os outros cards (efeito sanfona)
             document.querySelectorAll('.card-dica').forEach(c => c.classList.remove('expandido'));
-            
-            // Se o clicado não estava aberto, abre ele
             if (!jaExpandido) {
                 card.classList.add("expandido");
             }
