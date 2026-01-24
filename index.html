@@ -8,12 +8,28 @@
     <style>
 
 @media screen and (max-width: 480px) {
+    /* Ajusta o espaçamento do conteúdo principal para aproximar os itens da borda */
+    #main-content {
+        padding: 80px 10px 40px 10px !important; /* Reduzido de 20px para 10px nas laterais */
+    }
+
+    /* Remove o padding lateral do menu de dicas para dar mais espaço ao card */
+    #menu-dicas {
+        padding: 20px 0px !important;
+    }
+
+    /* Faz o card ocupar 98% da largura e ajusta o preenchimento interno */
+    .card-dica {
+        width: 98% !important; 
+        padding: 15px 20px !important; /* Ajuste interno para não comprimir o texto */
+    }
+
     /* Ajusta os botões de ambos os menus no mobile */
     #menu-dicionarios-raiz .btn-dica-quadrado,
     #menu-dicas .btn-dica-quadrado {
-        width: 62px;    /* Tamanho reduzido para caber lado a lado */
+        width: 62px;
         height: 62px;
-        flex-shrink: 0; /* Impede que o botão seja esmagado */
+        flex-shrink: 0;
     }
 
     #menu-dicionarios-raiz .btn-dica-quadrado img,
@@ -23,7 +39,7 @@
     }
 
     .hub-dicas-grid {
-        gap: 8px; /* Diminui o espaço entre botões no mobile */
+        gap: 8px;
         padding: 0 5px;
     }
 }
@@ -1368,7 +1384,7 @@
 
                 <div id="menu-dicionarios-raiz" class="menu-container" style="display: none; flex-direction: column; align-items: center;">
                     
-                    <h2 id="titulo-menu-dicas" style="width: 100%; text-align: center; margin-bottom: 20px;">
+                    <h2 id="titulo-menu-dict" style="width: 100%; text-align: center; margin-bottom: 20px;">
                         O que você deseja fazer?
                     </h2>
 
@@ -1557,7 +1573,7 @@
                 </div>
 
 <div id="menu-dicas" class="menu-secao" style="display: none;">
-    <h2 id="titulo-menu-dicas">O que você deseja fazer?</h2>
+    <h2 id="titulo-menu-dicas" style="width: 100%; text-align: center; margin-bottom: 20px;">O que você deseja fazer?</h2>
 
     <div id="hub-dicas-inicial" class="hub-dicas-grid">
         <div class="btn-dica-quadrado" onclick="navegarDicas('visualizar')">
@@ -1575,9 +1591,9 @@
     </div>
 
     <div id="area-adicionar-dica" style="display:none; width: 100%; margin-top: 20px;">
-        <input type="text" id="add-dica-assunto" placeholder="Assunto (Título)">
-        <input type="text" id="add-dica-explicacao" placeholder="Breve explicação (prévia)">
-        <textarea id="add-dica-texto" rows="5" placeholder="Texto completo da dica..."></textarea>
+        <input type="text" id="add-dica-assunto" placeholder="Assunto">
+        <input type="text" id="add-dica-explicacao" placeholder="Descrição">
+        <textarea id="add-dica-texto" rows="5" placeholder="Explicação"></textarea>
         
         <div style="display: flex; justify-content: center; gap: 40px; margin-top: 5px;">
             <div class="btn-voltar-icone" onclick="navegarDicas('voltar-hub')">

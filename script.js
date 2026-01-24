@@ -1712,7 +1712,7 @@ function navegarDicas(destino) {
         carregarDicas();
     } 
     else if (destino === 'adicionar') {
-        titulo.textContent = "Nova dica";
+        titulo.textContent = "Adicionar nova dica";
         areaAdd.style.display = "block";
     } 
     else if (destino === 'voltar-hub') {
