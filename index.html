@@ -96,55 +96,67 @@
     padding: 20px;
     box-sizing: border-box; /* Importante para não "fugir" da tela */
 }
-
-        .container-dicas {
-            display: flex;
-            flex-direction: column;
-            gap: 8px; /* Mantém os cards próximos */
-            width: 100%;
-            margin-top: 20px;
-            margin-bottom: 30px;
-            align-items: center; /* Centraliza os cards perfeitamente */
-        }
+.container-dicas {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    margin-top: 20px;
+    margin-bottom: 30px;
+    /* MUDANÇA: Alinha os itens pelo topo */
+    align-items: flex-start; 
+}
 
 .card-dica {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 0, 127, 0.2);
     border-radius: 12px;
-    padding: 20px 20px; /* Reduzi um pouco o padding para telas menores */
+    /* Padding igual em cima e embaixo para centralizar */
+    padding: 20px; 
     cursor: pointer;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-
-    /* CORREÇÃO AQUI */
-    width: 95%;          /* Use porcentagem para respeitar o container pai */
-    max-width: 800px;    /* Mantém o limite para telas grandes */
-    box-sizing: border-box; /* Garante que o padding não aumente a largura total */
-    
+    width: 95%;
+    max-width: 800px;
+    box-sizing: border-box;
     min-height: 110px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
     text-align: left;
-    margin: 0 auto;      /* Garante a centralização horizontal */
+    margin: 0 auto;
+
+    overflow: hidden; /* Essencial para esconder o texto antes da hora */
+    transition: 
+        max-height 2.0s cubic-bezier(0.4, 0, 0.2, 1),
+        padding 0.4s ease,
+        background-color 0.3s ease;
+    
+    /* Estado fechado */
+    max-height: 110px; 
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centraliza verticalmente enquanto fechado */
 }
 
-        .card-dica.expandido {
-            height: auto;
-            min-height: 110px;
-            max-height: 3000px;
-            padding: 30px 20px;
-            justify-content: flex-start;
-        }
+/* Localize sua classe .card-dica.expandido e substitua por esta */
+.card-dica.expandido {
+    /* Estado aberto */
+    max-height: 1000px; /* Um valor alto o suficiente para qualquer texto */
+    padding-bottom: 30px;
+    justify-content: flex-start; /* Trava no topo ao abrir */
+    padding-top: 25px;
+}
 
 
-        /* Assunto: Exatamente como o usuário escreveu */
-        .dica-assunto {
-            color: #ff007f;
-            font-weight: bold;
-            font-size: 1.1rem;
-            display: block;
-            margin-bottom: 4px;
-        }
+
+.dica-assunto {
+    color: #ff007f;
+    font-weight: bold;
+    font-size: 1.1rem;
+    display: block;
+    /* Remova qualquer margem que possa deslocar o texto */
+    margin-top: 0; 
+    margin-bottom: 4px;
+}
 
         .dica-explicacao {
             color: #ffffff;

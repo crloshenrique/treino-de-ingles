@@ -1664,7 +1664,6 @@ async function carregarDicas() {
         const card = document.createElement("div");
         card.className = "card-dica";
         
-        // Criamos uma div interna apenas para o cabeçalho para facilitar o alinhamento
         card.innerHTML = `
             <div class="dica-header">
                 <span class="dica-assunto">${dica.assunto}</span>
@@ -1676,8 +1675,14 @@ async function carregarDicas() {
         card.onclick = (e) => {
             e.stopPropagation();
             const jaExpandido = card.classList.contains("expandido");
+            
+            // Fecha todos os outros cards (efeito sanfona)
             document.querySelectorAll('.card-dica').forEach(c => c.classList.remove('expandido'));
-            if (!jaExpandido) card.classList.add("expandido");
+            
+            // Se o clicado não estava aberto, abre ele
+            if (!jaExpandido) {
+                card.classList.add("expandido");
+            }
         };
         
         container.appendChild(card);
