@@ -3,6 +3,9 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // SELETORES DE MENUS
+// Efeitos Sonoros
+const somAcerto = new Audio('sons/certo.wav');
+const somErro = new Audio('sons/errado.wav');
 const menuApagarDicasLista = document.getElementById("menu-apagar-dicas-lista");
 const listaDicasApagar = document.getElementById("lista-dicas-apagar");
 const menuEditarDicasLista = document.getElementById("menu-editar-dicas-lista");
@@ -876,10 +879,12 @@ function proximaRodada() {
                 acertos++; 
                 document.getElementById("num-acertos").textContent = acertos;
                 btn.classList.add("correto");
+                tocarSom('acerto');
             } else { 
                 erros++; 
                 document.getElementById("num-erros").textContent = erros;
                 btn.classList.add("errado");
+                tocarSom('erro');
                 Array.from(todosBotoes).find(b => b.textContent === atual.correta).classList.add("correto");
                 
                 try {
@@ -2002,4 +2007,18 @@ function formatarNegrito(texto) {
     if (!texto) return "";
     // Procura por **qualquer coisa** e substitui pela tag <b>
     return texto.replace(/\*(.*?)\*/g, "<b>$1</b>");
+}
+
+function tocarSom(tipo) {
+    const somAtivado = document.getElementById('check-som').checked;
+    
+    if (somAtivado) {
+        if (tipo === 'acerto') {
+            somAcerto.currentTime = 0; // Reinicia o som caso clique rápido
+            somAcerto.play();
+        } else {
+            somErro.currentTime = 0;
+            somErro.play();
+        }
+    }
 }
