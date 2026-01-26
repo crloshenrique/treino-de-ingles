@@ -1783,7 +1783,7 @@ function navegarDicas(destino) {
     if (btnInicioGeral) btnInicioGeral.style.display = "none"; 
 
     if (destino === 'visualizar') {
-        if (titulo) titulo.textContent = "Dicas";
+        if (titulo) titulo.textContent = "Lista de dicas";
         if (areaVer) areaVer.style.display = "block";
         carregarDicas();
     } 
@@ -1808,7 +1808,7 @@ function navegarDicas(destino) {
         if (areaEditarCampos) areaEditarCampos.style.display = "flex";
     }
     else if (destino === 'voltar-hub') {
-        if (titulo) titulo.textContent = "O que você deseja fazer?";
+        if (titulo) titulo.textContent = "Dicas";
         if (hub) hub.style.display = "flex";
         if (btnInicioGeral) btnInicioGeral.style.display = "flex"; 
     }
