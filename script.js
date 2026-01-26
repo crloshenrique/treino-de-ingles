@@ -1715,30 +1715,34 @@ async function carregarDicas() {
 
     if (error) return;
 
-    // Mensagem caso não existam dicas
     if (!data || data.length === 0) {
-        container.innerHTML = "<div style='color: white; opacity: 0.7; text-align: center; padding: 20px; width: 100%; box-sizing: border-box;'>Nenhuma dica encontrada.</div>";        return;
+        container.innerHTML = "<div style='color: white; opacity: 0.7; text-align: center; padding: 20px; width: 100%; box-sizing: border-box;'>Nenhuma dica encontrada.</div>";
+        return;
     }
 
     container.innerHTML = "";
-        data.forEach(dica => {
+    data.forEach(dica => {
         const card = document.createElement("div");
         card.className = "card-dica";
         
-        // Criamos o HTML do topo normalmente
+        // Aplicamos a formatação no Assunto e na Explicação curta também
+        const assuntoFormatado = formatarNegrito(dica.assunto);
+        const explicacaoFormatada = formatarNegrito(dica.explicacao);
+        const textoCompletoFormatado = formatarNegrito(dica.texto);
+
         card.innerHTML = `
             <div class="dica-header">
-                <span class="dica-assunto">${dica.assunto}</span>
-                <p class="dica-explicacao">${dica.explicacao}</p>
+                <span class="dica-assunto">${assuntoFormatado}</span>
+                <p class="dica-explicacao">${explicacaoFormatada}</p>
             </div>
         `;
         
-        // AQUI ESTÁ O SEGREDO: Criamos o elemento do texto separado
         const textoDiv = document.createElement("div");
         textoDiv.className = "dica-texto-completo";
-        textoDiv.textContent = dica.texto; // textContent preserva os "enters" do banco
         
-        // Adicionamos o texto dentro do card
+        // IMPORTANTE: Mudamos de .textContent para .innerHTML para aceitar o <b>
+        textoDiv.innerHTML = textoCompletoFormatado; 
+        
         card.appendChild(textoDiv);
         
         card.onclick = (e) => {
@@ -1992,4 +1996,10 @@ function renderizarListaApagarDicas(lista) {
 
         listaContainer.appendChild(div);
     });
+}
+
+function formatarNegrito(texto) {
+    if (!texto) return "";
+    // Procura por **qualquer coisa** e substitui pela tag <b>
+    return texto.replace(/\*(.*?)\*/g, "<b>$1</b>");
 }
