@@ -1914,7 +1914,7 @@ async function processarEdicaoDica() {
         exibirFeedback("feedback-editar-dica", "Dica atualizada com sucesso!", "sucesso");
         setTimeout(() => {
             if (btnContainer) btnContainer.style.pointerEvents = "auto";
-            navegarDicas('editar'); 
+            navegarDicas('voltar-hub');
         }, 1500);
     }
 }
