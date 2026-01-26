@@ -1787,12 +1787,12 @@ function navegarDicas(destino) {
     if (btnInicioGeral) btnInicioGeral.style.display = "none"; 
 
     if (destino === 'visualizar') {
-        if (titulo) titulo.textContent = "Lista de dicas";
+        if (titulo) titulo.textContent = "Visualizar anotações";
         if (areaVer) areaVer.style.display = "block";
         carregarDicas();
     } 
     else if (destino === 'adicionar') {
-        if (titulo) titulo.textContent = "Adicionar nova dica";
+        if (titulo) titulo.textContent = "Adicionar anotação";
         if (areaAdd) areaAdd.style.display = "block";
     } 
     else if (destino === 'editar') {
@@ -1808,11 +1808,11 @@ function navegarDicas(destino) {
         }
     }
     else if (destino === 'campos-edicao') {
-        if (titulo) titulo.textContent = "Edite a dica";
+        if (titulo) titulo.textContent = "Edite a anotação";
         if (areaEditarCampos) areaEditarCampos.style.display = "flex";
     }
     else if (destino === 'voltar-hub') {
-        if (titulo) titulo.textContent = "Dicas";
+        if (titulo) titulo.textContent = "Anotações";
         if (hub) hub.style.display = "flex";
         if (btnInicioGeral) btnInicioGeral.style.display = "flex"; 
     }
