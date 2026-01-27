@@ -44,6 +44,22 @@
     }
 }
 
+img {
+    /* Desativa o menu de seleção no iOS */
+    -webkit-touch-callout: none; 
+    
+    /* Impede a seleção da imagem (Versões específicas) */
+    -webkit-user-select: none;  /* Chrome, Safari, Opera */
+    -moz-user-select: none;     /* Firefox */
+    -ms-user-select: none;      /* Internet Explorer/Edge antigo */
+    
+    /* Propriedade Padrão (Resolve o aviso do VS Code) */
+    user-select: none;          
+    
+    /* Impede arrastar a imagem */
+    -webkit-user-drag: none;
+}
+
 /* Força a lista de apagar a seguir o padrão exato da lista de editar */
 #lista-dicas-apagar {
     display: flex;
