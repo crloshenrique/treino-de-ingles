@@ -44,6 +44,14 @@
     }
 }
 
+#menu-toggle {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: manipulation; /* Isso evita que o Android tente interpretar o toque longo */
+}
+
 * {
     -webkit-tap-highlight-color: transparent; /* Remove o brilho ao tocar */
     -webkit-touch-callout: none;                /* Impede o menu no iOS */
