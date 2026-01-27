@@ -45,13 +45,11 @@
 }
 
 #menu-toggle {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
     -webkit-user-select: none;
     user-select: none;
-    -webkit-touch-callout: none;
-    /* Impede que o navegador "segure" o toque para pesquisar */
-    touch-action: none; 
-    /* Garante que o clique seja limpo */
-    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation; /* Isso evita que o Android tente interpretar o toque longo */
 }
 
 * {
