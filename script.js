@@ -57,6 +57,13 @@ let ultimoMenuAberto = "";
 let dadosDicionarioAtual = []; 
 let palavraSendoEditada = null; 
 
+// Impede que o menu de contexto (e a pesquisa do Google) apareça
+window.oncontextmenu = function(event) {
+     event.preventDefault();
+     event.stopPropagation();
+     return false;
+};
+
 // --- FUNÇÃO DE FORMATAÇÃO CENTRALIZADA ---
 function formatarItem(palavraRaw, pronunciaRaw, significadoRaw) {
     const palavra = palavraRaw.charAt(0).toUpperCase() + palavraRaw.slice(1).toLowerCase();
