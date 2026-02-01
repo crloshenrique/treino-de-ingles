@@ -5,7 +5,7 @@ const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 // SELETORES DE MENUS
 // Efeitos Sonoros
 const somAcerto = new Audio('sons/certo.wav');
-somAcerto.volume = 0.3;
+somAcerto.volume = 0.4;
 const somErro = new Audio('sons/errado.wav');
 const menuApagarDicasLista = document.getElementById("menu-apagar-dicas-lista");
 const listaDicasApagar = document.getElementById("lista-dicas-apagar");
@@ -480,7 +480,8 @@ async function carregarCategoriasDoBanco() {
         const { data, error } = await _supabase
             .from('dicionarios')
             .select('categoria')
-            .eq('user_id', user.id);
+            .eq('user_id', user.id)
+            .order('id', { ascending: true }); // GARANTE: mais antigo primeiro, mais novo por último
 
         if (error) throw error;
 
