@@ -1723,7 +1723,7 @@ async function carregarDicas() {
     if (error) return;
 
     if (!data || data.length === 0) {
-        container.innerHTML = "<div style='color: white; opacity: 0.7; text-align: center; padding: 20px; width: 100%; box-sizing: border-box;'>Nenhuma dica encontrada.</div>";
+        container.innerHTML = "<div style='color: white; opacity: 0.7; text-align: center; padding: 20px; width: 100%; box-sizing: border-box;'>Nenhuma anotação encontrada.</div>";
         return;
     }
 
@@ -1849,7 +1849,7 @@ async function abrirListagemEditarDicas() {
 
         // 3. Verifica se está vazio
         if (!data || data.length === 0) {
-            listaDicasEditar.innerHTML = "<div style='color: white; opacity: 0.7; text-align: center; padding: 20px; width: 100%;'>Nenhuma dica encontrada.</div>";
+            listaDicasEditar.innerHTML = "<div style='color: white; opacity: 0.7; text-align: center; padding: 20px; width: 100%;'>Nenhuma anotação encontrada.</div>";
             return;
         }
 
@@ -1950,7 +1950,7 @@ function renderizarListaApagarDicas(lista) {
     listaContainer.innerHTML = "";
     
     if (lista.length === 0) {
-        listaContainer.innerHTML = "<div style='color: white; opacity: 0.7;'>Nenhuma dica encontrada.</div>";
+        listaContainer.innerHTML = "<div style='color: white; opacity: 0.7;'>Nenhuma anotação encontrada.</div>";
         return;
     }
 

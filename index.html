@@ -44,6 +44,29 @@
     }
 }
 
+/* Padroniza o espaçamento e fonte de todos os inputs de login */
+#login-user, 
+#login-senha, 
+#login-senha-text {
+    font-family: inherit; /* Garante que usem a mesma fonte do resto do site */
+    letter-spacing: 0.5px; /* Define um espaçamento fixo igual para todos */
+}
+
+/* Garante que os placeholders também sigam o mesmo padrão */
+#login-senha::placeholder,
+#login-senha-text::placeholder {
+    letter-spacing: 0.5px;
+    font-family: inherit;
+}
+
+/* Garante que as áreas de feedback tenham a mesma largura dos campos */
+#feedback-adicao, 
+#feedback-edicao {
+    width: 100%;
+    box-sizing: border-box; /* Essencial para o padding não aumentar a largura total */
+    display: none; /* Começa escondido */
+}
+
 #menu-toggle {
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
