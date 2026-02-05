@@ -379,13 +379,27 @@ function renderizarListaAlterar(lista) {
 
 function filtrarAlterarPalavras() {
     const termo = document.getElementById("busca-alterar").value.toLowerCase().trim();
+    
     if (termo === "") {
         renderizarListaAlterar(dadosDicionarioAtual);
         return;
     }
+
     const filtradas = dadosDicionarioAtual.filter(item => {
-        return item.palavra.toLowerCase().startsWith(termo) || item.significado.toLowerCase().startsWith(termo);
+        const palavraIngles = item.palavra.toLowerCase();
+        
+        // 1. Divide os significados por vírgula e remove espaços extras de cada um
+        const significadosArray = item.significado.toLowerCase().split(',').map(s => s.trim());
+        
+        // 2. Verifica se a palavra em inglês começa com o termo
+        const matchPalavra = palavraIngles.startsWith(termo);
+        
+        // 3. Verifica se PELO MENOS UM dos significados individuais começa com o termo
+        const matchSignificado = significadosArray.some(sig => sig.startsWith(termo));
+        
+        return matchPalavra || matchSignificado;
     });
+
     renderizarListaAlterar(filtradas);
 }
 
@@ -576,15 +590,27 @@ function renderizarListaPalavras(lista) {
 
 function filtrarPalavras() {
     const termo = document.getElementById("campo-busca").value.toLowerCase().trim();
+    
     if (termo === "") {
         renderizarListaPalavras(dadosDicionarioAtual);
         return;
     }
+
     const filtradas = dadosDicionarioAtual.filter(item => {
         const palavraIngles = item.palavra.toLowerCase();
-        const significado = item.significado.toLowerCase();
-        return palavraIngles.startsWith(termo) || significado.startsWith(termo);
+        
+        // 1. Transforma "conseguir, obter" em um Array: ["conseguir", "obter"]
+        const significadosArray = item.significado.toLowerCase().split(',').map(s => s.trim());
+        
+        // 2. Verifica se a palavra em inglês começa com o termo
+        const matchPalavra = palavraIngles.startsWith(termo);
+        
+        // 3. Verifica se PELO MENOS UM dos significados individuais começa com o termo
+        const matchSignificado = significadosArray.some(sig => sig.startsWith(termo));
+        
+        return matchPalavra || matchSignificado;
     });
+
     renderizarListaPalavras(filtradas);
 }
 
@@ -828,19 +854,17 @@ function proximaRodada() {
     let atual = palavrasParaOJogo.shift();
 
     const devePronunciar = document.getElementById('check-pronuncia').checked;
-        if (devePronunciar) {
-            // Chamamos a função de voz que você já tem, mas sem passar um botão
-            const utterance = new SpeechSynthesisUtterance(atual.palavra);
-            utterance.lang = 'en-US';
-            utterance.rate = 0.8;
-            window.speechSynthesis.cancel(); 
-            window.speechSynthesis.speak(utterance);
-        }
+    if (devePronunciar) {
+        const utterance = new SpeechSynthesisUtterance(atual.palavra);
+        utterance.lang = 'en-US';
+        utterance.rate = 0.8;
+        window.speechSynthesis.cancel(); 
+        window.speechSynthesis.speak(utterance);
+    }
 
     const box = document.getElementById("palavra-box");
     const containerOpcoes = document.getElementById("opcoes-container");
     
-    // Nova estrutura: A pronúncia ignora a largura do ícone para ficar centralizada
     box.innerHTML = `
         <div class="quiz-header-container">
             <div class="word-row-wrapper">
@@ -854,20 +878,42 @@ function proximaRodada() {
     `;
 
     containerOpcoes.innerHTML = "";
-    let opcoes = [atual.correta];
-    while (opcoes.length < 4) {
-        let sorteioRaw = vocabulario[Math.floor(Math.random() * vocabulario.length)].correta;
-        if (!opcoes.includes(sorteioRaw)) opcoes.push(sorteioRaw);
-    }
+
+    // --- LÓGICA DE SORTEIO COM PRIMEIRA LETRA MAIÚSCULA ---
     
+    // Função interna rápida para formatar: primeira maiúscula, resto minúscula
+    const formatar = (texto) => texto.trim().charAt(0).toUpperCase() + texto.trim().slice(1).toLowerCase();
+
+    // 1. Sorteia e formata a CORRETA
+    const listaSigsAtual = atual.original.significado.split(',').map(s => s.trim());
+    const sorteioCorreto = listaSigsAtual[Math.floor(Math.random() * listaSigsAtual.length)];
+    const respostaCorretaDestaRodada = formatar(sorteioCorreto);
+
+    let opcoes = [respostaCorretaDestaRodada];
+
+    while (opcoes.length < 4) {
+        let itemSorteado = vocabulario[Math.floor(Math.random() * vocabulario.length)];
+        let sigsErrados = itemSorteado.original.significado.split(',').map(s => s.trim());
+        let sorteioErrado = sigsErrados[Math.floor(Math.random() * sigsErrados.length)];
+        
+        // Formata a ERRADA antes de colocar na lista
+        let escolhaErrada = formatar(sorteioErrado);
+        
+        if (!opcoes.includes(escolhaErrada)) {
+            opcoes.push(escolhaErrada);
+        }
+    }
+    // -------------------------------------------------------
+
     opcoes.sort(() => Math.random() - 0.5).forEach(op => {
         const btn = document.createElement("button");
-        btn.className = "opcao-btn"; btn.textContent = op;
+        btn.className = "opcao-btn"; 
+        btn.textContent = op;
         btn.onclick = async () => {
             const todosBotoes = containerOpcoes.querySelectorAll("button");
             todosBotoes.forEach(b => b.style.pointerEvents = "none");
 
-            let acertou = (op === atual.correta);
+            let acertou = (op === respostaCorretaDestaRodada);
             const f = formatarItem(atual.original.palavra, atual.original.pronuncia, atual.original.significado);
             
             historicoSessao.push({
@@ -887,7 +933,8 @@ function proximaRodada() {
                 document.getElementById("num-erros").textContent = erros;
                 btn.classList.add("errado");
                 tocarSom('erro');
-                Array.from(todosBotoes).find(b => b.textContent === atual.correta).classList.add("correto");
+                // Revela a correta (que já está formatada com Maiúscula)
+                Array.from(todosBotoes).find(b => b.textContent === respostaCorretaDestaRodada).classList.add("correto");
                 
                 try {
                     const { data: { user } } = await _supabase.auth.getUser();
@@ -1396,9 +1443,18 @@ function filtrarApagarPalavras() {
     }
 
     const filtradas = dadosPalavrasParaApagar.filter(item => {
-        // Verifica se a palavra ou o significado começam com o termo pesquisado
-        return (item.palavra && item.palavra.toLowerCase().includes(termo)) || 
-               (item.significado && item.significado.toLowerCase().includes(termo));
+        const palavraIngles = (item.palavra || "").toLowerCase();
+        
+        // 1. Transforma os significados em uma lista, separando por vírgula e removendo espaços
+        const significadosArray = (item.significado || "").toLowerCase().split(',').map(s => s.trim());
+        
+        // 2. Verifica se a palavra principal começa com o termo
+        const matchPalavra = palavraIngles.startsWith(termo);
+        
+        // 3. Verifica se algum dos significados da lista começa com o termo
+        const matchSignificado = significadosArray.some(sig => sig.startsWith(termo));
+        
+        return matchPalavra || matchSignificado;
     });
 
     renderizarListaApagar(filtradas);
