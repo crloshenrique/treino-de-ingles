@@ -857,7 +857,7 @@ function proximaRodada() {
     if (devePronunciar) {
         const utterance = new SpeechSynthesisUtterance(atual.palavra);
         utterance.lang = 'en-US';
-        utterance.rate = 0.8;
+        utterance.rate = 0.7;
         window.speechSynthesis.cancel(); 
         window.speechSynthesis.speak(utterance);
     }
@@ -1131,6 +1131,7 @@ async function carregarPalavraDoDia() {
             }
             const msg = new SpeechSynthesisUtterance(palavraDoDia.palavra);
             msg.lang = 'en-US';
+            msg.rate = 0.7;
             msg.onstart = () => { btnSom.src = "imagens/parar.png"; };
             msg.onend = () => { btnSom.src = "imagens/pronuncia.png"; };
             window.speechSynthesis.speak(msg);
@@ -1258,7 +1259,7 @@ function falarPalavraQuiz(texto, botao) {
 
     const utterance = new SpeechSynthesisUtterance(texto);
     utterance.lang = 'en-US';
-    utterance.rate = 0.8;
+    utterance.rate = 0.7;
 
     utterance.onend = () => {
         img.src = 'imagens/pronuncia.png'; // Volta ao ícone original
