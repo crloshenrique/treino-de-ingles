@@ -1058,18 +1058,20 @@
             padding-top: 4px;
         }
 
-        .sidebar-item {
-            display: flex;
-            align-items: center;
-            padding: 15px 20px;
-            cursor: pointer;
-            text-decoration: none;
-            color: white;
-            white-space: nowrap;
-            transition: background 0.2s, transform 0.2s;
-            height: 75px; 
-            box-sizing: border-box;
-        }
+.sidebar-item {
+    display: flex;
+    align-items: center;
+    padding: 15px 15px; /* era 15px 20px */
+    cursor: pointer;
+    text-decoration: none;
+    color: white;
+    white-space: nowrap;
+    transition: background 0.2s, transform 0.2s;
+    height: 75px; 
+    box-sizing: border-box;
+    border-radius: 8px;            /* ← adicionado */
+    margin: 0 5px;                 /* ← adicionado */
+}
 
         .sidebar-item:hover { 
             background: rgba(255, 0, 116, 0.1); 
@@ -1498,11 +1500,9 @@
                 <span>Configurações</span>
             </div>
 
-            <div class="sidebar-bottom">
-                <div class="sidebar-item" onclick="irParaPerfil(); handleMenuClick();">
-                    <img src="imagens/menus/menu-login.png" alt="Perfil">
-                    <span>Perfil</span>
-                </div>
+            <div class="sidebar-item" onclick="irParaPerfil(); handleMenuClick();">
+                <img src="imagens/menus/menu-login.png" alt="Perfil">
+                <span>Perfil</span>
             </div>
         </nav>
 
