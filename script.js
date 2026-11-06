@@ -392,10 +392,10 @@ function filtrarAlterarPalavras() {
         const significadosArray = item.significado.toLowerCase().split(',').map(s => s.trim());
         
         // 2. Verifica se a palavra em inglês começa com o termo
-        const matchPalavra = palavraIngles.startsWith(termo);
+        const matchPalavra = comecaComTermo(palavraIngles, termo);
         
         // 3. Verifica se PELO MENOS UM dos significados individuais começa com o termo
-        const matchSignificado = significadosArray.some(sig => sig.startsWith(termo));
+        const matchSignificado = significadosArray.some(sig => comecaComTermo(sig, termo));
         
         return matchPalavra || matchSignificado;
     });
@@ -603,10 +603,10 @@ function filtrarPalavras() {
         const significadosArray = item.significado.toLowerCase().split(',').map(s => s.trim());
         
         // 2. Verifica se a palavra em inglês começa com o termo
-        const matchPalavra = palavraIngles.startsWith(termo);
+        const matchPalavra = comecaComTermo(palavraIngles, termo);
         
         // 3. Verifica se PELO MENOS UM dos significados individuais começa com o termo
-        const matchSignificado = significadosArray.some(sig => sig.startsWith(termo));
+        const matchSignificado = significadosArray.some(sig => comecaComTermo(sig, termo));
         
         return matchPalavra || matchSignificado;
     });
@@ -1099,7 +1099,7 @@ async function carregarPalavraDoDia() {
                 seed += dataString.charCodeAt(i);
             }
             
-            const indice = seed % palavras.length;
+            const indice = Math.floor(Math.random() * palavras.length);
             palavraDoDia = palavras[indice];
 
             // Salva a escolha do dia para não mudar se deletar outras palavras
@@ -1112,13 +1112,17 @@ async function carregarPalavraDoDia() {
         // --- ABAIXO SEGUE O RESTANTE DO SEU CÓDIGO DE EXIBIÇÃO (IGUAL) ---
         document.getElementById('word-day-title').innerText = palavraDoDia.palavra;
 
-        let significadoFormatado = palavraDoDia.significado
-            .toLowerCase()
-            .replace(/\//g, ', ')
-            .split(',')
+        // Junta os significados de todas as palavras iguais (de qualquer dicionário)
+        const nomeBase = palavraDoDia.palavra.trim().toLowerCase();
+
+        const todosSignificados = palavras
+            .filter(p => p.palavra.trim().toLowerCase() === nomeBase)
+            .flatMap(p => p.significado.toLowerCase().replace(/\//g, ',').split(','))
             .map(s => s.trim())
-            .filter(s => s !== "")
-            .join(', ');
+            .filter(s => s !== "");
+
+        // Remove repetidos, mantendo a ordem
+        const significadoFormatado = [...new Set(todosSignificados)].join(', ');
 
         document.getElementById('word-day-meaning').innerText = `${significadoFormatado}`;
         
@@ -1140,6 +1144,11 @@ async function carregarPalavraDoDia() {
     } catch (err) {
         console.error("Erro ao carregar palavra do dia:", err);
     }
+}
+
+// Retorna true se o texto, ou o início de qualquer palavra dentro dele, começa com o termo
+function comecaComTermo(texto, termo) {
+    return texto.startsWith(termo) || texto.includes(" " + termo);
 }
 
 async function carregarEstatisticas() {
@@ -1450,10 +1459,10 @@ function filtrarApagarPalavras() {
         const significadosArray = (item.significado || "").toLowerCase().split(',').map(s => s.trim());
         
         // 2. Verifica se a palavra principal começa com o termo
-        const matchPalavra = palavraIngles.startsWith(termo);
+        const matchPalavra = comecaComTermo(palavraIngles, termo);
         
         // 3. Verifica se algum dos significados da lista começa com o termo
-        const matchSignificado = significadosArray.some(sig => sig.startsWith(termo));
+        const matchSignificado = significadosArray.some(sig => comecaComTermo(sig, termo));
         
         return matchPalavra || matchSignificado;
     });
