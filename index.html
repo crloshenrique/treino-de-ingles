@@ -1228,6 +1228,7 @@
         .border-green { border-left-color: var(--success-color) !important; border-right-color: var(--success-color) !important; }
         .border-orange { border-left-color: var(--warning-color) !important; border-right-color: var(--warning-color) !important; }
         .border-red { border-left-color: var(--error-color) !important; border-right-color: var(--error-color) !important; }
+        .border-pink { border-left-color: var(--accent-color) !important; border-right-color: var(--accent-color) !important; }
 
         .btn-voltar-icone {
             display: flex;
@@ -1857,30 +1858,30 @@
                 <div id="menu-principal" class="menu" style="display:none">
                     <h2>Escolha o modo</h2>
                     <p id="status-load" style="display:none">Carregando...</p>
-                    <button onclick="abrirMenuIntervalos()" class="btn-custom-lateral">Intervalos</button>
-                    <button onclick="abrirMenuNiveis()" class="btn-custom-lateral">Níveis</button>
+                    <button onclick="abrirMenuIntervalos()" class="btn-custom-lateral">Quiz</button>
                     <div class="btn-voltar-icone" onclick="irParaTemas()">
                         <img src="imagens/voltar.png" alt="Voltar">
                         <span>Voltar</span>
                     </div>
                 </div>
 
-                <div id="menu-niveis" class="menu" style="display:none">
-                    <button onclick="iniciarNivel(25)" class="btn-custom-lateral border-blue">Iniciante</button>
-                    <button onclick="iniciarNivel(50)" class="btn-custom-lateral border-green">Intermediário</button>
-                    <button onclick="iniciarNivel(75)" class="btn-custom-lateral border-orange">Avançado</button>
-                    <button onclick="iniciarNivel(vocabulario.length)" class="btn-custom-lateral border-red">Pro</button>
+                <div id="menu-intervalos" class="menu" style="display:none">
+                    <button onclick="iniciarIntervalo(0,25)" class="btn-custom-lateral border-blue">1 ⮕ 25 palavras</button>
+                    <button onclick="iniciarIntervalo(25,50)" class="btn-custom-lateral border-green">26 ⮕ 50 palavras</button>
+                    <button onclick="iniciarIntervalo(50,75)" class="btn-custom-lateral border-orange">51 ⮕ 75 palavras</button>
+                    <button onclick="iniciarIntervalo(75,100)" class="btn-custom-lateral border-red">76 ⮕ 100 palavras</button>
+                    <button onclick="iniciarNivel(vocabulario.length)" class="btn-custom-lateral border-pink">1 ⮕ 100 palavras</button>
                     <div class="btn-voltar-icone" onclick="voltarAoMenuPraticar()">
                         <img src="imagens/voltar.png" alt="Voltar">
                         <span>Voltar</span>
                     </div>
                 </div>
 
-                <div id="menu-intervalos" class="menu" style="display:none">
-                    <button onclick="iniciarIntervalo(0,25)" class="btn-custom-lateral border-blue">1 ⮕ 25</button>
-                    <button onclick="iniciarIntervalo(25,50)" class="btn-custom-lateral border-green">26 ⮕ 50</button>
-                    <button onclick="iniciarIntervalo(50,75)" class="btn-custom-lateral border-orange">51 ⮕ 75</button>
-                    <button onclick="iniciarIntervalo(75,100)" class="btn-custom-lateral border-red">76 ⮕ 100</button>
+                <div id="menu-todos" class="menu" style="display:none">
+                    <button onclick="iniciarTodos(25)" class="btn-custom-lateral border-blue">25 palavras</button>
+                    <button onclick="iniciarTodos(50)" class="btn-custom-lateral border-green">50 palavras</button>
+                    <button onclick="iniciarTodos(75)" class="btn-custom-lateral border-orange">75 palavras</button>
+                    <button onclick="iniciarTodos(100)" class="btn-custom-lateral border-red">100 palavras</button>
                     <div class="btn-voltar-icone" onclick="voltarAoMenuPraticar()">
                         <img src="imagens/voltar.png" alt="Voltar">
                         <span>Voltar</span>

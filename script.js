@@ -27,8 +27,8 @@ const menuGerenciarDicionarios = document.getElementById("menu-gerenciar-diciona
 const areaAdicionarDicionario = document.getElementById("area-adicionar-dicionario");
 const menuTemas = document.getElementById("menu-temas");
 const menuPrincipal = document.getElementById("menu-principal");
-const menuNiveis = document.getElementById("menu-niveis");
 const menuIntervalos = document.getElementById("menu-intervalos");
+const menuTodos = document.getElementById("menu-todos");
 const visualizacaoPalavras = document.getElementById("visualizacao-palavras");
 const listaDicionariosVisualizar = document.getElementById("lista-dicionarios-visualizar");
 const areaListaPalavras = document.getElementById("area-lista-palavras");
@@ -52,6 +52,7 @@ let itemEmConfirmacao = null;
 let dadosPalavrasParaApagar = []; // Global para armazenar o que veio do banco
 let categoriasDisponiveis = [];
 let vocabulario = [];
+let modoTodos = false;
 let palavrasParaOJogo = [];
 let acertos = 0, erros = 0;
 let historicoSessao = []; 
@@ -257,7 +258,7 @@ function handleMenuClick() {
 // --- NAVEGAÇÃO ---
 function esconderTodosMenus() {
     const menus = [menuBoasVindas, menuHub, menuDicionariosRaiz, menuGerenciarDicionarios, areaAdicionarDicionario, 
-                   menuTemas, menuPrincipal, menuNiveis, menuIntervalos, visualizacaoPalavras, menuPerfil, menuMeusErros,
+                   menuTemas, menuPrincipal, menuIntervalos, menuTodos, visualizacaoPalavras, menuPerfil, menuMeusErros,
                    menuAlterarPalavras, telaEdicaoCampos, menuConfiguracoes, menuApagarRaiz, menuListaApagarPalavras, menuEscolhaDicionarioApagar, menuDicas,
                    menuEditarDicasLista, menuEditarDicaCampos, menuApagarDicasLista];
     menus.forEach(m => { if(m) m.style.display = "none"; });
@@ -763,6 +764,21 @@ async function gerarMenuTemas() {
         contagemPorCategoria[item.categoria] = (contagemPorCategoria[item.categoria] || 0) + 1;
     });
 
+    // Card "Todos" (mesmo estilo do Dicionário Visualizar)
+    const btnTodos = document.createElement("div");
+    btnTodos.className = "card-dicionario card-todos";
+    btnTodos.textContent = "Todos";
+    btnTodos.onclick = () => {
+        // Mesma regra dos outros: só entram dicionários com 100+ palavras
+        const categoriasValidas = categoriasDisponiveis.filter(cat => (contagemPorCategoria[cat] || 0) >= 100);
+        if (categoriasValidas.length === 0) {
+            aplicarEfeitoNegativo(btnTodos);
+        } else {
+            carregarVocabularioTodos(categoriasValidas);
+        }
+    };
+    listaTemasBotoes.appendChild(btnTodos);
+
     categoriasDisponiveis.forEach(cat => {
         const div = document.createElement("div");
         div.className = "card-dicionario";
@@ -812,29 +828,142 @@ async function carregarVocabulario(cat) {
         };
     });
 
+    modoTodos = false;
     esconderTodosMenus(); 
     menuPrincipal.style.display = "flex";
     document.getElementById("status-load").style.display = "none";
 }
 
-function abrirMenuNiveis() { 
-    ultimoMenuAberto = "niveis";
-    menuPrincipal.style.display = "none"; 
-    menuNiveis.style.display = "flex"; 
-}
 function abrirMenuIntervalos() { 
     ultimoMenuAberto = "intervalos";
     menuPrincipal.style.display = "none"; 
-    menuIntervalos.style.display = "flex"; 
+    if (modoTodos) {
+        menuTodos.style.display = "flex";
+    } else {
+        menuIntervalos.style.display = "flex"; 
+    }
 }
-function voltarAoMenuPraticar() { menuNiveis.style.display = "none"; menuIntervalos.style.display = "none"; menuPrincipal.style.display = "flex"; }
+
+function voltarAoMenuPraticar() { menuIntervalos.style.display = "none"; menuTodos.style.display = "none"; menuPrincipal.style.display = "flex"; }
 
 function iniciarNivel(q) { palavrasParaOJogo = vocabulario.slice(0, q); iniciarJogo(); } //OK
 
 function iniciarIntervalo(i, f) { palavrasParaOJogo = vocabulario.slice(i, f); iniciarJogo(); } //OK
 
+async function carregarVocabularioTodos(categoriasValidas) {
+    document.getElementById("status-load").style.display = "block";
+
+    // Busca em páginas de 1000 (o Supabase limita 1000 linhas por consulta)
+    let todos = [];
+    let inicio = 0;
+    const tamanhoPagina = 1000;
+
+    while (true) {
+        const { data, error } = await _supabase
+            .from('dicionarios')
+            .select('*')
+            .in('categoria', categoriasValidas)
+            .order('id', { ascending: true })
+            .range(inicio, inicio + tamanhoPagina - 1);
+
+        if (error) {
+            console.error("Erro ao carregar:", error);
+            return;
+        }
+        todos = todos.concat(data);
+        if (data.length < tamanhoPagina) break;
+        inicio += tamanhoPagina;
+    }
+
+    vocabulario = todos.map(item => {
+        const f = formatarItem(item.palavra, item.pronuncia, item.significado);
+        const corretaFormatada = f.significados.split(",")[0].trim();
+        const corretaQuiz = corretaFormatada.charAt(0).toUpperCase() + corretaFormatada.slice(1);
+        return { 
+            palavra: f.palavra,
+            pronuncia: f.pronuncia,
+            correta: corretaQuiz,
+            significadosFormatados: f.significados,
+            original: item 
+        };
+    });
+
+    modoTodos = true;
+    esconderTodosMenus(); 
+    menuPrincipal.style.display = "flex";
+    document.getElementById("status-load").style.display = "none";
+}
+
+function sortearPalavrasTodos(vocab, total) {
+    const embaralhar = (arr) => {
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    };
+
+    // Agrupa as palavras por dicionário e embaralha (ordem dos dicionários e das palavras)
+    const grupos = {};
+    vocab.forEach(item => {
+        const cat = item.original.categoria;
+        if (!grupos[cat]) grupos[cat] = [];
+        grupos[cat].push(item);
+    });
+    const filas = embaralhar(Object.keys(grupos)).map(cat => embaralhar(grupos[cat]));
+
+    const usadas = new Set(); // palavras já sorteadas (evita repetição entre dicionários)
+    const sorteadas = [];
+
+    // Tira da fila a próxima palavra que ainda não foi usada
+    const pegar = (fila) => {
+        while (fila.length > 0) {
+            const item = fila.pop();
+            const chave = item.palavra.trim().toLowerCase();
+            if (!usadas.has(chave)) {
+                usadas.add(chave);
+                return item;
+            }
+        }
+        return null;
+    };
+
+    // FASE 1: parte igual para cada dicionário (ex: 25 / 4 dicionários = 6 de cada)
+    const base = Math.floor(total / filas.length);
+    filas.forEach(fila => {
+        for (let i = 0; i < base; i++) {
+            const item = pegar(fila);
+            if (!item) break;
+            sorteadas.push(item);
+        }
+    });
+
+    // FASE 2: completa a sobra (ex: sobrou 1) uma palavra por vez, passando
+    // pelos dicionários em ordem aleatória. Também cobre quem não conseguiu
+    // dar a sua parte (poucas palavras ou muitas repetidas).
+    let achouAlguma = true;
+    while (sorteadas.length < total && achouAlguma) {
+        achouAlguma = false;
+        for (const fila of filas) {
+            if (sorteadas.length >= total) break;
+            const item = pegar(fila);
+            if (item) {
+                sorteadas.push(item);
+                achouAlguma = true;
+            }
+        }
+    }
+
+    return sorteadas;
+}
+
+function iniciarTodos(q) {
+    palavrasParaOJogo = sortearPalavrasTodos(vocabulario, q);
+    iniciarJogo();
+}
+
 function iniciarJogo() {
-    menuNiveis.style.display = "none"; menuIntervalos.style.display = "none"; //OK
+    menuIntervalos.style.display = "none"; menuTodos.style.display = "none"; //OK
     document.getElementById("palavra-box").style.display = "flex"; //OK
     document.getElementById("opcoes-container").style.display = "flex"; //OK
     document.getElementById("contador-container").style.display = "flex"; //OK
@@ -892,8 +1021,13 @@ function proximaRodada() {
 
     let opcoes = [respostaCorretaDestaRodada];
 
-    while (opcoes.length < 4) {
-        let itemSorteado = vocabulario[Math.floor(Math.random() * vocabulario.length)];
+    // As alternativas erradas vêm só do mesmo dicionário da palavra     ← NOVO
+    const poolOpcoes = vocabulario.filter(v => v.original.categoria === atual.original.categoria);   // ← NOVO
+    let tentativas = 0;   // ← NOVO
+
+    while (opcoes.length < 4 && tentativas < 300) {   // ← MUDOU
+        tentativas++;   // ← NOVO
+        let itemSorteado = poolOpcoes[Math.floor(Math.random() * poolOpcoes.length)];   // ← MUDOU (era vocabulario[...vocabulario.length])
         let sigsErrados = itemSorteado.original.significado.split(',').map(s => s.trim());
         let sorteioErrado = sigsErrados[Math.floor(Math.random() * sigsErrados.length)];
         
