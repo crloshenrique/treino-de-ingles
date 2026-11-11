@@ -5,7 +5,7 @@ const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 // SELETORES DE MENUS
 // Efeitos Sonoros
 const somAcerto = new Audio('sons/certo.wav');
-somAcerto.volume = 0.2;
+somAcerto.volume = 0.1;
 const somErro = new Audio('sons/errado.wav');
 somErro.volume = 0.2;
 const menuApagarDicasLista = document.getElementById("menu-apagar-dicas-lista");
