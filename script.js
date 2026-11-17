@@ -54,6 +54,7 @@ let categoriasDisponiveis = [];
 let vocabulario = [];
 let modoTodos = false;
 let palavrasParaOJogo = [];
+let ultimaPartida = null; // guarda como reiniciar a última opção escolhida
 let acertos = 0, erros = 0;
 let historicoSessao = []; 
 let ultimoMenuAberto = "";
@@ -518,7 +519,7 @@ function gerarMenuDicionariosVisualizacao() {
     listaDicionariosVisualizar.innerHTML = "";
     const btnTodos = document.createElement("div");
     btnTodos.className = "card-dicionario card-todos";
-    btnTodos.textContent = "Todos"; 
+    btnTodos.textContent = "All"; 
     btnTodos.onclick = () => carregarEExibirVarios('todos');
     listaDicionariosVisualizar.appendChild(btnTodos);
 
@@ -767,7 +768,7 @@ async function gerarMenuTemas() {
     // Card "Todos" (mesmo estilo do Dicionário Visualizar)
     const btnTodos = document.createElement("div");
     btnTodos.className = "card-dicionario card-todos";
-    btnTodos.textContent = "Todos";
+    btnTodos.textContent = "All";
     btnTodos.onclick = () => {
         // Mesma regra dos outros: só entram dicionários com 100+ palavras
         const categoriasValidas = categoriasDisponiveis.filter(cat => (contagemPorCategoria[cat] || 0) >= 100);
@@ -846,9 +847,9 @@ function abrirMenuIntervalos() {
 
 function voltarAoMenuPraticar() { menuIntervalos.style.display = "none"; menuTodos.style.display = "none"; menuPrincipal.style.display = "flex"; }
 
-function iniciarNivel(q) { palavrasParaOJogo = vocabulario.slice(0, q); iniciarJogo(); } //OK
+function iniciarNivel(q) { ultimaPartida = () => iniciarNivel(q); palavrasParaOJogo = vocabulario.slice(0, q); iniciarJogo(); } //OK
 
-function iniciarIntervalo(i, f) { palavrasParaOJogo = vocabulario.slice(i, f); iniciarJogo(); } //OK
+function iniciarIntervalo(i, f) { ultimaPartida = () => iniciarIntervalo(i, f); palavrasParaOJogo = vocabulario.slice(i, f); iniciarJogo(); } //OK
 
 async function carregarVocabularioTodos(categoriasValidas) {
     document.getElementById("status-load").style.display = "block";
@@ -958,6 +959,7 @@ function sortearPalavrasTodos(vocab, total) {
 }
 
 function iniciarTodos(q) {
+    ultimaPartida = () => iniciarTodos(q);
     palavrasParaOJogo = sortearPalavrasTodos(vocabulario, q);
     iniciarJogo();
 }
@@ -1128,6 +1130,12 @@ function voltarDoTeste() {
     container.classList.remove('modo-largo');
     
     irParaHub(); 
+}
+
+function repetirTeste() {
+    if (!ultimaPartida) return;
+    container.classList.remove("modo-largo");
+    ultimaPartida();
 }
 
 async function irParaMeusErros() {
@@ -2164,7 +2172,7 @@ function renderizarListaApagarDicas(lista) {
         // Conteúdo inicial (Assunto e Explicação)
         div.innerHTML = `
             <div class="col-palavra-info">
-                <span style="color: #ff007f; font-weight: bold; display: block;">${dica.assunto}</span>
+                <span style="color: #7c5cff; font-weight: bold; display: block;">${dica.assunto}</span>
                 <span class="pronuncia-pequena" style="display: block; margin-top: 5px;">${dica.explicacao}</span>
             </div>
         `;

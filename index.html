@@ -101,20 +101,20 @@
     justify-content: space-between;
     align-items: center;
     cursor: pointer;
-    background: rgba(255, 255, 255, 0.03); /* Fundo fixo sutil */
+    background: rgba(124, 92, 255, 0.05); /* Fundo fixo sutil */
     border-radius: 12px;
     
     /* A linha rosa fina que você aprovou */
-    border: 1px solid rgba(255, 0, 127, 0.3);  
+    border: 1px solid rgba(124, 92, 255, 0.3);  
     
     transition: all 0.3s ease-in-out;
 }
 
 /* Efeito de Hover: APENAS a borda engrossa/brilha e o card sobe */
 #lista-dicas-apagar .item-dicionario:hover {
-    border-color: #ff007f; /* Rosa brilhante ao passar o mouse */
+    border-color: #7c5cff; /* Rosa brilhante ao passar o mouse */
     transform: translateY(-2px); /* Efeito de subida */
-    box-shadow: 0 4px 15px rgba(255, 0, 127, 0.2); /* Brilho da borda */
+    box-shadow: 0 4px 15px rgba(124, 92, 255, 0.2); /* Brilho da borda */
     
     /* background-color REMOVIDO para não mudar a cor do fundo */
 }
@@ -152,17 +152,17 @@
 
 /* Efeito de borda forte em todo o card no Visualizar */
 .card-dica {
-    border: 2px solid #333; /* Borda padrão escura para não dar salto */
+    border: 2px solid rgba(124, 92, 255, 0.2); /* Borda padrão escura para não dar salto */
     transition: all 0.3s ease;
     cursor: pointer;
 }
 
 .card-dica:hover {
     /* A borda assume a cor rosa forte */
-    border-color: #ff007f !important;
+    border-color: #7c5cff !important;
     
     /* Adiciona um brilho externo para deixar o efeito mais "neon/forte" */
-    box-shadow: 0 0 15px rgba(255, 0, 127, 0.4);
+    box-shadow: 0 0 15px rgba(124, 92, 255, 0.4);
     
     /* Leve destaque no tamanho se quiser, ou mantenha 1.0 para fixo */
     transform: scale(1.01); 
@@ -181,14 +181,14 @@
 
 #edit-dica-explicacao::-webkit-scrollbar-thumb,
 #add-dica-texto::-webkit-scrollbar-thumb {
-    background: #ff007f;
+    background: #7c5cff;
     border-radius: 10px;
     /* Removida a borda que criava o efeito preto */
 }
 
 #edit-dica-explicacao::-webkit-scrollbar-thumb:hover,
 #add-dica-texto::-webkit-scrollbar-thumb:hover {
-    background: #ff007f;
+    background: #7c5cff;
 }
 
 /* Remove botões e o redimensionador de ambos para evitar furos na borda do campo */
@@ -224,8 +224,8 @@
         .btn-dica-quadrado {
             width: 70px;
             height: 70px;
-            background: rgba(255, 0, 127, 0.1); /* Rosa sutil no fundo */
-            border: 2px solid #ff007f; /* Borda rosa viva */
+            background: rgba(124, 92, 255, 0.1); /* Violeta sutil no fundo */
+            border: 2px solid #7c5cff; /* Borda violeta */
             border-radius: 12px;
             display: flex;
             justify-content: center;
@@ -235,7 +235,7 @@
         }
 
         .btn-dica-quadrado:hover {
-            background: rgba(255, 0, 127, 0.3);
+            background: rgba(124, 92, 255, 0.3);
             transform: scale(1.05);
         }
 
@@ -268,8 +268,8 @@
 }
 
 .card-dica {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 0, 127, 0.2);
+    background: rgba(124, 92, 255, 0.05);
+    border: 1px solid rgba(124, 92, 255, 0.2);
     border-radius: 12px;
     /* Padding igual em cima e embaixo para centralizar */
     padding: 20px; 
@@ -309,7 +309,7 @@
 
 
 .dica-assunto {
-    color: #ff007f;
+    color: #7c5cff;
     font-weight: bold;
     font-size: 1.1rem;
     display: block;
@@ -337,7 +337,7 @@
             line-height: 1.6;
             margin-top: 15px;
             padding-top: 15px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-top: 1px solid rgba(124, 92, 255, 0.2);
             display: none;
             white-space: pre-wrap;
         }
@@ -475,7 +475,7 @@
 
         /* Nova classe Rosa que você pediu */
         .btn-apagar-rosa {
-            background-color: #ff007f !important; /* Rosa Padrão */
+            background-color: #7c5cff !important; /* Rosa Padrão */
             color: white !important;
             border: none;
             padding: 20px;
@@ -504,8 +504,8 @@
             align-items: center;
             width: 100%;
             padding: 15px;
-            background: rgba(255, 255, 255, 0.05); /* Fundo levemente visível */
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(124, 92, 255, 0.05); /* Fundo levemente visível */
+            border: 1px solid rgba(124, 92, 255, 0.2);
             border-radius: 12px;
             margin-bottom: 12px;
             box-sizing: border-box;
@@ -535,7 +535,7 @@
             position: absolute;
             cursor: pointer;
             top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #333;
+            background-color: #262f5c;
             transition: .4s;
             border-radius: 34px;
         }
@@ -554,8 +554,8 @@
 
         /* Cor rosa quando o input estiver checado */
         input:checked + .slider {
-            background-color: #ff007f; /* Seu rosa padrão */
-            box-shadow: 0 0 10px rgba(255, 0, 127, 0.4);
+            background-color: #7c5cff; /* Seu rosa padrão */
+            box-shadow: 0 0 10px rgba(124, 92, 255, 0.4);
         }
 
         input:checked + .slider:before {
@@ -565,7 +565,7 @@
         /* Para Firefox */
         #texto-massa {
             resize: none;
-            scrollbar-color: var(--accent-color) rgba(255, 255, 255, 0.05);
+            scrollbar-color: var(--accent-color) rgba(124, 92, 255, 0.05);
         }
 
 
@@ -632,14 +632,14 @@
             height: 140px; /* Mesma altura aproximada do #palavra-box */
             overflow-y: auto; /* Cria scroll se a tradução for longa */
             box-sizing: border-box;
-            background: rgba(255, 0, 127, 0.03); /* Mantém o estilo visual */
-            border: 1px solid rgba(255, 0, 127, 0.4);
+            background: rgba(124, 92, 255, 0.03); /* Mantém o estilo visual */
+            border: 1px solid rgba(124, 92, 255, 0.4);
             border-radius: 15px; /* Mesma curvatura do word-card */
         }
 
         .search-box-futuristic {
-            background: rgba(255, 0, 127, 0.03);
-            border: 1px solid rgba(255, 0, 127, 0.4);
+            background: #121731;
+            border: 1px solid rgba(124, 92, 255, 0.4);
             padding: 20px;
             margin-top: 25px;
             position: relative;
@@ -655,8 +655,8 @@
 
         #input-busca-oxford {
             flex: 1;
-            background: #1a1a1a;
-            border: 1px solid rgba(255, 0, 127, 0.5);
+            background: #121731;
+            border: 1px solid rgba(124, 92, 255, 0.5);
             border-right: none;
             color: white;
             padding: 0 15px;
@@ -684,7 +684,7 @@
         #btn-search-oxford img {
             width: 16px !important; /* Lupa menor e mais delicada */
             height: 16px !important;
-            filter: brightness(0) invert(1);
+            filter: brightness(0) !important;
         }
 
         .resultado-container {
@@ -734,8 +734,8 @@
         }
 
         .stat-box {
-            background: rgba(255, 0, 127, 0.03);
-            border: 1px solid rgba(255, 0, 127, 0.4);
+            background: #121731;
+            border: 1px solid rgba(124, 92, 255, 0.4);
             padding: 20px 15px;
             position: relative;
             border-radius: 4px; /* Retângulo inteiro, sem cortes */
@@ -745,9 +745,9 @@
         }
 
         .stat-box:hover {
-            background: rgba(255, 0, 127, 0.08);
-            border-color: var(--accent-color);
-            box-shadow: 0 0 15px rgba(255, 0, 127, 0.2), inset 0 0 10px rgba(255, 0, 127, 0.1);
+background: #161c3a;
+border-color: var(--accent-color);
+box-shadow: 0 0 15px rgba(124, 92, 255, 0.2), inset 0 0 10px rgba(124, 92, 255, 0.1);
             transform: translateY(-3px);
         }
 
@@ -790,8 +790,8 @@
         }
 
         .word-card {
-            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
-            border: 1px solid #333;
+            background: #121731;
+            border: 1px solid rgba(124, 92, 255, 0.4);
             border-radius: 15px;
             padding: 20px;
             margin-bottom: 20px;
@@ -853,8 +853,8 @@
         }
 
         :root {
-            --bg-color: #1f1f1f;
-            --accent-color: #ff0074;
+            --bg-color: #0b0e1f;
+            --accent-color: #7c5cff;
             --text-color: #ffffff;
             --sidebar-width-pc: 85px; 
             --sidebar-expanded-pc: 260px;
@@ -930,8 +930,8 @@
             margin-bottom: 8px;
             border-radius: 10px;
             overflow: hidden;
-            border: 1px solid #444;
-            background: #2a2a2a;
+            border: 1px solid rgba(124, 92, 255, 0.4);
+            background: #121731;
             transition: border-color 0.2s;
             box-sizing: border-box;
         }
@@ -1047,7 +1047,7 @@
         body.menu-aberto #overlay { display: block; }
 
         #sidebar {
-            background: var(--bg-color);
+            background: #0e1228;
             border-right: 2px solid var(--accent-color);
             height: 100%;
             display: flex;
@@ -1074,7 +1074,7 @@
 }
 
         .sidebar-item:hover { 
-            background: rgba(255, 0, 116, 0.1); 
+            background: rgba(124, 92, 255, 0.1); 
             border: 1px solid var(--accent-color); 
             border-radius: 8px; 
             margin: 0 5px;
@@ -1101,7 +1101,7 @@
                 left: 15px;
                 z-index: 1100;
                 cursor: pointer;
-                background: var(--bg-color);
+                background: #0e1228;
                 border: 1px solid var(--accent-color);
                 border-radius: 8px;
                 padding: 5px;
@@ -1189,38 +1189,46 @@
             box-sizing: border-box;
         }
 
-        .card-dicionario {
-            min-height: 100px;
-            background: transparent;
-            border: 2px solid var(--accent-color);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            padding: 15px;
-            color: white;
-            font-weight: bold;
-            font-size: 14px;
-            text-transform: uppercase;
-            word-break: break-word;
-            transition: background 0.2s, transform 0.2s;
-            text-align: center;
-        }
-        .card-dicionario:hover { background: rgba(255, 0, 116, 0.1); transform: scale(1.05); }
+.card-dicionario {
+    min-height: 100px;
+    background: linear-gradient(145deg, #141a36, #1c2347);
+    border: 1px solid rgba(148, 163, 255, 0.2);
+    border-radius: 18px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 15px;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    word-break: break-word;
+    transition: background 0.2s, transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    text-align: center;
+}
+.card-dicionario:hover {
+    background: #1c2347;
+    transform: scale(1.05);
+}
 
-        .card-todos { border-color: var(--blue-color) !important; }
-        .card-todos:hover { background: rgba(16, 162, 221, 0.1) !important; border-color: var(--blue-color) !important; }
+.card-todos { border: 1px solid rgba(148, 163, 255, 0.2) !important; background: #232b5e !important; }
+.card-todos:hover { background: #2f3a85 !important; }
 
-        button { padding: 14px; font-size: 18px; border-radius: 10px; border: none; cursor: pointer; background: #3d3d3d; color: white; transition: transform 0.2s; }
-        button:hover { transform: scale(1.05); background: #4a4a4a; }
+button { padding: 14px; font-size: 18px; border-radius: 10px; border: none; cursor: pointer; background: #1c2347; color: white; transition: transform 0.2s; }
+button:hover { transform: scale(1.05); background: #262f5c; }
         
-        .btn-custom-lateral {
-            background: #171717 !important; 
-            border-left: 3px solid var(--accent-color) !important;
-            border-right: 3px solid var(--accent-color) !important;
-            color: white !important;
-        }
+.btn-custom-lateral {
+    background: linear-gradient(135deg, #141a36, #1c2347) !important;
+    border-top: 1px solid rgba(148, 163, 255, 0.2) !important;
+    border-bottom: 1px solid rgba(148, 163, 255, 0.2) !important;
+    border-left: 3px solid var(--accent-color) !important;
+    border-right: 3px solid var(--accent-color) !important;
+    border-radius: 14px !important;
+    color: white !important;
+}
 
         .btn-quadrado { width: 80px !important; height: 80px; background: var(--accent-color) !important; color: white !important; font-weight: bold; font-size: 32px; border-radius: 15px; }
 
@@ -1230,6 +1238,29 @@
         .border-red { border-left-color: var(--error-color) !important; border-right-color: var(--error-color) !important; }
         .border-pink { border-left-color: var(--accent-color) !important; border-right-color: var(--accent-color) !important; }
 
+/* --- OPÇÃO LENDÁRIA (Quiz 1 ⮕ 100) --- */
+.btn-lendario {
+    border: 2px solid transparent !important;
+    background:
+        linear-gradient(#1c2347, #1c2347) padding-box,
+        linear-gradient(135deg, #7c5cff, #a78bfa, #7c5cff) border-box !important;
+    color: #ffffff !important;
+    font-weight: bold;
+    letter-spacing: 1px;
+    text-shadow: 0 0 6px rgba(124, 92, 255, 0.7);
+    animation: lendario-pulso 2.4s ease-in-out infinite;
+}
+
+.btn-lendario:hover {
+    animation-duration: 1.2s;
+    text-shadow: 0 0 10px rgba(124, 92, 255, 1);
+}
+
+@keyframes lendario-pulso {
+    0%, 100% { box-shadow: 0 0 4px rgba(124, 92, 255, 0.35), 0 0 8px rgba(124, 92, 255, 0.15); }
+    50%      { box-shadow: 0 0 7px rgba(124, 92, 255, 0.7), 0 0 14px rgba(124, 92, 255, 0.3); }
+}
+        
         .btn-voltar-icone {
             display: flex;
             align-items: center;
@@ -1248,8 +1279,8 @@
         .btn-voltar-icone:hover { transform: scale(1.1); }
         .btn-voltar-icone img { width: 28px; height: 28px; object-fit: contain; }
 
-        input, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 10px; border: 1px solid #444; background: #2a2a2a; color: white; box-sizing: border-box; outline: none; transition: border-color 0.2s; font-family: Arial, sans-serif;}
-        
+input, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 10px; border: 1px solid rgba(124, 92, 255, 0.4); background: #121731; color: white; box-sizing: border-box; outline: none; transition: border-color 0.2s; font-family: Arial, sans-serif;}
+input::placeholder, textarea::placeholder { color: #8f97c9; opacity: 1; }
         input:focus, textarea:focus { border: 1px solid var(--accent-color); }
 
         #palavra-box { 
@@ -1282,13 +1313,13 @@
 
         .opcao-btn { 
             width: 100% !important; 
-            background: #2a2a2a; 
-            border: 1px solid #444;
+            background: #121731; 
+            border: 1px solid rgba(124, 92, 255, 0.4);
             padding: 16px;
             font-size: 1.1rem;
             text-align: center;
         }
-        .opcao-btn:hover { background: #333; border-color: var(--accent-color); }
+        .opcao-btn:hover { background: #1c2347; border-color: var(--accent-color); }
 
         .correto { border: 2px solid var(--success-color) !important; background: rgba(90, 187, 106, 0.2) !important; color: var(--success-color) !important; font-weight: bold; }
         .errado { border: 2px solid var(--error-color) !important; background: rgba(241, 71, 56, 0.2) !important; color: var(--error-color) !important; }
@@ -1309,7 +1340,7 @@
             justify-content: center; 
             font-weight: bold;
             font-size: 1.2rem;
-            background: #2a2a2a;
+            background: #121731;
         }
 
         #num-acertos { color: var(--success-color); }
@@ -1328,7 +1359,7 @@
             width: 100%; 
             padding: 12px; 
             border-radius: 8px; 
-            background: #2a2a2a; 
+            background: #121731;
             display: grid; 
             grid-template-columns: 1fr 2fr; 
             gap: 15px; 
@@ -1344,7 +1375,7 @@
         
         /* Reduzido de 1.02 para 1.01 e adicionado margin-left para não cortar na borda */
         .item-clicavel:hover { 
-            background: #333; 
+            background: #1c2347;
             transform: scale(1.01); 
             margin-left: 5px; 
         }
@@ -1360,7 +1391,7 @@
             padding: 10px; 
             font-weight: bold; 
             color: var(--accent-color); 
-            border-bottom: 1px solid #444; 
+            border-bottom: 1px solid rgba(124, 92, 255, 0.4);
             box-sizing: border-box; 
             margin-bottom: 10px; 
             text-align: left; 
@@ -1383,8 +1414,8 @@
             padding-left: 0; /* Remova o padding-left extra se houver */
         }
         
-        .revisao-correto { border-left: 5px solid var(--success-color) !important; }
-        .revisao-errado { border-left: 5px solid var(--error-color) !important; }
+.revisao-correto { border-left: 5px solid #7c5cff !important; }
+.revisao-errado { border-left: 5px solid #7c5cff !important; }
 
 /* Altura e Comportamento da Lista */
 #lista-revisao, 
@@ -1413,7 +1444,7 @@
 #lista-meus-erros::-webkit-scrollbar-track, 
 #lista-alterar-palavras::-webkit-scrollbar-track, 
 #corpo-lista-apagar-palavras::-webkit-scrollbar-track { 
-    background: #2a2a2a; 
+    background: #121731;
     border-radius: 10px; 
 }
 
@@ -1866,12 +1897,12 @@
                 </div>
 
                 <div id="menu-intervalos" class="menu" style="display:none">
-                    <button onclick="iniciarIntervalo(0,25)" class="btn-custom-lateral border-blue">1 ⮕ 25 palavras</button>
-                    <button onclick="iniciarIntervalo(25,50)" class="btn-custom-lateral border-green">26 ⮕ 50 palavras</button>
-                    <button onclick="iniciarIntervalo(50,75)" class="btn-custom-lateral border-orange">51 ⮕ 75 palavras</button>
-                    <button onclick="iniciarIntervalo(75,100)" class="btn-custom-lateral border-red">76 ⮕ 100 palavras</button>
-                    <button onclick="iniciarNivel(vocabulario.length)" class="btn-custom-lateral border-pink">1 ⮕ 100 palavras</button>
-                    <div class="btn-voltar-icone" onclick="voltarAoMenuPraticar()">
+<button onclick="iniciarIntervalo(0,25)" class="btn-custom-lateral">1 ⮕ 25 palavras</button>
+<button onclick="iniciarIntervalo(25,50)" class="btn-custom-lateral">26 ⮕ 50 palavras</button>
+<button onclick="iniciarIntervalo(50,75)" class="btn-custom-lateral">51 ⮕ 75 palavras</button>
+<button onclick="iniciarIntervalo(75,100)" class="btn-custom-lateral">76 ⮕ 100 palavras</button>
+<button onclick="iniciarNivel(vocabulario.length)" class="btn-custom-lateral btn-lendario">1 ⮕ 100 palavras</button>
+                        <div class="btn-voltar-icone" onclick="voltarAoMenuPraticar()">
                         <img src="imagens/voltar.png" alt="Voltar">
                         <span>Voltar</span>
                     </div>
@@ -1900,9 +1931,15 @@
                     <div id="lista-revisao"></div>
                 </div>
 
-                <div id="btn-voltar-final" class="btn-voltar-icone" style="display:none; width: 100%;" onclick="voltarDoTeste()">
-                    <img src="imagens/voltar.png" alt="Voltar">
-                    <span>Início</span>
+                <div id="btn-voltar-final" style="display:none; width: 100%; justify-content: center; align-items: center; gap: 30px;">
+                    <div class="btn-voltar-icone" onclick="voltarDoTeste()">
+                        <img src="imagens/voltar.png" alt="Voltar">
+                        <span>Início</span>
+                    </div>
+                    <div class="btn-voltar-icone" onclick="repetirTeste()">
+                        <img src="imagens/repetir.png" alt="Repetir">
+                        <span>Repetir</span>
+                    </div>
                 </div>
             </div>
         </main>
